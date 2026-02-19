@@ -686,3 +686,57 @@
     min-width: 760px;
   }
 }
+
+.action-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-select {
+  padding: 6px 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  min-width: 130px;
+  color: #374151;
+  transition: border-color 0.2s;
+}
+
+.action-select:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+.action-select:hover {
+  border-color: #a5b4fc;
+}
+
+.remarks-btn {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.remarks-btn:hover {
+  background: #eef2ff;
+  border-color: #a5b4fc;
+}
+
+.lead-status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}

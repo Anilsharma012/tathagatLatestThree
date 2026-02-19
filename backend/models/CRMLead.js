@@ -15,6 +15,11 @@ const CRMLeadSchema = new mongoose.Schema({
   message: { type: String, trim: true },
   preferredDate: { type: Date },
   stage: { type: String, enum: ['New', 'Contacted', 'Demo Scheduled', 'Negotiation', 'Won', 'Lost'], default: 'New', index: true },
+  leadStatus: { 
+    type: String, 
+    enum: ['new', 'contacted', 'hot_lead', 'cold_lead', 'response_pending', 'follow_up', 'not_interested', 'demo_scheduled', 'converted', 'lost'], 
+    default: 'new' 
+  },
   owner: { type: String, trim: true },
   score: { type: Number, default: 0 },
   tags: [{ type: String }],

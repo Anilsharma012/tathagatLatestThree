@@ -28,4 +28,22 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
+// Admin route to update enquiry status/remarks
+router.put("/:id", authMiddleware, async (req, res) => {
+  try {
+    const { status, remarks } = req.body;
+    const update = {};
+    if (status) update.status = status;
+    if (remarks !== undefined) update.remarks = remarks;
+    
+    const enquiry = await Enquiry.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!enquiry) {
+      return res.status(404).json({ success: false, message: "Enquiry not found" });
+    }
+    res.json({ success: true, enquiry });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+});
+
 module.exports = router;

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../AdminLayout/AdminLayout';
 import crm from '../../../utils/crmApi';
+import { toast } from 'react-toastify';
 import './crm.css';
 
 const formTypes = [
@@ -12,12 +13,32 @@ const formTypes = [
   { key: 'other', label: 'Other', color: '#6b7280' }
 ];
 
+const leadStatuses = [
+  { value: 'new', label: 'New', color: '#6366f1', bg: '#eef2ff' },
+  { value: 'contacted', label: 'Contacted', color: '#0369a1', bg: '#e0f2fe' },
+  { value: 'hot_lead', label: 'Hot Lead', color: '#dc2626', bg: '#fee2e2' },
+  { value: 'cold_lead', label: 'Cold Lead', color: '#475569', bg: '#e2e8f0' },
+  { value: 'response_pending', label: 'Response Pending', color: '#d97706', bg: '#fef3c7' },
+  { value: 'follow_up', label: 'Follow Up', color: '#7c3aed', bg: '#ede9fe' },
+  { value: 'not_interested', label: 'Not Interested', color: '#9ca3af', bg: '#f3f4f6' },
+  { value: 'demo_scheduled', label: 'Demo Scheduled', color: '#7c3aed', bg: '#ede9fe' },
+  { value: 'converted', label: 'Converted', color: '#16a34a', bg: '#dcfce7' },
+  { value: 'lost', label: 'Lost', color: '#dc2626', bg: '#fee2e2' }
+];
+
+const getStatusStyle = (lead) => {
+  const status = lead.leadStatus || 'new';
+  return leadStatuses.find(s => s.value === status) || leadStatuses[0];
+};
+
 const InquiryManagement = () => {
   const [activeType, setActiveType] = useState('all');
   const [leads, setLeads] = useState([]);
   const [counts, setCounts] = useState({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [remarksModal, setRemarksModal] = useState(null);
+  const [remarksText, setRemarksText] = useState('');
 
   useEffect(() => {
     fetchCounts();
@@ -61,9 +82,69 @@ const InquiryManagement = () => {
     }
   };
 
+  const handleStatusChange = async (leadId, value) => {
+    try {
+      const stageMap = {
+        'new': 'New',
+        'contacted': 'Contacted',
+        'hot_lead': 'Contacted',
+        'cold_lead': 'Contacted',
+        'response_pending': 'Contacted',
+        'follow_up': 'Contacted',
+        'not_interested': 'Lost',
+        'demo_scheduled': 'Demo Scheduled',
+        'converted': 'Won',
+        'lost': 'Lost'
+      };
+      
+      const updateData = { 
+        leadStatus: value,
+        stage: stageMap[value] || 'New'
+      };
+      
+      if (value === 'hot_lead') {
+        const lead = leads.find(l => l._id === leadId);
+        updateData.tags = [...(lead?.tags || []).filter(t => t !== 'hot' && t !== 'cold'), 'hot'];
+      } else if (value === 'cold_lead') {
+        const lead = leads.find(l => l._id === leadId);
+        updateData.tags = [...(lead?.tags || []).filter(t => t !== 'hot' && t !== 'cold'), 'cold'];
+      }
+
+      const { data } = await crm.put(`/crm/leads/${leadId}`, updateData);
+      if (data.success) {
+        setLeads(prev => prev.map(l => l._id === leadId ? { ...l, ...data.lead } : l));
+        toast.success('Status updated');
+      }
+    } catch (err) {
+      toast.error('Failed to update status');
+    }
+  };
+
+  const saveRemarks = async () => {
+    if (!remarksModal) return;
+    try {
+      const { data } = await crm.put(`/crm/leads/${remarksModal}`, { notes: remarksText });
+      if (data.success) {
+        setLeads(prev => prev.map(l => l._id === remarksModal ? { ...l, notes: remarksText } : l));
+        toast.success('Remarks saved');
+      }
+      setRemarksModal(null);
+    } catch (err) {
+      toast.error('Failed to save remarks');
+    }
+  };
+
+  const getCurrentStatus = (lead) => {
+    if (lead.leadStatus) return lead.leadStatus;
+    if (lead.tags?.includes('hot')) return 'hot_lead';
+    if (lead.tags?.includes('cold')) return 'cold_lead';
+    const stageToStatus = { 'New': 'new', 'Contacted': 'contacted', 'Demo Scheduled': 'demo_scheduled', 'Won': 'converted', 'Lost': 'lost' };
+    return stageToStatus[lead.stage] || 'new';
+  };
+
   const exportCSV = () => {
     if (leads.length === 0) return;
-    const headers = ['Name', 'Mobile', 'Email', 'Course Interest', 'Message', 'Form Type', 'Date'];
+    const headers = ['Name', 'Mobile', 'Email', 'Course Interest', 'Message', 'Form Type', 'Status', 'Date'];
     const rows = leads.map(l => [
       l.name || '',
       l.mobile || '',
@@ -71,6 +152,7 @@ const InquiryManagement = () => {
       l.courseInterest || '',
       (l.message || l.notes || '').replace(/,/g, ' '),
       l.formType || '',
+      getCurrentStatus(l),
       new Date(l.createdAt).toLocaleString()
     ]);
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -147,38 +229,100 @@ const InquiryManagement = () => {
                   <th>Interest</th>
                   <th>Message</th>
                   <th>Type</th>
+                  <th>Status</th>
+                  <th>Action</th>
                   <th>Date</th>
                 </tr>
               </thead>
               <tbody>
-                {leads.map((l) => (
-                  <tr key={l._id}>
-                    <td><strong>{l.name}</strong></td>
-                    <td>{l.mobile || '-'}</td>
-                    <td>{l.email || '-'}</td>
-                    <td>{l.courseInterest || '-'}</td>
-                    <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {l.message || l.notes || '-'}
-                    </td>
-                    <td>
-                      <span style={{
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                        background: formTypes.find(f => f.key === l.formType)?.color || '#6b7280',
-                        color: '#fff'
-                      }}>
-                        {l.formType || 'other'}
-                      </span>
-                    </td>
-                    <td>{new Date(l.createdAt).toLocaleString()}</td>
-                  </tr>
-                ))}
+                {leads.map((l) => {
+                  const statusInfo = getStatusStyle(l);
+                  return (
+                    <tr key={l._id}>
+                      <td><strong>{l.name}</strong></td>
+                      <td>{l.mobile || '-'}</td>
+                      <td>{l.email || '-'}</td>
+                      <td>{l.courseInterest || '-'}</td>
+                      <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {l.message || l.notes || '-'}
+                      </td>
+                      <td>
+                        <span style={{
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          background: formTypes.find(f => f.key === l.formType)?.color || '#6b7280',
+                          color: '#fff'
+                        }}>
+                          {l.formType || 'other'}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="lead-status-badge" style={{
+                          background: statusInfo?.bg || '#f3f4f6',
+                          color: statusInfo?.color || '#374151',
+                          padding: '4px 10px',
+                          borderRadius: '20px',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {statusInfo?.label || l.stage}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="action-cell">
+                          <select
+                            className="action-select"
+                            value={getCurrentStatus(l)}
+                            onChange={(e) => handleStatusChange(l._id, e.target.value)}
+                          >
+                            {leadStatuses.map(s => (
+                              <option key={s.value} value={s.value}>{s.label}</option>
+                            ))}
+                          </select>
+                          <button
+                            className="remarks-btn"
+                            title={l.notes || 'Add remarks'}
+                            onClick={() => { setRemarksModal(l._id); setRemarksText(l.notes || ''); }}
+                          >
+                            {l.notes ? '📝' : '💬'}
+                          </button>
+                        </div>
+                      </td>
+                      <td style={{ whiteSpace: 'nowrap', fontSize: '12px' }}>{new Date(l.createdAt).toLocaleString()}</td>
+                    </tr>
+                  );
+                })}
                 {leads.length === 0 && (
-                  <tr><td colSpan={7} className="muted" style={{ textAlign: 'center', padding: '40px' }}>No inquiries found</td></tr>
+                  <tr><td colSpan={9} className="muted" style={{ textAlign: 'center', padding: '40px' }}>No inquiries found</td></tr>
                 )}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {remarksModal && (
+          <div className="modal-overlay" onClick={() => setRemarksModal(null)}>
+            <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+              <div className="modal-header">
+                <h3 style={{ margin: 0 }}>Add Remarks / Notes</h3>
+                <button className="close" onClick={() => setRemarksModal(null)}>&times;</button>
+              </div>
+              <div className="modal-body">
+                <textarea
+                  value={remarksText}
+                  onChange={e => setRemarksText(e.target.value)}
+                  placeholder="Add notes about this inquiry... e.g. Called on 15th Feb, interested in CAT course..."
+                  rows={4}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb', resize: 'vertical' }}
+                />
+              </div>
+              <div className="modal-footer">
+                <button className="btn" style={{ background: '#6b7280' }} onClick={() => setRemarksModal(null)}>Cancel</button>
+                <button className="btn" onClick={saveRemarks}>Save Remarks</button>
+              </div>
+            </div>
           </div>
         )}
       </div>
