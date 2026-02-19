@@ -146,6 +146,21 @@ const Footer = () => {
                   IIM Predictor
                 </Link>
               </li>
+              <li>
+                <Link to="/privacy-policy" style={{ color: "inherit", textDecoration: "none" }}>
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/refund-policy" style={{ color: "inherit", textDecoration: "none" }}>
+                  Refund & Cancellation
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms-and-conditions" style={{ color: "inherit", textDecoration: "none" }}>
+                  Terms & Conditions
+                </Link>
+              </li>
               {/* <li>
                 <Link to="/Cat26Online" style={{ color: "inherit", textDecoration: "none" }}>
                   Cat26 Online

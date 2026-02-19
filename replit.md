@@ -140,6 +140,13 @@ TathaGat is a full-stack education platform for CAT/XAT/SNAP exam preparation. I
   - Enhanced StudentPerformance.jsx with 3-tab layout: Dashboard (charts + tables), By Student (split panel with charts), By Test (leaderboard)
   - Chart.js integration: Line chart for daily activity, Bar charts for score distribution and section performance, score trend charts per student
   - Modern CSS with card-based design, medal badges for top 3, avatar sidebar, responsive grid layouts
+- 2026-02-19: Policy Pages & Footer Links
+  - Created Privacy Policy page at /privacy-policy with full content (8 sections: Registration, Cookies, User Communications, Log Info, Confidential, Feedback, Improvement, Queries)
+  - Created Refund & Cancellation Policy page at /refund-policy with Important Notice callout (offline-only refund, no online refunds)
+  - Created Terms & Conditions page at /terms-and-conditions with full content (Trademark, Copyright, Shipping, Order, Payment, Refund, Electronic Communication, Reviews, Terms of Use, Applicable Law)
+  - Shared PolicyPages.css with professional styling: clean white cards, indigo accents, highlighted notices, responsive design
+  - Added 3 links under "Explore" section in Footer component
+  - Routes added in App.js for all 3 policy pages
 - 2026-02-14: Initial Replit setup - migrated from GitHub import
   - Moved sensitive credentials from `.env` to Replit Secrets
   - Configured workflows for frontend and backend

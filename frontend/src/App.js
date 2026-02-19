@@ -51,6 +51,9 @@ import GetInTouch from "./pages/GetInTouch/GetInTouch";
 
 import ResourcesPage from "./pages/Resources/ResourcesPage";
 import OurFaculity from "./pages/ourFaculity/OurFaculity";
+import PrivacyPolicy from "./pages/PolicyPages/PrivacyPolicy";
+import RefundPolicy from "./pages/PolicyPages/RefundPolicy";
+import TermsConditions from "./pages/PolicyPages/TermsConditions";
 import CourseDetails from "./pages/CourseDetails/CourseDetails";
 import CoursePurchase from "./pages/CousePurchase/CoursePurchase";
 // import MyCourses from "./pages/Student/MyCourses/MyCourses";
@@ -751,6 +754,9 @@ const AppContent = () => {
         <Route path="/my-courses" element={<MyCourses />} />
         <Route path="/explore-blog" element={<ExploreBlog />} />
         <Route path="/instruction" element={<Instruction />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="/terms-and-conditions" element={<TermsConditions />} />
 
         <Route path="/student" element={<StudentLayout />}>
           <Route path="/student/dashboard" element={<StudentDashboard />} />

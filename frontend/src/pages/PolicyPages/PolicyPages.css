@@ -1,0 +1,130 @@
+.policy-page {
+  min-height: 100vh;
+  background: #f8f9fc;
+  padding: 40px 20px 60px;
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+}
+
+.policy-container {
+  max-width: 860px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 48px 56px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+}
+
+.policy-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 8px;
+  padding-bottom: 16px;
+  border-bottom: 3px solid #4f46e5;
+  display: inline-block;
+}
+
+.policy-intro {
+  font-size: 1.05rem;
+  color: #475569;
+  font-weight: 500;
+  margin-top: 24px;
+}
+
+.policy-container h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 36px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.policy-container h3 {
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: #334155;
+  margin: 28px 0 10px;
+}
+
+.policy-container p {
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.75;
+  margin: 0 0 14px;
+}
+
+.policy-container ul {
+  padding-left: 24px;
+  margin: 0 0 16px;
+}
+
+.policy-container li {
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.75;
+  margin-bottom: 6px;
+}
+
+.policy-container a {
+  color: #4f46e5;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.policy-container a:hover {
+  text-decoration: underline;
+}
+
+.policy-note {
+  background: #fffbeb;
+  border-left: 4px solid #f59e0b;
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+}
+
+.policy-notice {
+  margin-top: 28px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #ef4444;
+  border-radius: 0 12px 12px 0;
+  padding: 20px 24px;
+}
+
+.policy-notice h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #dc2626;
+  margin: 0 0 10px;
+}
+
+.policy-notice p {
+  font-size: 0.92rem;
+  color: #7f1d1d;
+  margin: 0 0 8px;
+}
+
+.policy-notice p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .policy-page {
+    padding: 20px 12px 40px;
+  }
+
+  .policy-container {
+    padding: 28px 20px;
+    border-radius: 12px;
+  }
+
+  .policy-title {
+    font-size: 1.5rem;
+  }
+
+  .policy-container h2 {
+    font-size: 1.15rem;
+  }
+}
