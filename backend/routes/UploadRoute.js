@@ -29,12 +29,12 @@ const upload = multer({
 });
 
 router.post("/", adminAuth, upload.single("file"), (req, res) => {
-  const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+  const fileUrl = `/uploads/${req.file.filename}`;
   return res.json({ success: true, url: fileUrl });
 });
 
 router.post("/image", adminAuth, upload.single("image"), (req, res) => {
-  const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+  const fileUrl = `/uploads/${req.file.filename}`;
   return res.json({ success: true, url: fileUrl });
 });
 

@@ -386,20 +386,20 @@ const AddQuestion = () => {
 
     try {
       const token = localStorage.getItem("adminToken");
-      console.log("🔑 Token exists:", !!token);
 
-      // Make exactly one POST request
-      console.log("📡 Making POST request to /api/questions");
-      const response = await axios.post(`/api/questions`, questionData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      let response;
+      if (editingQuestionId) {
+        response = await axios.put(`/api/questions/${editingQuestionId}`, questionData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        response = await axios.post(`/api/questions`, questionData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
 
-      console.log("✅ Response received:", response.status, response.data);
-
-      // Success (201 or ok:true) → green toast "Saved"
-      if (response.status === 201 || response.data?.success === true) {
-        console.log("🎉 Success! Showing toast and refetching...");
-        toast.success("Saved");
+      if (response.status === 200 || response.status === 201 || response.data?.success === true) {
+        toast.success(editingQuestionId ? "Question updated!" : "Question saved!");
 
         // Then one refetch: GET /api/questions?testId=<TEST_ID>
         const refetchRes = await axios.get(`/api/questions?testId=${test}`, {
