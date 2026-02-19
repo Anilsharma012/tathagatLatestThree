@@ -49,6 +49,9 @@ const AddQuestion = () => {
     uploader: {
       insertImageAsBase64URI: false,
       url: "/api/upload",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`
+      },
       filesVariableName: function () {
         return "file";
       },
