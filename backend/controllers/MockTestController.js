@@ -414,12 +414,12 @@ const startTestAttempt = async (req, res) => {
           questionText: q.questionText,
           questionType: q.questionType || 'MCQ',
           section: singleSection.name,
-          options: [
-            { id: 'A', text: q.options?.A || q.optionA || '' },
-            { id: 'B', text: q.options?.B || q.optionB || '' },
-            { id: 'C', text: q.options?.C || q.optionC || '' },
-            { id: 'D', text: q.options?.D || q.optionD || '' }
-          ],
+          options: {
+            A: q.options?.A || q.optionA || '',
+            B: q.options?.B || q.optionB || '',
+            C: q.options?.C || q.optionC || '',
+            D: q.options?.D || q.optionD || ''
+          },
           marks: q.marks || 3,
           sequenceNumber: idx + 1,
           images: []
@@ -1595,12 +1595,12 @@ const getAttemptData = async (req, res) => {
         questionText: q.questionText,
         questionType: q.questionType || 'MCQ',
         section: courseTest.topic?.name || 'General',
-        options: [
-          { id: 'A', text: q.options?.A || q.optionA || '' },
-          { id: 'B', text: q.options?.B || q.optionB || '' },
-          { id: 'C', text: q.options?.C || q.optionC || '' },
-          { id: 'D', text: q.options?.D || q.optionD || '' }
-        ],
+        options: {
+          A: q.options?.A || q.optionA || '',
+          B: q.options?.B || q.optionB || '',
+          C: q.options?.C || q.optionC || '',
+          D: q.options?.D || q.optionD || ''
+        },
         marks: q.marks || 3,
         sequenceNumber: idx + 1,
         images: []

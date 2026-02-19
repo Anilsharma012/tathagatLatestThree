@@ -127,6 +127,11 @@ TathaGat is a full-stack education platform for CAT/XAT/SNAP exam preparation. I
   - Added SENDER_EMAIL environment variable for configurable sender address
 - 2026-02-19: Admin User List Enhancements
   - AllStudents, AllUsers, AllTeachers: search, pagination (20/page), CSV export
+- 2026-02-19: Course Test Options Display Fix
+  - Fixed data format mismatch: backend was sending options as `[{ id, text }]` array but frontend expected `{ A, B, C, D }` object format
+  - Changed `startTest` and `getAttemptData` in MockTestController to return options as `{ A, B, C, D }` object for course tests
+  - Added `option.text` fallback in MockTestAttempt.jsx for backward compatibility with any cached `{ id, text }` format data
+  - Images uploaded via JoditEditor in question options now display correctly in student test view
 - 2026-02-14: Initial Replit setup - migrated from GitHub import
   - Moved sensitive credentials from `.env` to Replit Secrets
   - Configured workflows for frontend and backend

@@ -1770,7 +1770,7 @@ const MockTestAttempt = () => {
                           const optionLabel = String.fromCharCode(65 + index);
                           const optionText =
                             typeof option === "object"
-                              ? option.optionText || option.value || ""
+                              ? option.optionText || option.value || option.text || ""
                               : option;
                           const isSelected =
                             responses[questionId] === optionLabel ||
