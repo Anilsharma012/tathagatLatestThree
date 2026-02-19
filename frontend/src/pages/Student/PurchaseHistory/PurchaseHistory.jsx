@@ -346,31 +346,25 @@ export default function PurchaseHistory() {
         return;
       }
 
-      // Multi-route fallback (fixes 404 like /api/user/receipt/.../download)
-      let paths = [];
-
       if (type === 'invoice') {
-        paths = [
-          `/invoices/download/${id}`,
-          `/invoice/download/${id}`,
-          `/payments/invoice/${id}`,
-        ];
-      } else {
-        // receipt download/view/txt
-        const fmt = (format || 'pdf').toLowerCase();
-        paths = [
-          `/user/receipt/${id}/download?format=${fmt}`,     // matches your console screenshot style (but with correct base)
-          `/user/receipts/${id}/download?format=${fmt}`,    // plural variant
-          `/payments/receipt/${id}/${fmt}`,                 // your old style
-          `/payments/receipt/${id}/download?format=${fmt}`, // alt variant
-          `/receipt/${id}/download?format=${fmt}`,          // fallback
-        ];
+        const token = tokenFromStorage();
+        const invoiceUrl = `/api/invoices/download/${id}?token=${encodeURIComponent(token)}`;
+        window.open(invoiceUrl, '_blank', 'noopener,noreferrer');
+        return;
       }
+
+      const fmt = (format || 'pdf').toLowerCase();
+      const paths = [
+        `/user/receipt/${id}/download?format=${fmt}`,
+        `/user/receipts/${id}/download?format=${fmt}`,
+        `/payments/receipt/${id}/${fmt}`,
+        `/payments/receipt/${id}/download?format=${fmt}`,
+        `/receipt/${id}/download?format=${fmt}`,
+      ];
 
       const { res } = await tryGetBlob(paths);
       const blob = res.data;
 
-      // If backend returns JSON (like {url,message}) instead of file
       if (blob?.type && blob.type.includes('application/json')) {
         const text = await blob.text();
         try {
@@ -384,33 +378,25 @@ export default function PurchaseHistory() {
             return;
           }
         } catch {
-          // continue
         }
       }
 
-      // Decide action based on format
       const receiptNo = row.receiptNo || row.receiptNumber || id;
 
-      if (type !== 'invoice' && String(format).toLowerCase() === 'html') {
-        // View in new tab
+      if (String(format).toLowerCase() === 'html') {
         openInNewTab(new Blob([blob], { type: 'text/html' }));
         return;
       }
 
-      if (type !== 'invoice' && String(format).toLowerCase() === 'txt') {
+      if (String(format).toLowerCase() === 'txt') {
         saveAs(new Blob([blob], { type: 'text/plain' }), `Receipt-${receiptNo}.txt`);
         return;
       }
 
-      // Default PDF download
-      const fileName = type === 'invoice'
-        ? `Invoice-${receiptNo}.pdf`
-        : `Receipt-${receiptNo}.pdf`;
-
-      saveAs(new Blob([blob], { type: 'application/pdf' }), fileName);
+      saveAs(new Blob([blob], { type: 'application/pdf' }), `Receipt-${receiptNo}.pdf`);
     } catch (e) {
       console.error('Download error:', e);
-      alert('Failed to download receipt. Please try again.');
+      alert('Failed to download. Please try again.');
     }
   };
 

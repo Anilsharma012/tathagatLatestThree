@@ -1,4 +1,3 @@
-const puppeteer = require('puppeteer');
 const handlebars = require('handlebars');
 const fs = require('fs');
 const path = require('path');
@@ -29,26 +28,25 @@ const numberToWords = (num) => {
   const decimalPart = Math.round((num - intPart) * 100);
   
   let result = '';
+  let remaining = intPart;
   
-  if (intPart >= 10000000) {
-    result += convertLessThanThousand(Math.floor(intPart / 10000000)) + ' Crore ';
-    num = intPart % 10000000;
-  } else {
-    num = intPart;
+  if (remaining >= 10000000) {
+    result += convertLessThanThousand(Math.floor(remaining / 10000000)) + ' Crore ';
+    remaining = remaining % 10000000;
   }
   
-  if (num >= 100000) {
-    result += convertLessThanThousand(Math.floor(num / 100000)) + ' Lakh ';
-    num = num % 100000;
+  if (remaining >= 100000) {
+    result += convertLessThanThousand(Math.floor(remaining / 100000)) + ' Lakh ';
+    remaining = remaining % 100000;
   }
   
-  if (num >= 1000) {
-    result += convertLessThanThousand(Math.floor(num / 1000)) + ' Thousand ';
-    num = num % 1000;
+  if (remaining >= 1000) {
+    result += convertLessThanThousand(Math.floor(remaining / 1000)) + ' Thousand ';
+    remaining = remaining % 1000;
   }
   
-  if (num > 0) {
-    result += convertLessThanThousand(num);
+  if (remaining > 0) {
+    result += convertLessThanThousand(remaining);
   }
   
   result = result.trim() + ' Rupees';
@@ -78,9 +76,12 @@ const formatDate = (date) => {
 };
 
 const prepareInvoiceData = (payment, user, course, billingSettings) => {
-  const amountInRupees = payment.amount / 100;
-  const originalAmount = payment.originalAmount ? payment.originalAmount / 100 : amountInRupees;
-  const discountAmount = payment.discountAmount ? payment.discountAmount / 100 : 0;
+  const amountPaise = Number(payment.amount) || 0;
+  const amountInRupees = amountPaise >= 100 ? amountPaise / 100 : amountPaise;
+  
+  const originalPaise = payment.originalAmount ? Number(payment.originalAmount) : amountPaise;
+  const originalAmount = originalPaise >= 100 ? originalPaise / 100 : originalPaise;
+  const discountAmount = originalAmount - amountInRupees;
   
   const cgstRate = billingSettings.taxSettings?.cgstRate || 9;
   const sgstRate = billingSettings.taxSettings?.sgstRate || 9;
@@ -112,7 +113,7 @@ const prepareInvoiceData = (payment, user, course, billingSettings) => {
     description: course.name || 'Course Enrollment',
     hsnCode: billingSettings.taxSettings?.defaultHsnCode || '999293',
     baseFee: originalAmount,
-    discount: discountAmount,
+    discount: discountAmount > 0 ? discountAmount : 0,
     taxableValue: taxableValue,
     cgstRate: isInterstate ? 0 : cgstRate,
     cgstAmount: cgstAmount,
@@ -163,7 +164,7 @@ const prepareInvoiceData = (payment, user, course, billingSettings) => {
     
     isInterstate: isInterstate,
     subtotalBaseFee: originalAmount,
-    subtotalDiscount: discountAmount,
+    subtotalDiscount: discountAmount > 0 ? discountAmount : 0,
     subtotalTaxable: taxableValue,
     subtotalCgst: cgstAmount,
     subtotalSgst: sgstAmount,
@@ -192,53 +193,23 @@ const prepareInvoiceData = (payment, user, course, billingSettings) => {
     
     panNumber: billingSettings.panNumber || '',
     cinNumber: billingSettings.cinNumber || '',
-    registeredAddress: registeredAddress
+    registeredAddress: registeredAddress,
+    
+    couponCode: payment.couponCode || null,
+    discountPercent: payment.discountPercent || null,
   };
 };
 
-const generateInvoicePdf = async (invoiceData) => {
+const generateInvoiceHtml = (invoiceData) => {
   const templatePath = path.join(__dirname, '../templates/taxInvoice.hbs');
   const templateSource = fs.readFileSync(templatePath, 'utf8');
   const template = handlebars.compile(templateSource);
-  const html = template(invoiceData);
-  
-  let browser;
-  try {
-    browser = await puppeteer.launch({
-      headless: 'new',
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu'
-      ]
-    });
-    
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
-    
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '10mm',
-        right: '10mm',
-        bottom: '10mm',
-        left: '10mm'
-      }
-    });
-    
-    return pdfBuffer;
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
-  }
+  return template(invoiceData);
 };
 
 module.exports = {
   prepareInvoiceData,
-  generateInvoicePdf,
+  generateInvoiceHtml,
   generateInvoiceNumber,
   numberToWords
 };

@@ -105,6 +105,15 @@ TathaGat is a full-stack education platform for CAT/XAT/SNAP exam preparation. I
   - Remarks/Notes modal for adding notes to each inquiry
   - Color-coded status badges in all inquiry tables
   - CSS styles for action dropdowns, remarks buttons, and status badges
+- 2026-02-19: Invoice Download System
+  - Replaced puppeteer-based PDF generation with HTML-based invoice rendering (browser print-to-PDF)
+  - Invoice opens in new tab with professional toolbar (Download/Print PDF + Close buttons)
+  - Uses existing taxInvoice.hbs Handlebars template with company details from BillingSettings
+  - Auth via query token parameter for new-tab opens (tokenFromQuery middleware)
+  - Full tax invoice with GST breakdown (CGST/SGST or IGST), student details, payment info
+  - Amount calculations handle paise-to-rupees conversion, discount display
+  - PurchaseHistory "Tax Invoice" button opens invoice in new tab
+  - Installed handlebars dependency; removed puppeteer dependency
 - 2026-02-19: Coupon Code System & Admin Management
   - Coupon model: code, discountPercent, applicableTo (all/specific), courses array, maxUses, maxUsesPerUser, expiryDate, isActive, usedBy tracking
   - Backend CRUD endpoints at /api/coupons (create, all, validate, toggle, update, delete)
