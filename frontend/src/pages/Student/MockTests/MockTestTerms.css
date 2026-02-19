@@ -123,7 +123,7 @@
 }
 
 .section-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: bold;
   color: #000;
   margin: 0 0 15px 0;
@@ -132,7 +132,8 @@
 .instruction-list {
   margin: 0;
   padding-left: 25px;
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 600;
   line-height: 1.6;
   color: #333;
 }
@@ -140,6 +141,7 @@
 .instruction-list li {
   margin-bottom: 15px;
   text-align: justify;
+  font-weight: 600;
 }
 
 .instruction-list em {
