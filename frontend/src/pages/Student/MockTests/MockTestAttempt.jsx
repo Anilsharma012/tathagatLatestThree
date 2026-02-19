@@ -1818,7 +1818,7 @@ const MockTestAttempt = () => {
                 className="action-btn mark-review"
                 onClick={handleMarkForReview}
               >
-                Mark for Review & Next
+                Mark for Review
               </button>
               <button
                 className="action-btn clear-response"
@@ -1833,12 +1833,6 @@ const MockTestAttempt = () => {
                 onClick={handleSaveAndNext}
               >
                 Save & Next
-              </button>
-              <button
-                className="action-btn submit-btn"
-                onClick={handleSubmitClick}
-              >
-                Submit
               </button>
             </div>
           </div>
@@ -2190,9 +2184,9 @@ const MockTestAttempt = () => {
                         question.
                       </li>
                       <li>
-                        Click on <strong>Mark for Review & Next</strong> to save
+                        Click on <strong>Mark for Review</strong> to save
                         your answer for the current question and also mark it
-                        for review, and then go to the next question.
+                        for review.
                       </li>
                     </ul>
                   </li>
@@ -2247,7 +2241,7 @@ const MockTestAttempt = () => {
                   </li>
                   <li>
                     To mark a question for review, click on the{" "}
-                    <strong>Mark for Review & Next</strong> button.
+                    <strong>Mark for Review</strong> button.
                   </li>
                 </ol>
               </div>

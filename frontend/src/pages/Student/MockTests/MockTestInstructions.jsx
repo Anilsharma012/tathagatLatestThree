@@ -204,9 +204,9 @@ const MockTestInstructions = () => {
                   </ol>
                 </li>
                 <li>
-                  Click on 'Save & Next' to save your answer for the current question and then proceed to the next question. To revisit an answered question before finishing the section, click on 'Mark for Review & Next'.
+                  Click on 'Save & Next' to save your answer for the current question and then proceed to the next question. To revisit an answered question before finishing the section, click on 'Mark for Review'.
                   <p className="caution-text">
-                    <strong>Caution: Your answer for the current question will not be saved if you navigate directly to another question by clicking on a question number and do not click the 'Save & Next' or 'Mark for Review & Next' button.</strong>
+                    <strong>Caution: Your answer for the current question will not be saved if you navigate directly to another question by clicking on a question number and do not click the 'Save & Next' or 'Mark for Review' button.</strong>
                   </p>
                 </li>
                 <li>
@@ -217,7 +217,7 @@ const MockTestInstructions = () => {
                   <ol type="a">
                     <li>To deselect your chosen answer, click on the question number on the question palette and then click the 'Clear Response' button.</li>
                     <li>To change your answer, select a different option by clicking on its radio button.</li>
-                    <li>To save your updated answer, click on either the 'Save & Next' or 'Mark for Review & Next' button.</li>
+                    <li>To save your updated answer, click on either the 'Save & Next' or 'Mark for Review' button.</li>
                   </ol>
                 </li>
                 <li>
