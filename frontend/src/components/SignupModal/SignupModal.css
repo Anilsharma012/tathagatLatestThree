@@ -1,0 +1,377 @@
+.signup-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: sm-fadeIn 0.2s ease;
+}
+
+@keyframes sm-fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.signup-modal-container {
+  background: white;
+  border-radius: 16px;
+  padding: 32px 28px;
+  width: 90%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  animation: sm-slideUp 0.3s ease;
+}
+
+@keyframes sm-slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.signup-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #999;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+}
+
+.signup-modal-close:hover {
+  color: #333;
+}
+
+.signup-modal-toast {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  z-index: 10001;
+}
+
+.signup-modal-toast.error { background: #e53935; }
+.signup-modal-toast.success { background: #43a047; }
+
+.signup-modal-toast button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.signup-modal-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.signup-modal-icon {
+  font-size: 32px;
+  background: #fff3e0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 12px;
+}
+
+.signup-modal-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 4px;
+}
+
+.signup-modal-header p {
+  font-size: 13px;
+  color: #777;
+  margin: 0;
+}
+
+.signup-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.signup-modal-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.signup-modal-input:focus {
+  border-color: #e35c43;
+}
+
+.signup-modal-phone-input {
+  display: flex;
+  align-items: center;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.signup-modal-phone-input:focus-within {
+  border-color: #e35c43;
+}
+
+.signup-modal-country-code {
+  padding: 11px 14px;
+  background: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  border-right: 2px solid #e0e0e0;
+}
+
+.signup-modal-phone-input input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 11px 14px;
+  font-size: 14px;
+  color: #333;
+}
+
+.signup-modal-password-wrap {
+  position: relative;
+}
+
+.signup-modal-eye {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #888;
+  font-size: 16px;
+}
+
+.signup-modal-row {
+  display: flex;
+  gap: 10px;
+}
+
+.signup-modal-select,
+.signup-modal-date {
+  flex: 1;
+}
+
+.signup-modal-select {
+  appearance: auto;
+  color: #555;
+}
+
+.signup-modal-btn {
+  width: 100%;
+  padding: 12px;
+  background: #e35c43;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 4px;
+}
+
+.signup-modal-btn:hover { background: #c3442d; }
+.signup-modal-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+.signup-modal-footer-text {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  margin-top: 12px;
+}
+
+.signup-modal-link {
+  color: #e35c43;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.signup-modal-link:hover { text-decoration: underline; }
+
+.signup-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.signup-modal-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #e35c43;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.signup-modal-back:hover { color: #c3442d; }
+
+.signup-modal-otp-boxes {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.signup-modal-otp-digit {
+  width: 44px;
+  height: 48px;
+  font-size: 20px;
+  text-align: center;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.signup-modal-otp-digit:focus { border-color: #e35c43; }
+
+.signup-modal-resend {
+  text-align: center;
+  font-size: 13px;
+  color: #888;
+}
+
+.signup-modal-course-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.signup-modal-course-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.signup-modal-course-card:hover {
+  border-color: #e35c43;
+  background: #fff8f6;
+}
+
+.signup-modal-course-card.selected {
+  border-color: #e35c43;
+  background: #fff0ed;
+  color: #e35c43;
+  font-weight: 600;
+}
+
+.course-card-icon {
+  font-size: 28px;
+}
+
+.signup-modal-exam-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.signup-modal-exam-card {
+  padding: 14px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+}
+
+.signup-modal-exam-card:hover {
+  border-color: #e35c43;
+  background: #fff8f6;
+}
+
+.signup-modal-exam-card.selected {
+  border-color: #e35c43;
+  background: #fff0ed;
+  color: #e35c43;
+  font-weight: 600;
+}
+
+.signup-modal-skip {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-align: center;
+  padding: 0;
+}
+
+.signup-modal-skip:hover { color: #666; }
+
+@media (max-width: 480px) {
+  .signup-modal-container {
+    padding: 24px 18px;
+    width: 94%;
+  }
+
+  .signup-modal-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .signup-modal-course-grid,
+  .signup-modal-exam-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .signup-modal-otp-digit {
+    width: 38px;
+    height: 42px;
+    font-size: 18px;
+  }
+}

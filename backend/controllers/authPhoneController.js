@@ -10,18 +10,15 @@ exports.sendPhoneOtp = async (req, res) => {
       return res.status(400).json({ message: "Please enter a valid 10-digit phone number" });
     }
 
-    // Validate phone number format (Indian mobile numbers start with 6-9)
     if (!/^[6-9]\d{9}$/.test(phoneNumber)) {
       return res.status(400).json({ message: "Please enter a valid Indian mobile number" });
     }
 
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Find or create user
     let user = await User.findOne({ phoneNumber });
     if (!user) {
-      user = new User({ phoneNumber, isPhoneVerified: false });
-      await user.save();
+      return res.status(404).json({ message: "User not registered. Please sign up first." });
     }
 
     // Delete any existing OTPs for this user
