@@ -36,6 +36,10 @@ const CoursePurchase = () => {
   const [loading, setLoading] = useState(true);
   const [pageContent, setPageContent] = useState(null);
   const [courseData, setCourseData] = useState(null);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState(null);
+  const [couponError, setCouponError] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -136,7 +140,41 @@ const CoursePurchase = () => {
   }, [activeTab]);
 
  
-// ✅ Put this ABOVE handlePayment (same file)
+const handleApplyCoupon = async () => {
+  if (!couponCode.trim()) return;
+  setCouponLoading(true);
+  setCouponError("");
+  setCouponApplied(null);
+  try {
+    const token = localStorage.getItem("authToken");
+    const activeCourseId = courseId || course?._id;
+    const res = await axios.post("/api/coupons/validate", {
+      code: couponCode.trim(),
+      courseId: activeCourseId,
+    }, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (res.data.success) {
+      setCouponApplied({
+        code: res.data.code,
+        discountPercent: res.data.discountPercent,
+      });
+      setCouponError("");
+    }
+  } catch (err) {
+    setCouponError(err.response?.data?.message || "Invalid coupon code");
+    setCouponApplied(null);
+  } finally {
+    setCouponLoading(false);
+  }
+};
+
+const handleRemoveCoupon = () => {
+  setCouponApplied(null);
+  setCouponCode("");
+  setCouponError("");
+};
+
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
     if (window.Razorpay) return resolve(true);
@@ -208,6 +246,7 @@ const handlePayment = async () => {
       body: JSON.stringify({
         amount: amountInPaise,
         courseId: activeCourseId,
+        couponCode: couponApplied ? couponApplied.code : undefined,
       }),
     });
 
@@ -585,9 +624,24 @@ const handlePayment = async () => {
                 color: "#1A237E",
               }}
             >
-              Price:{" "}
-              <span style={{ color: "#D32F2F" }}>₹{displayPrice}/-</span>
-              <del style={{ marginLeft: "8px", color: "#888" }}>₹{displayOldPrice}/-</del>
+              {couponApplied ? (
+                <>
+                  Price:{" "}
+                  <span style={{ color: "#D32F2F" }}>
+                    ₹{Math.round(displayPrice - (displayPrice * couponApplied.discountPercent / 100))}/-
+                  </span>
+                  <del style={{ marginLeft: "8px", color: "#888", fontSize: "16px" }}>₹{displayPrice}/-</del>
+                  <div style={{ fontSize: "13px", color: "#059669", fontWeight: "500", marginTop: "4px" }}>
+                    {couponApplied.discountPercent}% off applied ({couponApplied.code})
+                  </div>
+                </>
+              ) : (
+                <>
+                  Price:{" "}
+                  <span style={{ color: "#D32F2F" }}>₹{displayPrice}/-</span>
+                  <del style={{ marginLeft: "8px", color: "#888" }}>₹{displayOldPrice}/-</del>
+                </>
+              )}
             </div>
 
             <div
@@ -608,6 +662,80 @@ const handlePayment = async () => {
               </ul>
             </div>
 
+            <div className="coupon-section" style={{ marginTop: "16px", marginBottom: "12px" }}>
+              {!couponApplied ? (
+                <>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(""); }}
+                      placeholder="Coupon Code"
+                      style={{
+                        flex: 1,
+                        padding: "10px 12px",
+                        border: "1px solid #ddd",
+                        borderRadius: "6px",
+                        fontSize: "14px",
+                        fontFamily: "monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    />
+                    <button
+                      onClick={handleApplyCoupon}
+                      disabled={couponLoading || !couponCode.trim()}
+                      style={{
+                        padding: "10px 16px",
+                        background: "#059669",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "6px",
+                        fontWeight: "600",
+                        fontSize: "13px",
+                        cursor: "pointer",
+                        opacity: couponLoading || !couponCode.trim() ? 0.6 : 1,
+                      }}
+                    >
+                      {couponLoading ? "..." : "Apply"}
+                    </button>
+                  </div>
+                  {couponError && (
+                    <p style={{ color: "#dc2626", fontSize: "12px", marginTop: "6px", marginBottom: 0 }}>
+                      {couponError}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  background: "#ecfdf5",
+                  padding: "10px 14px",
+                  borderRadius: "8px",
+                  border: "1px solid #a7f3d0",
+                }}>
+                  <span style={{ fontSize: "13px", color: "#065f46", fontWeight: "600" }}>
+                    {couponApplied.code} - {couponApplied.discountPercent}% OFF
+                  </span>
+                  <button
+                    onClick={handleRemoveCoupon}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#dc2626",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                      fontWeight: "600",
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+            </div>
+
             <button
               className="buy-btn"
               style={{
@@ -616,7 +744,7 @@ const handlePayment = async () => {
                 padding: "12px",
                 fontWeight: "600",
                 borderRadius: "8px",
-                marginTop: "15px",
+                marginTop: "8px",
                 transition: "0.3s",
               }}
               onClick={handlePayment}

@@ -105,6 +105,19 @@ TathaGat is a full-stack education platform for CAT/XAT/SNAP exam preparation. I
   - Remarks/Notes modal for adding notes to each inquiry
   - Color-coded status badges in all inquiry tables
   - CSS styles for action dropdowns, remarks buttons, and status badges
+- 2026-02-19: Coupon Code System & Admin Management
+  - Coupon model: code, discountPercent, applicableTo (all/specific), courses array, maxUses, maxUsesPerUser, expiryDate, isActive, usedBy tracking
+  - Backend CRUD endpoints at /api/coupons (create, all, validate, toggle, update, delete)
+  - Coupon validation in createOrder: discount applied, originalAmount saved, usedBy updated
+  - Payment model extended with couponCode, discountPercent, originalAmount fields
+  - CouponManagement admin page at /admin/coupons with full CRUD, course selection, status toggle
+  - CoursePurchase page: coupon input field with apply/remove, discounted price display
+  - Admin sidebar: Coupon Management link under Analytics section (FaTag icon)
+- 2026-02-19: Email Sender Configuration
+  - Changed email sender from tathagat949@gmail.com to payment@tathagat.co.in
+  - Added SENDER_EMAIL environment variable for configurable sender address
+- 2026-02-19: Admin User List Enhancements
+  - AllStudents, AllUsers, AllTeachers: search, pagination (20/page), CSV export
 - 2026-02-14: Initial Replit setup - migrated from GitHub import
   - Moved sensitive credentials from `.env` to Replit Secrets
   - Configured workflows for frontend and backend

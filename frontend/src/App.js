@@ -137,6 +137,7 @@ import TopPerformerManagement from "./pages/mainAdmin/TopPerformerManagement/Top
 import CoursePurchaseContentManagement from "./pages/mainAdmin/CoursePurchaseContentManagement/CoursePurchaseContentManagement";
 import ResponseSheetSubmissions from "./pages/mainAdmin/ResponseSheetSubmissions/ResponseSheetSubmissions";
 import BillingSettings from "./pages/mainAdmin/BillingSettings/BillingSettings";
+import CouponManagement from "./pages/mainAdmin/CouponManagement/CouponManagement";
 import RoleManagement from "./pages/mainAdmin/RoleManagement/RoleManagement";
 import TeacherLiveClasses from "./pages/MainSubAdmin/LiveClasses/TeacherLiveClasses";
 import StudentLiveClasses from "./pages/Student/LiveClasses/StudentLiveClasses";
@@ -659,6 +660,14 @@ const AppContent = () => {
           element={
             <PrivateRoute tokenName="adminToken">
               <BillingSettings />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/coupons"
+          element={
+            <PrivateRoute tokenName="adminToken">
+              <CouponManagement />
             </PrivateRoute>
           }
         />

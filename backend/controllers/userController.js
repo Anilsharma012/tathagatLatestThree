@@ -10,6 +10,7 @@ const User = require("../models/UserSchema");
 const Course = require("../models/course/Course");
 const Payment = require("../models/Payment");
 const Receipt = require("../models/Receipt");
+const Coupon = require("../models/Coupon");
 const { sendCoursePurchaseEmail } = require("../services/authEmailService");
 
 // ---------------- Helpers ----------------
@@ -718,7 +719,7 @@ exports.getUnlockedCourses = async (req, res) => {
 exports.createOrder = async (req, res) => {
   try {
     const userId = getUserId(req);
-    const { courseId } = req.body;
+    const { courseId, couponCode } = req.body;
 
     if (!userId) {
       return res
@@ -738,11 +739,31 @@ exports.createOrder = async (req, res) => {
         .json({ success: false, status: false, msg: "Course not found", message: "Course not found" });
     }
 
-    // OLD (kept for reference, not deleted):
-    // const amount = Number(course.price || 0);
+    const originalAmountRupees = parsePriceRupees(course.price);
+    let amountRupees = originalAmountRupees;
+    let appliedCoupon = null;
 
-    // ✅ FIX: handle string price like "₹4,554/-"
-    const amountRupees = parsePriceRupees(course.price);
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ code: couponCode.toUpperCase().trim() });
+      if (coupon && coupon.isActive) {
+        const now = new Date();
+        const notExpired = !coupon.expiryDate || new Date(coupon.expiryDate) >= now;
+        const withinLimit = coupon.maxUses === 0 || coupon.usedCount < coupon.maxUses;
+        const courseApplicable = coupon.applicableTo === 'all' ||
+          coupon.courses.map(c => c.toString()).includes(courseId);
+        let userCanUse = true;
+        if (coupon.maxUsesPerUser > 0) {
+          const userUseCount = coupon.usedBy.filter(u => u.userId?.toString() === userId.toString()).length;
+          if (userUseCount >= coupon.maxUsesPerUser) userCanUse = false;
+        }
+
+        if (notExpired && withinLimit && courseApplicable && userCanUse) {
+          const discount = Math.round(amountRupees * coupon.discountPercent / 100);
+          amountRupees = amountRupees - discount;
+          appliedCoupon = coupon;
+        }
+      }
+    }
 
     if (!amountRupees || amountRupees <= 0) {
       return res.status(400).json({
@@ -770,19 +791,26 @@ exports.createOrder = async (req, res) => {
 
     const order = await razorpay.orders.create(options);
 
-    // Save a "created" payment entry (keep as you had)
     try {
       await Payment.create({
         userId,
         courseId,
         razorpay_order_id: order.id,
-        amount: amountRupees, // keep rupees (same style as your existing createOrder)
+        amount: amountRupees,
         currency: "INR",
         status: "created",
-        originalAmount: amountRupees,
+        originalAmount: originalAmountRupees,
+        couponCode: appliedCoupon ? appliedCoupon.code : undefined,
+        discountPercent: appliedCoupon ? appliedCoupon.discountPercent : undefined,
       });
     } catch (e) {
       console.warn("Payment create warning:", e?.message);
+    }
+
+    if (appliedCoupon) {
+      appliedCoupon.usedCount += 1;
+      appliedCoupon.usedBy.push({ userId, courseId });
+      await appliedCoupon.save();
     }
 
     const publicKey = process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY;
@@ -796,6 +824,9 @@ exports.createOrder = async (req, res) => {
       key: publicKey,
       keyId: publicKey,
       amount: amountRupees,
+      originalAmount: originalAmountRupees,
+      couponApplied: appliedCoupon ? appliedCoupon.code : null,
+      discountPercent: appliedCoupon ? appliedCoupon.discountPercent : 0,
       courseId,
     });
   } catch (err) {

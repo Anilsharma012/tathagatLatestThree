@@ -821,6 +821,7 @@ safeUse("/api/mock-test-feedback", "./routes/mockTestFeedbackRoutes");
 safeUse("/api/gallery", "./routes/galleryRoutes");
 safeUse("/api/admin/roles", "./routes/roleRoutes");
 safeUse("/api/admin/admin-users", "./routes/adminUserRoutes");
+safeUse("/api/coupons", "./routes/couponRoutes");
 
 /* -------------------- Production Static -------------------- */
 if (process.env.NODE_ENV === "production") {
