@@ -9,13 +9,9 @@ import fbIcon from "../../images/f_logo_RGB-Blue_1024.png";
 import waIcon from "../../images/whatsapp-icon-3.png";
 import quantPdf from "../../images/pdf/Important Concepts for CAT.pdf";
 import varcPdf from "../../images/100 RC.pdf";
-import LoginModal from "../LoginModal/LoginModal";
-import SignupModal from "../SignupModal/SignupModal";
 
 export default function Header({ user, setUser }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSignupModal, setShowSignupModal] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const location = useLocation();
@@ -205,9 +201,9 @@ export default function Header({ user, setUser }) {
                     )}
                   </div>
                 ) : (
-                  <button className="btn-orange" onClick={() => setShowLoginModal(true)}>
-                    Log In
-                  </button>
+                  <Link to="/Login">
+                    <button className="btn-orange">Log In</button>
+                  </Link>
                 )}
               </div>
 
@@ -255,12 +251,9 @@ export default function Header({ user, setUser }) {
                         </div>
                       </>
                     ) : (
-                      <button
-                        className="mobile-btn-orange"
-                        onClick={() => { closeMenu(); setShowLoginModal(true); }}
-                      >
-                        Log In
-                      </button>
+                      <Link to="/Login" onClick={closeMenu}>
+                        <button className="mobile-btn-orange">Log In</button>
+                      </Link>
                     )}
                   </div>
                 </nav>
@@ -269,20 +262,6 @@ export default function Header({ user, setUser }) {
           </div>
         </div>
       </header>
-
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        setUser={(u) => { setCurrentUser(u); if (setUser) setUser(u); }}
-        onSwitchToSignup={() => { setShowLoginModal(false); setShowSignupModal(true); }}
-      />
-
-      <SignupModal
-        isOpen={showSignupModal}
-        onClose={() => setShowSignupModal(false)}
-        setUser={(u) => { setCurrentUser(u); if (setUser) setUser(u); }}
-        onSwitchToLogin={() => { setShowSignupModal(false); setShowLoginModal(true); }}
-      />
     </>
   );
 }
