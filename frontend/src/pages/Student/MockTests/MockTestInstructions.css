@@ -214,50 +214,50 @@
   color: #555;
 }
 
-/* Not Answered - Red/orange hexagon */
+/* Not Answered - Red downward pentagon (inverted house) */
 .status-box.red {
-  background: #e53935;
-  clip-path: polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%);
+  background: linear-gradient(180deg, #e53935 0%, #c62828 100%);
+  clip-path: polygon(0% 0%, 100% 0%, 100% 65%, 50% 100%, 0% 65%);
   border-radius: 0;
   width: 34px;
   height: 34px;
 }
 
-/* Answered - Green pentagon (arrow pointing right) */
+/* Answered - Green upward pentagon (house shape) */
 .status-box.green {
-  background: #4CAF50;
-  clip-path: polygon(0% 0%, 70% 0%, 100% 50%, 70% 100%, 0% 100%);
+  background: linear-gradient(180deg, #8BC34A 0%, #4CAF50 100%);
+  clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%);
   border-radius: 0;
-  width: 36px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
 }
 
 /* Marked for Review - Purple circle */
 .status-box.purple {
-  background: #7b1fa2;
+  background: linear-gradient(180deg, #9C27B0 0%, #7b1fa2 100%);
   border-radius: 50%;
 }
 
-/* Answered & Marked for Review - Green circle with checkbox */
+/* Answered & Marked for Review - Purple circle with green "A" badge */
 .status-box.purple-tick {
-  background: #4CAF50;
+  background: linear-gradient(180deg, #9C27B0 0%, #7b1fa2 100%);
   border-radius: 50%;
   position: relative;
 }
 
 .status-box.purple-tick::after {
-  content: '✓';
+  content: 'A';
   position: absolute;
   bottom: -3px;
   right: -3px;
-  width: 14px;
-  height: 14px;
-  background: white;
-  border: 2px solid #4CAF50;
-  border-radius: 2px;
-  font-size: 10px;
+  width: 15px;
+  height: 15px;
+  background: #4CAF50;
+  border: 2px solid #388E3C;
+  border-radius: 3px;
+  font-size: 9px;
   font-weight: bold;
-  color: #4CAF50;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
