@@ -6,6 +6,8 @@ import "./AddQuestion.css";
 
 const AddQuestion = () => {
   const editor = useRef(null);
+  const formRef = useRef(null);
+  const [editorKey, setEditorKey] = useState(0);
   const [courses, setCourses] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [chapters, setChapters] = useState([]);
@@ -456,11 +458,15 @@ const AddQuestion = () => {
     setMarks(q.marks || 2);
     setNegativeMarks(q.negativeMarks || 0.66);
     setIsActive(q.isActive !== undefined ? q.isActive : true);
+    setEditorKey(prev => prev + 1);
+    if (formRef.current) {
+      formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   return (
-    <div className="add-question-container">
-      <h2>➕ Add New Question</h2>
+    <div className="add-question-container" ref={formRef}>
+      <h2>{editingQuestionId ? "✏️ Edit Question" : "➕ Add New Question"}</h2>
 
       <div className="form-group">
         <label>Course</label>
@@ -525,6 +531,7 @@ const AddQuestion = () => {
           <div className="form-group">
             <label>Question Text</label>
             <JoditEditor
+              key={`question-${editorKey}`}
               ref={editor}
               config={joditConfig}
               value={questionText}
@@ -538,6 +545,7 @@ const AddQuestion = () => {
               <div key={optionKey} style={{ marginBottom: "15px" }}>
                 <label>Option {optionKey}</label>
                 <JoditEditor
+                  key={`option-${optionKey}-${editorKey}`}
                   value={options[optionKey]}
                   config={joditConfig}
                   onBlur={(val) => handleOptionChange(optionKey, val)}
@@ -563,6 +571,7 @@ const AddQuestion = () => {
           <div className="form-group">
             <label>Explanation (optional)</label>
             <JoditEditor
+              key={`explanation-${editorKey}`}
               ref={editor}
               config={joditConfig}
               value={explanation}
@@ -629,6 +638,28 @@ const AddQuestion = () => {
                   : "🚀 Save Question"
               }
             </button>
+
+            {editingQuestionId && (
+              <button
+                type="button"
+                className="submit-btn"
+                style={{flex: 1, background: "#95a5a6"}}
+                onClick={() => {
+                  setEditingQuestionId(null);
+                  setQuestionText("");
+                  setOptions({ A: "", B: "", C: "", D: "" });
+                  setCorrectOption("");
+                  setExplanation("");
+                  setDifficulty("Medium");
+                  setMarks(2);
+                  setNegativeMarks(0.66);
+                  setIsActive(true);
+                  setEditorKey(prev => prev + 1);
+                }}
+              >
+                ❌ Cancel Edit
+              </button>
+            )}
 
             <button
               type="button"
