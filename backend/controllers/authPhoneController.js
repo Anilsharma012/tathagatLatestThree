@@ -195,8 +195,6 @@ exports.registerWithPhone = async (req, res) => {
       return res.status(400).json({ message: "Account already exists. Please login." });
     }
 
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-
     let user;
     if (existing) {
       existing.name = name;
@@ -204,7 +202,8 @@ exports.registerWithPhone = async (req, res) => {
       existing.city = city || existing.city;
       existing.gender = gender || existing.gender;
       existing.dob = dob || existing.dob;
-      existing.isPhoneVerified = false;
+      existing.isPhoneVerified = true;
+      existing.isOnboardingComplete = false;
       await existing.save();
       user = existing;
     } else {
@@ -214,31 +213,21 @@ exports.registerWithPhone = async (req, res) => {
         city: city || null,
         gender: gender || null,
         dob: dob || null,
-        isPhoneVerified: false,
+        isPhoneVerified: true,
+        isOnboardingComplete: false,
       };
       if (password) userData.password = password;
       user = new User(userData);
       await user.save();
     }
 
-    await OTP.deleteMany({ userId: user._id });
-    await OTP.create({
-      userId: user._id,
-      otpCode,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-    });
-
-    try {
-      await sendOtpPhoneUtil(phoneNumber, otpCode);
-    } catch (smsErr) {
-      console.error("SMS send failed:", smsErr.message);
-    }
-
-    console.log(`[Register] OTP for ${phoneNumber}: ${otpCode}`);
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "default_secret_key", { expiresIn: "30d" });
 
     res.status(200).json({
-      message: "OTP sent to your phone number. Please verify.",
-      phoneNumber: phoneNumber.slice(0, 5) + "XXXXX",
+      message: "Account created successfully!",
+      token,
+      user: { _id: user._id, name: user.name, phoneNumber: user.phoneNumber, email: user.email },
+      redirectTo: "/exam-category",
     });
   } catch (error) {
     console.error("Error in registration:", error);

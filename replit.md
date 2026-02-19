@@ -87,10 +87,12 @@ TathaGat is a full-stack education platform for CAT/XAT/SNAP exam preparation. I
   - Course categories in signup: MBA, After 12, GMAT, Govt Exams with exam sub-selections
   - Existing /Login and /signup page routes maintained for backward compatibility
 - 2026-02-19: Signup & Onboarding Flow Updates
-  - Removed password and confirm password fields from Signup page
-  - Backend registerWithPhone now accepts registration without password
-  - After signup OTP verification, redirects to /exam-category → /exam-selection → dashboard
-  - isOnboardingComplete set to false during registration, true after exam selection
+  - Removed password, confirm password fields and OTP step from Signup page
+  - Signup flow: Fill details → Click Sign Up → Account created directly → Navigate to /exam-category
+  - OTP is only used during Login, not during Signup
+  - Backend registerWithPhone creates user and returns token immediately (no OTP)
+  - After signup, redirects to /exam-category → /exam-selection → dashboard
+  - isOnboardingComplete set to false during registration, true after exam selection (save-exam)
   - Added image upload with visible preview on left panel of ExamCategory and ExamSelection pages
   - Used shared axiosConfig across all UserDetails components for consistent API calls
   - Added defensive null checks for localStorage user in image upload handlers
