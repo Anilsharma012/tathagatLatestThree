@@ -589,7 +589,7 @@ export default function PurchaseHistory() {
                 <td>{row.courseTitle || row.courseId?.name || '—'}</td>
                 <td>{toDate(row.paidAt || row.createdAt)}</td>
                 <td>{formatINR(Number(row.amount || 0) / 100, row.currency || 'INR')}</td>
-                <td>{row.downloads || row.downloadCount || row.downloaded || 0}</td>
+                <td>{typeof row.downloads === 'object' ? (row.downloadCount || 0) : (row.downloads || row.downloadCount || row.downloaded || 0)}</td>
                 <td style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   <button className="ph-view" onClick={() => onDownload(row, 'receipt', 'pdf')}>PDF</button>
                   <button className="ph-view" onClick={() => onDownload(row, 'receipt', 'html')}>View</button>

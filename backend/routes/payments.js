@@ -106,7 +106,7 @@ router.get('/history', authMiddleware, async (req, res) => {
       paidAt: p.status === 'paid' ? (p.updatedAt || p.createdAt) : p.createdAt,
       method: p.paymentMethod || p.method || 'Razorpay',
       status: p.status,
-      downloads: { receiptPdf: p.status === 'paid' },
+      downloads: p.downloadCount || 0,
       createdAt: p.createdAt,
     }));
 

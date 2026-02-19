@@ -1871,13 +1871,24 @@ const StudentDashboard = () => {
                     )}
                   </div>
 
-                  {payment.status === "paid" && (
+                  {(payment.status === "paid" || payment.status === "captured" || payment.status === "success") && (
                     <div className="purchase-actions">
                       <button
                         className="download-btn"
-                        onClick={() => downloadReceipt(payment._id, "html")}
+                        onClick={() => {
+                          const token = localStorage.getItem('authToken') || localStorage.getItem('token') || '';
+                          const url = `/api/invoices/download/${payment._id}?token=${encodeURIComponent(token)}`;
+                          window.open(url, '_blank');
+                        }}
                       >
-                        <FiDownload /> Download Receipt
+                        <FiDownload /> Tax Invoice
+                      </button>
+                      <button
+                        className="download-btn"
+                        onClick={() => downloadReceipt(payment._id, "html")}
+                        style={{ marginLeft: 8 }}
+                      >
+                        <FiDownload /> Receipt
                       </button>
                     </div>
                   )}
