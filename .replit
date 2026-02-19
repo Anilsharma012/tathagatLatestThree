@@ -16,6 +16,13 @@ KARIX_SMS_URL = "https://japi.instaalerts.zone/httpapi/JsonReceiver"
 KARIX_OTP_TEXT_TEMPLATE = "Dear User, use {{OTP}} as your sign up otp for mytathagat.com. OTP is confidential and valid for 10 mins. Never share your OTP with any unauthorized person."
 NODE_ENV = "development"
 SKIP_SEED = "1"
+PORT = "3001"
+JWT_SECRET = "Sachin@123"
+MONGO_URI = "mongodb+srv://RAJAT:RAJAT123@cluster0.wkiqhck.mongodb.net/tathagat"
+EMAIL_PASSWORD = "sxylwsaatcqwcfnu"
+RAZORPAY_KEY_ID = "rzp_live_RyDbrsQzJjSB1s"
+RAZORPAY_KEY_SECRET = "6PXx8plwhHvaO6GeeHSjwvPi"
+KARIX_API_KEY = "nNTT1B6KaHaxEqQc0omzPQ=="
 
 [workflows]
 runButton = "Project"
