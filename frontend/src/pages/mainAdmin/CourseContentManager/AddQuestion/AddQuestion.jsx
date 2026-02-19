@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import axios from "axios";
 import JoditEditor from "jodit-react";
 import { toast } from "react-toastify";
@@ -41,7 +41,7 @@ const AddQuestion = () => {
     return tempDiv.textContent || tempDiv.innerText || "";
   };
 
-  const joditConfig = {
+  const joditConfig = useMemo(() => ({
     readonly: false,
     toolbarSticky: false,
     height: 400,
@@ -172,7 +172,7 @@ const AddQuestion = () => {
         '#5B0F00', '#660000', '#783F04', '#7F6000', '#274E13', '#0C343D', '#1C4587', '#073763', '#20124D', '#4C1130'
       ]
     }
-  };
+  }), []);
 
   // Fetch courses
   useEffect(() => {
@@ -226,18 +226,16 @@ const AddQuestion = () => {
       .catch((err) => console.error("❌ Fetch question error:", err));
   }, [test]);
 
-  const handleOptionChange = (optionKey, value) => {
-    console.log(`📝 Option ${optionKey} changed:`, value);
+  const handleOptionChange = useCallback((optionKey, value) => {
     setOptions(prev => ({
       ...prev,
       [optionKey]: value
     }));
-  };
+  }, []);
 
-  const handleQuestionTextChange = (value) => {
-    console.log("📝 Question text changed:", value);
+  const handleQuestionTextChange = useCallback((value) => {
     setQuestionText(value);
-  };
+  }, []);
 
   const validateForm = () => {
     console.log("🔍 Validating form...");
@@ -527,11 +525,8 @@ const AddQuestion = () => {
               ref={editor}
               config={joditConfig}
               value={questionText}
-              onChange={handleQuestionTextChange}
+              onBlur={handleQuestionTextChange}
             />
-            <small style={{color: "#666", fontSize: "12px"}}>
-              Debug: Current length = {questionText?.length || 0}
-            </small>
           </div>
 
           <div className="form-group">
@@ -542,7 +537,7 @@ const AddQuestion = () => {
                 <JoditEditor
                   value={options[optionKey]}
                   config={joditConfig}
-                  onChange={(val) => handleOptionChange(optionKey, val)}
+                  onBlur={(val) => handleOptionChange(optionKey, val)}
                 />
               </div>
             ))}
@@ -568,7 +563,7 @@ const AddQuestion = () => {
               ref={editor}
               config={joditConfig}
               value={explanation}
-              onChange={setExplanation}
+              onBlur={setExplanation}
             />
           </div>
 
