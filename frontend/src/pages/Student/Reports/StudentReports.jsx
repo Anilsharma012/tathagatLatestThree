@@ -48,21 +48,15 @@ const StudentReports = () => {
   const fetchReportsData = async () => {
     try {
       setLoading(true);
-      console.log('📊 StudentReports: Fetching reports data...');
-      
       const [summaryRes, sectionRes] = await Promise.all([
         http.get('/mock-tests/reports/summary'),
         http.get('/mock-tests/reports/section-analysis')
       ]);
 
-      console.log('📊 Summary response:', summaryRes.data);
-      console.log('📊 Section response:', sectionRes.data);
-
       if (summaryRes.data?.success) {
         setSummary(summaryRes.data.summary);
         setAttempts(summaryRes.data.attempts);
         setPerformanceTrend(summaryRes.data.performanceTrend);
-        console.log('📊 Set summary:', summaryRes.data.summary);
       }
 
       if (sectionRes.data?.success) {
@@ -74,7 +68,6 @@ const StudentReports = () => {
       console.error('Error fetching reports:', error);
     } finally {
       setLoading(false);
-      console.log('📊 Finished loading reports');
     }
   };
 
@@ -91,27 +84,41 @@ const StudentReports = () => {
     }
   };
 
+  const sectionColors = ['#6366f1', '#06b6d4', '#f59e0b'];
+  const sectionBgColors = ['rgba(99,102,241,0.1)', 'rgba(6,182,212,0.1)', 'rgba(245,158,11,0.1)'];
+
   const trendChartData = {
     labels: performanceTrend.map(p => p.testName),
     datasets: [{
       label: 'Score',
       data: performanceTrend.map(p => p.score),
       fill: true,
-      backgroundColor: 'rgba(45, 140, 255, 0.1)',
-      borderColor: '#2d8cff',
+      backgroundColor: (ctx) => {
+        if (!ctx.chart?.ctx) return 'rgba(99, 102, 241, 0.1)';
+        const canvas = ctx.chart.ctx;
+        const gradient = canvas.createLinearGradient(0, 0, 0, ctx.chart.height || 280);
+        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.25)');
+        gradient.addColorStop(1, 'rgba(99, 102, 241, 0.01)');
+        return gradient;
+      },
+      borderColor: '#6366f1',
       tension: 0.4,
-      pointBackgroundColor: '#2d8cff',
-      pointRadius: 5
+      pointBackgroundColor: '#fff',
+      pointBorderColor: '#6366f1',
+      pointBorderWidth: 2,
+      pointRadius: 5,
+      pointHoverRadius: 8
     }]
   };
 
   const sectionChartData = {
     labels: sectionAnalysis.map(s => s.section),
     datasets: [{
-      label: 'Average Score',
       data: sectionAnalysis.map(s => parseFloat(s.averageScore)),
-      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-      borderWidth: 0
+      backgroundColor: sectionColors,
+      hoverBackgroundColor: ['#4f46e5', '#0891b2', '#d97706'],
+      borderWidth: 0,
+      cutout: '68%'
     }]
   };
 
@@ -120,18 +127,24 @@ const StudentReports = () => {
     datasets: [{
       label: 'Accuracy %',
       data: sectionAnalysis.map(s => parseFloat(s.averageAccuracy)),
-      backgroundColor: ['rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)', 'rgba(255, 206, 86, 0.7)'],
-      borderColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-      borderWidth: 2
+      backgroundColor: sectionColors.map(c => c + 'cc'),
+      borderColor: sectionColors,
+      borderWidth: 2,
+      borderRadius: 8,
+      barThickness: 44
     }]
   };
 
-  console.log('📊 Render - loading state:', loading, 'summary:', summary ? 'present' : 'null');
-  
+  const isTrendUp = performanceTrend.length >= 2 &&
+    performanceTrend[performanceTrend.length - 1]?.score >= performanceTrend[performanceTrend.length - 2]?.score;
+
   if (loading) {
     return (
       <div className="reports-container">
-        <div className="loading-state">Loading your reports...</div>
+        <div className="loading-state">
+          <div className="loading-spinner"></div>
+          <p>Loading your reports...</p>
+        </div>
       </div>
     );
   }
@@ -145,36 +158,28 @@ const StudentReports = () => {
 
       <div className="stats-cards-row">
         <div className="stat-card blue">
-          <div className="stat-icon">
-            <span>📝</span>
-          </div>
+          <div className="stat-icon"><span>📝</span></div>
           <div className="stat-info">
             <h3>{summary?.totalAttempts || 0}</h3>
             <p>Tests Taken</p>
           </div>
         </div>
         <div className="stat-card green">
-          <div className="stat-icon">
-            <span>📊</span>
-          </div>
+          <div className="stat-icon"><span>📊</span></div>
           <div className="stat-info">
             <h3>{summary?.averageScore || 0}</h3>
             <p>Average Score</p>
           </div>
         </div>
         <div className="stat-card orange">
-          <div className="stat-icon">
-            <span>🏆</span>
-          </div>
+          <div className="stat-icon"><span>🏆</span></div>
           <div className="stat-info">
             <h3>{summary?.bestScore || 0}</h3>
             <p>Best Score</p>
           </div>
         </div>
         <div className="stat-card purple">
-          <div className="stat-icon">
-            <span>⏱️</span>
-          </div>
+          <div className="stat-icon"><span>⏱️</span></div>
           <div className="stat-info">
             <h3>{summary?.averageTimeMinutes || 0} min</h3>
             <p>Avg. Time</p>
@@ -182,66 +187,157 @@ const StudentReports = () => {
         </div>
       </div>
 
-      <div className="charts-row">
-        <div className="chart-card">
-          <h3>Performance Trend</h3>
-          <div className="chart-container">
-            {performanceTrend.length > 0 ? (
-              <Line 
-                data={trendChartData}
-                height={150}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: { legend: { display: false } },
-                  scales: {
-                    y: { beginAtZero: true, max: 200 }
-                  }
-                }}
-              />
-            ) : (
-              <div className="empty-chart">No data available yet</div>
+      <div className="charts-grid-pro">
+        <div className="chart-card-pro chart-trend">
+          <div className="chart-card-header">
+            <div className="chart-header-left">
+              <h3>Performance Trend</h3>
+              <p>Your score progression across tests</p>
+            </div>
+            {performanceTrend.length >= 2 && (
+              <span className={`trend-badge ${isTrendUp ? 'up' : 'down'}`}>
+                {isTrendUp ? '▲ Improving' : '▼ Needs Focus'}
+              </span>
             )}
           </div>
-        </div>
-        <div className="chart-card">
-          <h3>Section-wise Performance</h3>
-          <div className="chart-container">
-            {sectionAnalysis.length > 0 ? (
-              <Doughnut 
-                data={sectionChartData}
-                height={150}
+          <div className="chart-body-pro">
+            {performanceTrend.length > 0 ? (
+              <Line
+                data={trendChartData}
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
                   plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+                    legend: { display: false },
+                    tooltip: {
+                      backgroundColor: '#1e1e3f',
+                      titleFont: { size: 13, weight: '600' },
+                      bodyFont: { size: 12 },
+                      padding: 14,
+                      cornerRadius: 10,
+                      displayColors: false,
+                      callbacks: { label: (ctx) => `Score: ${ctx.parsed.y}` }
+                    }
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+                      ticks: { font: { size: 11 }, color: '#aaa', padding: 10 }
+                    },
+                    x: {
+                      grid: { display: false },
+                      ticks: { font: { size: 10 }, color: '#aaa', maxRotation: 45 }
+                    }
                   }
                 }}
               />
             ) : (
-              <div className="empty-chart">No data available yet</div>
+              <div className="empty-state-pro">
+                <div className="empty-icon-circle"><span>📈</span></div>
+                <h4>No test data yet</h4>
+                <p>Take your first mock test to see your performance trend here</p>
+              </div>
             )}
           </div>
         </div>
-        <div className="chart-card">
-          <h3>Section Accuracy</h3>
-          <div className="chart-container">
+
+        <div className="chart-card-pro chart-section">
+          <div className="chart-card-header">
+            <div className="chart-header-left">
+              <h3>Section-wise Performance</h3>
+              <p>Score distribution by section</p>
+            </div>
+          </div>
+          <div className="chart-body-pro">
             {sectionAnalysis.length > 0 ? (
-              <Bar 
+              <div className="section-split">
+                <div className="section-doughnut-area">
+                  <Doughnut
+                    data={sectionChartData}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                          backgroundColor: '#1e1e3f',
+                          padding: 12,
+                          cornerRadius: 10,
+                          bodyFont: { size: 12 },
+                          callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed} marks` }
+                        }
+                      }
+                    }}
+                  />
+                </div>
+                <div className="section-legend">
+                  {sectionAnalysis.map((s, idx) => (
+                    <div key={s.section} className="legend-row" style={{ borderLeftColor: sectionColors[idx % 3] }}>
+                      <div className="legend-name">{s.section}</div>
+                      <div className="legend-values">
+                        <span className="legend-score-pill" style={{ color: sectionColors[idx % 3], background: sectionBgColors[idx % 3] }}>
+                          {s.averageScore} avg
+                        </span>
+                        <span className="legend-acc">{s.averageAccuracy}% accuracy</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="empty-state-pro">
+                <div className="empty-icon-circle"><span>📊</span></div>
+                <h4>No section data yet</h4>
+                <p>Complete a mock test to see section-wise breakdown</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="chart-card-pro chart-accuracy">
+          <div className="chart-card-header">
+            <div className="chart-header-left">
+              <h3>Section Accuracy</h3>
+              <p>How accurately you answer in each section</p>
+            </div>
+          </div>
+          <div className="chart-body-pro">
+            {sectionAnalysis.length > 0 ? (
+              <Bar
                 data={accuracyChartData}
-                height={150}
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
-                  plugins: { legend: { display: false } },
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      backgroundColor: '#1e1e3f',
+                      padding: 12,
+                      cornerRadius: 10,
+                      callbacks: { label: (ctx) => `Accuracy: ${ctx.parsed.y}%` }
+                    }
+                  },
                   scales: {
-                    y: { beginAtZero: true, max: 100 }
+                    y: {
+                      beginAtZero: true,
+                      max: 100,
+                      grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+                      ticks: { font: { size: 11 }, color: '#aaa', callback: (v) => v + '%' }
+                    },
+                    x: {
+                      grid: { display: false },
+                      ticks: { font: { size: 12, weight: '500' }, color: '#555' }
+                    }
                   }
                 }}
               />
             ) : (
-              <div className="empty-chart">No data available yet</div>
+              <div className="empty-state-pro">
+                <div className="empty-icon-circle"><span>🎯</span></div>
+                <h4>No accuracy data yet</h4>
+                <p>Take a mock test to track your accuracy</p>
+              </div>
             )}
           </div>
         </div>
@@ -343,13 +439,13 @@ const StudentReports = () => {
                     <td>{attempt.timeTakenMinutes} min</td>
                     <td>{new Date(attempt.completedAt).toLocaleDateString()}</td>
                     <td>
-                      <button 
+                      <button
                         className="action-btn leaderboard-btn"
                         onClick={() => fetchLeaderboard(attempt.testId, attempt.testName)}
                       >
                         Leaderboard
                       </button>
-                      <a 
+                      <a
                         href={`/student/mock-test/review/${attempt._id}`}
                         className="action-btn review-btn"
                       >
