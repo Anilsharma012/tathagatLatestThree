@@ -22,7 +22,7 @@ const sendEmailNotification = async (user, notification) => {
 
   try {
     const mailOptions = {
-      from: `"TathaGat Classes" <${process.env.EMAIL_USER || 'noreply@tathagat.com'}>`,
+      from: `"TathaGat Classes" <${process.env.SENDER_EMAIL || process.env.EMAIL_USER || 'noreply@tathagat.com'}>`,
       to: user.email,
       subject: notification.title,
       html: `

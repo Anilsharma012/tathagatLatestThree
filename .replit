@@ -23,6 +23,7 @@ EMAIL_PASSWORD = "sxylwsaatcqwcfnu"
 RAZORPAY_KEY_ID = "rzp_live_RyDbrsQzJjSB1s"
 RAZORPAY_KEY_SECRET = "6PXx8plwhHvaO6GeeHSjwvPi"
 KARIX_API_KEY = "nNTT1B6KaHaxEqQc0omzPQ=="
+SENDER_EMAIL = "payment@tathagat.co.in"
 
 [workflows]
 runButton = "Project"

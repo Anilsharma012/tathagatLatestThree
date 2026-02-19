@@ -440,7 +440,7 @@ router.post('/invoices/:id/send', adminOnly, async (req, res) => {
     `;
 
     const info = await transporter.sendMail({
-      from: 'invoices@tathagat.com',
+      from: `"TathaGat Classes" <${process.env.SENDER_EMAIL || 'invoices@tathagat.com'}>`,
       to: toEmail,
       subject: `Invoice ${invoice.number}`,
       html,

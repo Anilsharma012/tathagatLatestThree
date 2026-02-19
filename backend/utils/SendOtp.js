@@ -68,7 +68,7 @@ exports.sendOtpEmailUtil = async (email, otpCode) => {
   const fromUser = getEnvEmailUser() || "no-reply@tathagat.com";
 
   const info = await transporter.sendMail({
-    from: `"Tathagat" <${fromUser}>`,
+    from: `"TathaGat Classes" <${process.env.SENDER_EMAIL || fromUser}>`,
     to: email,
     subject: "Tathagat OTP Verification",
     html: `

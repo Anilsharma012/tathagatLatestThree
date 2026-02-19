@@ -34,7 +34,7 @@ const sendWelcomeEmail = async (user) => {
   
   try {
     const mailOptions = {
-      from: `"TathaGat Classes" <${process.env.EMAIL}>`,
+      from: `"TathaGat Classes" <${process.env.SENDER_EMAIL || process.env.EMAIL}>`,
       to: user.email,
       subject: 'Welcome to TathaGat - Your CAT Preparation Journey Begins!',
       html: `
@@ -114,7 +114,7 @@ const sendLoginNotificationEmail = async (user) => {
     });
     
     const mailOptions = {
-      from: `"TathaGat Classes" <${process.env.EMAIL}>`,
+      from: `"TathaGat Classes" <${process.env.SENDER_EMAIL || process.env.EMAIL}>`,
       to: user.email,
       subject: 'Login Notification - TathaGat Classes',
       html: `
@@ -190,7 +190,7 @@ const sendCoursePurchaseEmail = async (user, course, paymentDetails = {}) => {
     const amount = paymentDetails.amount ? `₹${(paymentDetails.amount / 100).toLocaleString('en-IN')}` : '';
     
     const mailOptions = {
-      from: `"TathaGat Classes" <${process.env.EMAIL}>`,
+      from: `"TathaGat Classes" <${process.env.SENDER_EMAIL || process.env.EMAIL}>`,
       to: user.email,
       subject: `Payment Successful - ${courseName} | TathaGat Classes`,
       html: `
