@@ -132,6 +132,14 @@ TathaGat is a full-stack education platform for CAT/XAT/SNAP exam preparation. I
   - Changed `startTest` and `getAttemptData` in MockTestController to return options as `{ A, B, C, D }` object for course tests
   - Added `option.text` fallback in MockTestAttempt.jsx for backward compatibility with any cached `{ id, text }` format data
   - Images uploaded via JoditEditor in question options now display correctly in student test view
+- 2026-02-19: Admin Student Performance Analytics Enhancement
+  - Added getDashboardAnalytics endpoint: overview stats (students, tests, attempts), daily activity chart, score distribution, top 10 performers, recent attempts
+  - Dashboard counts include both MockTest and CourseTest models for accurate totals
+  - Fixed hardcoded VARC/DILR/QA sections in getStudentPerformance to be dynamic (supports any section names)
+  - Added CourseTest model lookup for resolving test names in admin student performance view
+  - Enhanced StudentPerformance.jsx with 3-tab layout: Dashboard (charts + tables), By Student (split panel with charts), By Test (leaderboard)
+  - Chart.js integration: Line chart for daily activity, Bar charts for score distribution and section performance, score trend charts per student
+  - Modern CSS with card-based design, medal badges for top 3, avatar sidebar, responsive grid layouts
 - 2026-02-14: Initial Replit setup - migrated from GitHub import
   - Moved sensitive credentials from `.env` to Replit Secrets
   - Configured workflows for frontend and backend

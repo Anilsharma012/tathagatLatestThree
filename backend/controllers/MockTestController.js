@@ -1312,15 +1312,29 @@ const submitTest = async (req, res) => {
         }
       }
       
-      // Update attempt
-      attempt.isCompleted = true;
+      const endTime = new Date();
+      const timeTakenSeconds = Math.floor((endTime - attempt.startedAt) / 1000);
+      const totalMaxScore = questions.reduce((sum, q) => sum + (q.marks || 3), 0);
+      
       attempt.isSubmitted = true;
       attempt.status = 'COMPLETED';
-      attempt.endTime = new Date();
-      attempt.submittedAt = new Date();
-      attempt.timeSpent = Math.floor((attempt.endTime - attempt.startedAt) / (1000 * 60));
-      attempt.score = { total: totalScore };
-      attempt.marks = { total: totalScore, positive: positiveMarks, negative: negativeMarks };
+      attempt.endTime = endTime;
+      attempt.completedAt = endTime;
+      attempt.submittedAt = endTime;
+      attempt.totalScore = totalScore;
+      attempt.totalMaxScore = totalMaxScore;
+      attempt.totalTimeTakenSeconds = timeTakenSeconds;
+      attempt.sectionWiseStats = [{
+        section: courseTest.topic?.name || 'General',
+        score: totalScore,
+        maxScore: totalMaxScore,
+        attempted: totalAnswered,
+        correct: totalCorrect,
+        incorrect: totalIncorrect,
+        unattempted: questions.length - totalAnswered,
+        accuracy: totalAnswered > 0 ? parseFloat(((totalCorrect / totalAnswered) * 100).toFixed(2)) : 0,
+        timeSpent: timeTakenSeconds
+      }];
       
       await attempt.save();
       
@@ -1329,7 +1343,7 @@ const submitTest = async (req, res) => {
         success: true,
         message: 'Test submitted successfully',
         score: totalScore,
-        timeSpent: attempt.timeSpent,
+        timeSpent: Math.floor(timeTakenSeconds / 60),
         results: {
           totalQuestions: questions.length,
           totalAnswered,
@@ -2170,10 +2184,6 @@ const getStudentReportsSummary = async (req, res) => {
     const userId = req.user.id;
     console.log(`📊 Fetching reports summary for user: ${userId}`);
 
-    const allAttempts = await MockTestAttempt.find({ userId });
-    console.log(`📊 Total attempts for user: ${allAttempts.length}`);
-    allAttempts.forEach(a => console.log(`  - Attempt ${a._id}: status=${a.status}, testPaperId=${a.testPaperId}`));
-
     const attempts = await MockTestAttempt.find({ 
       userId, 
       status: 'COMPLETED' 
@@ -2181,8 +2191,37 @@ const getStudentReportsSummary = async (req, res) => {
     .populate('testPaperId', 'title testNumber')
     .populate('seriesId', 'title')
     .sort({ completedAt: -1 });
+
+    const CourseTest = require("../models/course/Test");
+    const courseTestIds = attempts
+      .filter(a => !a.testPaperId?.title && a.isCourseTest)
+      .map(a => a.testPaperId?._id || a.testPaperId);
     
-    console.log(`📊 Completed attempts: ${attempts.length}`);
+    let courseTestMap = {};
+    if (courseTestIds.length > 0) {
+      const courseTests = await CourseTest.find({ _id: { $in: courseTestIds } })
+        .populate('course', 'name')
+        .populate('topic', 'name')
+        .select('title course topic');
+      courseTests.forEach(ct => {
+        courseTestMap[ct._id.toString()] = ct;
+      });
+    }
+    
+    const unpopulatedIds = attempts
+      .filter(a => !a.testPaperId?.title && !a.isCourseTest)
+      .map(a => a.testPaperId?._id || a.testPaperId);
+    if (unpopulatedIds.length > 0) {
+      const extraCourseTests = await CourseTest.find({ _id: { $in: unpopulatedIds } })
+        .populate('course', 'name')
+        .populate('topic', 'name')
+        .select('title course topic');
+      extraCourseTests.forEach(ct => {
+        courseTestMap[ct._id.toString()] = ct;
+      });
+    }
+    
+    console.log(`📊 Completed attempts: ${attempts.length}, Course tests resolved: ${Object.keys(courseTestMap).length}`);
 
     if (attempts.length === 0) {
       return res.json({
@@ -2192,43 +2231,78 @@ const getStudentReportsSummary = async (req, res) => {
           averageScore: 0,
           bestScore: 0,
           averagePercentile: 0,
-          averageTimeMinutes: 0
+          averageTimeMinutes: 0,
+          averageAccuracy: 0
         },
         attempts: [],
         performanceTrend: []
       });
     }
 
+    const getTestName = (attempt) => {
+      if (attempt.testPaperId?.title) return attempt.testPaperId.title;
+      const tpId = (attempt.testPaperId?._id || attempt.testPaperId)?.toString();
+      const ct = courseTestMap[tpId];
+      if (ct) {
+        const courseName = ct.course?.name || '';
+        const topicName = ct.topic?.name || '';
+        return ct.title || `${courseName} - ${topicName}` || 'Course Test';
+      }
+      return 'Test';
+    };
+
+    const getTestId = (attempt) => {
+      return attempt.testPaperId?._id || attempt.testPaperId;
+    };
+
     const scores = attempts.map(a => a.totalScore || 0);
     const percentiles = attempts.filter(a => a.percentile).map(a => a.percentile);
     const times = attempts.map(a => Math.floor((a.totalTimeTakenSeconds || 0) / 60));
+    
+    let totalCorrectAll = 0, totalAttemptedAll = 0;
+    attempts.forEach(a => {
+      (a.sectionWiseStats || []).forEach(s => {
+        totalCorrectAll += s.correct || 0;
+        totalAttemptedAll += s.attempted || 0;
+      });
+    });
 
     const summary = {
       totalAttempts: attempts.length,
-      averageScore: scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2) : 0,
-      bestScore: Math.max(...scores),
-      averagePercentile: percentiles.length > 0 ? (percentiles.reduce((a, b) => a + b, 0) / percentiles.length).toFixed(2) : 0,
-      averageTimeMinutes: times.length > 0 ? Math.round(times.reduce((a, b) => a + b, 0) / times.length) : 0
+      averageScore: scores.length > 0 ? parseFloat((scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2)) : 0,
+      bestScore: Math.max(...scores, 0),
+      averagePercentile: percentiles.length > 0 ? parseFloat((percentiles.reduce((a, b) => a + b, 0) / percentiles.length).toFixed(2)) : 0,
+      averageTimeMinutes: times.length > 0 ? Math.round(times.reduce((a, b) => a + b, 0) / times.length) : 0,
+      averageAccuracy: totalAttemptedAll > 0 ? parseFloat(((totalCorrectAll / totalAttemptedAll) * 100).toFixed(2)) : 0
     };
 
     const formattedAttempts = attempts.map(attempt => ({
-      _id: attempt._id,
-      testName: attempt.testPaperId?.title || 'Unknown Test',
-      testId: attempt.testPaperId?._id,
+      attemptId: attempt._id,
+      testName: getTestName(attempt),
+      testId: getTestId(attempt),
       seriesName: attempt.seriesId?.title,
+      isCourseTest: attempt.isCourseTest || false,
       score: attempt.totalScore || 0,
-      maxScore: attempt.totalMaxScore || 150,
+      maxScore: attempt.totalMaxScore || 0,
       percentile: attempt.percentile || 0,
       rank: attempt.rank || 0,
       timeTakenMinutes: Math.floor((attempt.totalTimeTakenSeconds || 0) / 60),
-      completedAt: attempt.completedAt,
-      sectionWiseStats: attempt.sectionWiseStats || []
+      completedAt: attempt.completedAt || attempt.submittedAt || attempt.updatedAt,
+      sectionWiseStats: attempt.sectionWiseStats || [],
+      accuracy: (() => {
+        const stats = attempt.sectionWiseStats || [];
+        const correct = stats.reduce((s, sec) => s + (sec.correct || 0), 0);
+        const attempted = stats.reduce((s, sec) => s + (sec.attempted || 0), 0);
+        return attempted > 0 ? parseFloat(((correct / attempted) * 100).toFixed(2)) : 0;
+      })()
     }));
 
-    const performanceTrend = attempts.slice(0, 10).reverse().map(a => ({
-      testName: a.testPaperId?.title?.substring(0, 15) || 'Test',
+    const performanceTrend = attempts.slice(0, 15).reverse().map(a => ({
+      testName: getTestName(a)?.substring(0, 20) || 'Test',
       score: a.totalScore || 0,
-      date: a.completedAt
+      maxScore: a.totalMaxScore || 0,
+      percentage: a.totalMaxScore > 0 ? parseFloat(((a.totalScore / a.totalMaxScore) * 100).toFixed(1)) : 0,
+      date: a.completedAt || a.submittedAt || a.updatedAt
     }));
 
     res.json({
@@ -2305,7 +2379,6 @@ const getTestLeaderboard = async (req, res) => {
   }
 };
 
-// Get section-wise performance comparison with top 10 comparison
 const getSectionWiseAnalysis = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -2314,29 +2387,29 @@ const getSectionWiseAnalysis = async (req, res) => {
     const attempts = await MockTestAttempt.find({
       userId,
       status: 'COMPLETED'
-    }).sort({ completedAt: -1 }).limit(10);
+    }).sort({ completedAt: -1 }).limit(20);
 
-    const sectionAverages = { VARC: [], DILR: [], QA: [] };
+    const sectionAverages = {};
     
     attempts.forEach(attempt => {
       (attempt.sectionWiseStats || []).forEach(stat => {
-        const section = stat.section?.toUpperCase();
-        if (sectionAverages[section]) {
-          sectionAverages[section].push({
-            score: stat.score || 0,
-            accuracy: stat.accuracy || 0,
-            timeSpent: stat.timeSpent || 0
-          });
-        }
+        const section = stat.section || 'General';
+        if (!sectionAverages[section]) sectionAverages[section] = [];
+        sectionAverages[section].push({
+          score: stat.score || 0,
+          maxScore: stat.maxScore || 0,
+          accuracy: stat.accuracy || 0,
+          timeSpent: stat.timeSpent || 0,
+          correct: stat.correct || 0,
+          attempted: stat.attempted || 0
+        });
       });
     });
 
-    // Get top 10 performers' section-wise averages for comparison
     const allCompletedAttempts = await MockTestAttempt.find({
       status: 'COMPLETED'
-    }).sort({ totalScore: -1 }).limit(100);
+    }).sort({ totalScore: -1 }).limit(200);
 
-    // Get unique top 10 users
     const seenUsers = new Set();
     const topTenAttempts = [];
     for (const attempt of allCompletedAttempts) {
@@ -2348,22 +2421,23 @@ const getSectionWiseAnalysis = async (req, res) => {
       }
     }
 
-    // Calculate top 10 section averages
-    const top10SectionAverages = { VARC: [], DILR: [], QA: [] };
+    const top10SectionAverages = {};
     topTenAttempts.forEach(attempt => {
       (attempt.sectionWiseStats || []).forEach(stat => {
-        const section = stat.section?.toUpperCase();
-        if (top10SectionAverages[section]) {
-          top10SectionAverages[section].push({
-            score: stat.score || 0,
-            accuracy: stat.accuracy || 0,
-            timeSpent: stat.timeSpent || 0
-          });
-        }
+        const section = stat.section || 'General';
+        if (!top10SectionAverages[section]) top10SectionAverages[section] = [];
+        top10SectionAverages[section].push({
+          score: stat.score || 0,
+          accuracy: stat.accuracy || 0,
+          timeSpent: stat.timeSpent || 0
+        });
       });
     });
 
-    const analysis = Object.entries(sectionAverages).map(([section, stats]) => {
+    const allSections = new Set([...Object.keys(sectionAverages), ...Object.keys(top10SectionAverages)]);
+
+    const analysis = Array.from(allSections).map(section => {
+      const stats = sectionAverages[section] || [];
       const top10Stats = top10SectionAverages[section] || [];
       const userAvgScore = stats.length > 0 
         ? (stats.reduce((a, b) => a + b.score, 0) / stats.length) 
@@ -2380,20 +2454,19 @@ const getSectionWiseAnalysis = async (req, res) => {
       
       return {
         section,
-        averageScore: userAvgScore.toFixed(2),
-        averageAccuracy: userAvgAccuracy.toFixed(2),
+        averageScore: parseFloat(userAvgScore.toFixed(2)),
+        averageAccuracy: parseFloat(userAvgAccuracy.toFixed(2)),
         averageTimeMinutes: stats.length > 0 
           ? Math.round(stats.reduce((a, b) => a + b.timeSpent, 0) / stats.length / 60) 
           : 0,
         attempts: stats.length,
-        top10AverageScore: top10AvgScore.toFixed(2),
-        top10AverageAccuracy: top10AvgAccuracy.toFixed(2),
-        scoreDifference: (userAvgScore - top10AvgScore).toFixed(2),
-        accuracyDifference: (userAvgAccuracy - top10AvgAccuracy).toFixed(2)
+        top10AverageScore: parseFloat(top10AvgScore.toFixed(2)),
+        top10AverageAccuracy: parseFloat(top10AvgAccuracy.toFixed(2)),
+        scoreDifference: parseFloat((userAvgScore - top10AvgScore).toFixed(2)),
+        accuracyDifference: parseFloat((userAvgAccuracy - top10AvgAccuracy).toFixed(2))
       };
     });
 
-    // Get user's current rank
     let userRank = null;
     const allUserScores = await MockTestAttempt.aggregate([
       { $match: { status: 'COMPLETED' } },

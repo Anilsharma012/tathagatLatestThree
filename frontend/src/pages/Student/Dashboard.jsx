@@ -2431,15 +2431,7 @@ const StudentDashboard = () => {
     if (analyticsLoading) {
       return (
         <div className="analysis-content">
-          <div
-            className="loading-state"
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "300px",
-            }}
-          >
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "300px" }}>
             <div className="loading-spinner"></div>
             <p style={{ marginLeft: "10px" }}>Loading your analytics...</p>
           </div>
@@ -2447,263 +2439,190 @@ const StudentDashboard = () => {
       );
     }
 
+    const trendChartData = performanceTrend.length > 0 ? {
+      labels: performanceTrend.map(t => t.testName),
+      datasets: [
+        {
+          label: 'Score',
+          data: performanceTrend.map(t => t.score),
+          borderColor: '#667eea',
+          backgroundColor: 'rgba(102,126,234,0.1)',
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#667eea',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+        },
+        {
+          label: 'Score %',
+          data: performanceTrend.map(t => t.percentage),
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16,185,129,0.1)',
+          fill: false,
+          tension: 0.4,
+          pointBackgroundColor: '#10b981',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          yAxisID: 'y1',
+        }
+      ]
+    } : null;
+
+    const sectionBarData = sectionAnalysis.length > 0 ? {
+      labels: sectionAnalysis.map(s => s.section),
+      datasets: [
+        {
+          label: 'Your Avg Score',
+          data: sectionAnalysis.map(s => s.averageScore),
+          backgroundColor: 'rgba(102,126,234,0.8)',
+          borderColor: '#667eea',
+          borderWidth: 1,
+          borderRadius: 6,
+        },
+        {
+          label: 'Top 10 Avg Score',
+          data: sectionAnalysis.map(s => s.top10AverageScore),
+          backgroundColor: 'rgba(16,185,129,0.8)',
+          borderColor: '#10b981',
+          borderWidth: 1,
+          borderRadius: 6,
+        }
+      ]
+    } : null;
+
+    const accuracyDoughnutData = summary && summary.totalAttempts > 0 ? {
+      labels: ['Accuracy', 'Remaining'],
+      datasets: [{
+        data: [summary.averageAccuracy || 0, 100 - (summary.averageAccuracy || 0)],
+        backgroundColor: ['#667eea', '#e8e8e8'],
+        borderWidth: 0,
+        cutout: '75%',
+      }]
+    } : null;
+
     return (
       <div className="analysis-content">
-        <div className="section-header">
-          <h2>Analysis & Reports</h2>
-          <button
-            className="refresh-btn"
-            onClick={loadAnalyticsData}
-            style={{
-              padding: "8px 16px",
-              borderRadius: "6px",
-              background: "#667eea",
-              color: "white",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
+        <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+          <h2 style={{ margin: 0 }}>Analysis & Reports</h2>
+          <button onClick={loadAnalyticsData} style={{ padding: "8px 16px", borderRadius: "6px", background: "#667eea", color: "white", border: "none", cursor: "pointer", fontSize: '14px' }}>
             Refresh
           </button>
         </div>
 
-        {/* Summary Cards */}
-        <div
-          className="stats-cards-row"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: "20px",
-            marginBottom: "30px",
-          }}
-        >
-          <div
-            className="stat-card"
-            style={{
-              background: "white",
-              borderRadius: "12px",
-              padding: "20px",
-              boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-            }}
-          >
-            <div style={{ fontSize: "24px", marginBottom: "8px" }}>📝</div>
-            <h3 style={{ fontSize: "28px", margin: "0", color: "#1a1a2e" }}>
-              {summary?.totalAttempts || 0}
-            </h3>
-            <p style={{ color: "#888", margin: "4px 0 0" }}>Tests Taken</p>
-          </div>
-          <div
-            className="stat-card"
-            style={{
-              background: "white",
-              borderRadius: "12px",
-              padding: "20px",
-              boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-            }}
-          >
-            <div style={{ fontSize: "24px", marginBottom: "8px" }}>📊</div>
-            <h3 style={{ fontSize: "28px", margin: "0", color: "#1a1a2e" }}>
-              {summary?.averageScore || 0}
-            </h3>
-            <p style={{ color: "#888", margin: "4px 0 0" }}>Average Score</p>
-          </div>
-          <div
-            className="stat-card"
-            style={{
-              background: "white",
-              borderRadius: "12px",
-              padding: "20px",
-              boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-            }}
-          >
-            <div style={{ fontSize: "24px", marginBottom: "8px" }}>🏆</div>
-            <h3 style={{ fontSize: "28px", margin: "0", color: "#1a1a2e" }}>
-              {summary?.bestScore || 0}
-            </h3>
-            <p style={{ color: "#888", margin: "4px 0 0" }}>Best Score</p>
-          </div>
-          <div
-            className="stat-card"
-            style={{
-              background: "white",
-              borderRadius: "12px",
-              padding: "20px",
-              boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-            }}
-          >
-            <div style={{ fontSize: "24px", marginBottom: "8px" }}>⏱️</div>
-            <h3 style={{ fontSize: "28px", margin: "0", color: "#1a1a2e" }}>
-              {summary?.averageTimeMinutes || 0} min
-            </h3>
-            <p style={{ color: "#888", margin: "4px 0 0" }}>Avg. Time</p>
-          </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "15px", marginBottom: "25px" }}>
+          {[
+            { icon: "📝", value: summary?.totalAttempts || 0, label: "Tests Taken", color: "#667eea" },
+            { icon: "📊", value: summary?.averageScore || 0, label: "Avg Score", color: "#764ba2" },
+            { icon: "🏆", value: summary?.bestScore || 0, label: "Best Score", color: "#f59e0b" },
+            { icon: "🎯", value: `${summary?.averageAccuracy || 0}%`, label: "Accuracy", color: "#10b981" },
+            { icon: "⏱️", value: `${summary?.averageTimeMinutes || 0}m`, label: "Avg Time", color: "#ef4444" },
+          ].map((card, i) => (
+            <div key={i} style={{ background: "white", borderRadius: "12px", padding: "18px", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", borderLeft: `4px solid ${card.color}` }}>
+              <div style={{ fontSize: "20px", marginBottom: "6px" }}>{card.icon}</div>
+              <h3 style={{ fontSize: "26px", margin: "0", color: "#1a1a2e" }}>{card.value}</h3>
+              <p style={{ color: "#888", margin: "4px 0 0", fontSize: "13px" }}>{card.label}</p>
+            </div>
+          ))}
         </div>
 
-        <div className="analysis-grid">
-          {/* Rank Progress */}
-          <div className="rank-progress">
-            <h3>Your Ranking</h3>
-            <div className="rank-stats">
-              <div className="rank-item">
-                <span className="rank-label">Current Rank</span>
-                <span className="rank-value">#{userRank || "-"}</span>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', marginBottom: '25px' }}>
+          <div style={{ background: "white", borderRadius: "12px", padding: "20px", boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
+            <h3 style={{ margin: "0 0 15px", fontSize: '16px' }}>Your Ranking</h3>
+            <div style={{ display: 'flex', gap: '30px', alignItems: 'center' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: "36px", fontWeight: "bold", color: "#667eea" }}>#{userRank || "-"}</div>
+                <div style={{ fontSize: "12px", color: "#888" }}>Current Rank</div>
               </div>
-              <div className="rank-item">
-                <span className="rank-label">Total Participants</span>
-                <span className="rank-value">{totalParticipants || 0}</span>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: "36px", fontWeight: "bold", color: "#10b981" }}>{totalParticipants || 0}</div>
+                <div style={{ fontSize: "12px", color: "#888" }}>Total Students</div>
               </div>
-              <div className="rank-item">
-                <span className="rank-label">Percentile</span>
-                <span className="rank-value improvement">{percentile}%</span>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: "36px", fontWeight: "bold", color: "#764ba2" }}>{percentile}%</div>
+                <div style={{ fontSize: "12px", color: "#888" }}>Percentile</div>
               </div>
             </div>
           </div>
+
+          {accuracyDoughnutData && (
+            <div style={{ background: "white", borderRadius: "12px", padding: "20px", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+              <div style={{ width: '140px', height: '140px', position: 'relative' }}>
+                <Doughnut data={accuracyDoughnutData} options={{ plugins: { legend: { display: false }, tooltip: { enabled: false } }, maintainAspectRatio: true }} />
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+                  <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#667eea' }}>{summary?.averageAccuracy || 0}%</div>
+                  <div style={{ fontSize: '11px', color: '#888' }}>Accuracy</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Section-wise Comparison with Top 10 */}
+        {trendChartData && (
+          <div style={{ background: "white", borderRadius: "12px", padding: "20px", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", marginBottom: "25px" }}>
+            <h3 style={{ margin: "0 0 15px", fontSize: '16px' }}>Performance Trend</h3>
+            <div style={{ height: '280px' }}>
+              <Line data={trendChartData} options={{
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                  y: { beginAtZero: true, title: { display: true, text: 'Score' }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                  y1: { beginAtZero: true, position: 'right', max: 100, title: { display: true, text: 'Percentage' }, grid: { display: false } },
+                  x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 11 } } }
+                },
+                plugins: { legend: { position: 'top' }, tooltip: { mode: 'index', intersect: false } }
+              }} />
+            </div>
+          </div>
+        )}
+
+        {sectionBarData && (
+          <div style={{ background: "white", borderRadius: "12px", padding: "20px", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", marginBottom: "25px" }}>
+            <h3 style={{ margin: "0 0 15px", fontSize: '16px' }}>Section-wise Comparison with Top 10</h3>
+            <div style={{ height: '260px' }}>
+              <Bar data={sectionBarData} options={{
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                  y: { beginAtZero: true, title: { display: true, text: 'Avg Score' }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                  x: { grid: { display: false } }
+                },
+                plugins: { legend: { position: 'top' } }
+              }} />
+            </div>
+          </div>
+        )}
+
         {sectionAnalysis.length > 0 && (
-          <div
-            style={{
-              marginTop: "30px",
-              background: "white",
-              borderRadius: "12px",
-              padding: "20px",
-              boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-            }}
-          >
-            <h3 style={{ marginBottom: "20px" }}>
-              Compare with Top 10 Performers
-            </h3>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "20px",
-              }}
-            >
+          <div style={{ background: "white", borderRadius: "12px", padding: "20px", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", marginBottom: "25px" }}>
+            <h3 style={{ margin: "0 0 15px", fontSize: '16px' }}>Compare with Top 10 Performers</h3>
+            <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(sectionAnalysis.length, 4)}, 1fr)`, gap: "15px" }}>
               {sectionAnalysis.map((section) => (
-                <div
-                  key={section.section}
-                  style={{
-                    background: "#f8f9fa",
-                    borderRadius: "10px",
-                    padding: "15px",
-                  }}
-                >
-                  <h4 style={{ margin: "0 0 15px", color: "#333" }}>
-                    {section.section}
-                  </h4>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: "10px",
-                    }}
-                  >
+                <div key={section.section} style={{ background: "#f8f9fa", borderRadius: "10px", padding: "15px" }}>
+                  <h4 style={{ margin: "0 0 12px", color: "#333", fontSize: '14px' }}>{section.section}</h4>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
                     <div>
-                      <div
-                        style={{
-                          fontSize: "24px",
-                          fontWeight: "bold",
-                          color: "#667eea",
-                        }}
-                      >
-                        {section.averageScore}
-                      </div>
-                      <div style={{ fontSize: "12px", color: "#888" }}>
-                        Your Score
-                      </div>
+                      <div style={{ fontSize: "22px", fontWeight: "bold", color: "#667eea" }}>{section.averageScore}</div>
+                      <div style={{ fontSize: "11px", color: "#888" }}>Your Score</div>
                     </div>
                     <div>
-                      <div
-                        style={{
-                          fontSize: "24px",
-                          fontWeight: "bold",
-                          color: "#10b981",
-                        }}
-                      >
-                        {section.top10AverageScore || 0}
-                      </div>
-                      <div style={{ fontSize: "12px", color: "#888" }}>
-                        Top 10 Avg
-                      </div>
+                      <div style={{ fontSize: "22px", fontWeight: "bold", color: "#10b981" }}>{section.top10AverageScore || 0}</div>
+                      <div style={{ fontSize: "11px", color: "#888" }}>Top 10 Avg</div>
                     </div>
                     <div>
-                      <div
-                        style={{
-                          fontSize: "24px",
-                          fontWeight: "bold",
-                          color:
-                            parseFloat(section.scoreDifference) >= 0
-                              ? "#10b981"
-                              : "#ef4444",
-                        }}
-                      >
-                        {parseFloat(section.scoreDifference) >= 0 ? "+" : ""}
-                        {section.scoreDifference}
+                      <div style={{ fontSize: "22px", fontWeight: "bold", color: parseFloat(section.scoreDifference) >= 0 ? "#10b981" : "#ef4444" }}>
+                        {parseFloat(section.scoreDifference) >= 0 ? "+" : ""}{section.scoreDifference}
                       </div>
-                      <div style={{ fontSize: "12px", color: "#888" }}>
-                        Difference
-                      </div>
+                      <div style={{ fontSize: "11px", color: "#888" }}>Diff</div>
                     </div>
                   </div>
-                  <div style={{ marginTop: "10px" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        fontSize: "12px",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      <span>Your Accuracy: {section.averageAccuracy}%</span>
+                  <div style={{ marginTop: "8px" }}>
+                    <div style={{ fontSize: "11px", marginBottom: "3px", color: '#555' }}>Your Accuracy: {section.averageAccuracy}%</div>
+                    <div style={{ background: "#e0e0e0", borderRadius: "4px", height: "6px", overflow: "hidden" }}>
+                      <div style={{ width: `${Math.min(100, section.averageAccuracy)}%`, height: "100%", background: "#667eea", borderRadius: "4px" }}></div>
                     </div>
-                    <div
-                      style={{
-                        background: "#e0e0e0",
-                        borderRadius: "4px",
-                        height: "8px",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: `${Math.min(100, section.averageAccuracy)}%`,
-                          height: "100%",
-                          background: "#667eea",
-                          borderRadius: "4px",
-                        }}
-                      ></div>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        fontSize: "12px",
-                        marginTop: "8px",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      <span>
-                        Top 10 Accuracy: {section.top10AverageAccuracy || 0}%
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        background: "#e0e0e0",
-                        borderRadius: "4px",
-                        height: "8px",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: `${Math.min(100, section.top10AverageAccuracy || 0)}%`,
-                          height: "100%",
-                          background: "#10b981",
-                          borderRadius: "4px",
-                        }}
-                      ></div>
+                    <div style={{ fontSize: "11px", marginTop: "6px", marginBottom: "3px", color: '#555' }}>Top 10: {section.top10AverageAccuracy || 0}%</div>
+                    <div style={{ background: "#e0e0e0", borderRadius: "4px", height: "6px", overflow: "hidden" }}>
+                      <div style={{ width: `${Math.min(100, section.top10AverageAccuracy || 0)}%`, height: "100%", background: "#10b981", borderRadius: "4px" }}></div>
                     </div>
                   </div>
                 </div>
@@ -2712,35 +2631,14 @@ const StudentDashboard = () => {
           </div>
         )}
 
-        {/* Test Attempts Table */}
-        <div
-          style={{
-            marginTop: "30px",
-            background: "white",
-            borderRadius: "12px",
-            padding: "20px",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-          }}
-        >
-          <h3 style={{ marginBottom: "20px" }}>Your Test Attempts</h3>
+        <div style={{ background: "white", borderRadius: "12px", padding: "20px", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", marginBottom: "25px" }}>
+          <h3 style={{ margin: "0 0 15px", fontSize: '16px' }}>Your Test Attempts</h3>
           {attempts.length === 0 ? (
-            <div
-              style={{ textAlign: "center", padding: "40px", color: "#888" }}
-            >
-              <p>You haven't taken any mock tests yet.</p>
-              <button
-                onClick={() => setActiveSection("mockTests")}
-                style={{
-                  marginTop: "15px",
-                  padding: "10px 20px",
-                  background: "#667eea",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                }}
-              >
-                Start a Mock Test
+            <div style={{ textAlign: "center", padding: "40px", color: "#888" }}>
+              <div style={{ fontSize: '48px', marginBottom: '15px' }}>📋</div>
+              <p style={{ fontSize: '16px', marginBottom: '15px' }}>You haven't completed any tests yet.</p>
+              <button onClick={() => setActiveSection("mockTests")} style={{ padding: "10px 24px", background: "#667eea", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: '14px' }}>
+                Take a Test Now
               </button>
             </div>
           ) : (
@@ -2748,122 +2646,32 @@ const StudentDashboard = () => {
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ background: "#f8f9fa" }}>
-                    <th
-                      style={{
-                        padding: "12px",
-                        textAlign: "left",
-                        borderBottom: "2px solid #e0e0e0",
-                      }}
-                    >
-                      Test Name
-                    </th>
-                    <th
-                      style={{
-                        padding: "12px",
-                        textAlign: "center",
-                        borderBottom: "2px solid #e0e0e0",
-                      }}
-                    >
-                      Score
-                    </th>
-                    <th
-                      style={{
-                        padding: "12px",
-                        textAlign: "center",
-                        borderBottom: "2px solid #e0e0e0",
-                      }}
-                    >
-                      Time
-                    </th>
-                    <th
-                      style={{
-                        padding: "12px",
-                        textAlign: "center",
-                        borderBottom: "2px solid #e0e0e0",
-                      }}
-                    >
-                      Rank
-                    </th>
-                    <th
-                      style={{
-                        padding: "12px",
-                        textAlign: "center",
-                        borderBottom: "2px solid #e0e0e0",
-                      }}
-                    >
-                      Date
-                    </th>
-                    <th
-                      style={{
-                        padding: "12px",
-                        textAlign: "center",
-                        borderBottom: "2px solid #e0e0e0",
-                      }}
-                    >
-                      Actions
-                    </th>
+                    {["Test Name", "Score", "Accuracy", "Time", "Rank", "Date", "Actions"].map(h => (
+                      <th key={h} style={{ padding: "10px 12px", textAlign: h === "Test Name" ? "left" : "center", borderBottom: "2px solid #e0e0e0", fontSize: '13px', color: '#555' }}>{h}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {attempts.map((attempt, index) => (
-                    <tr
-                      key={attempt.attemptId || index}
-                      style={{ borderBottom: "1px solid #e0e0e0" }}
-                    >
-                      <td style={{ padding: "12px" }}>{attempt.testName}</td>
-                      <td
-                        style={{
-                          padding: "12px",
-                          textAlign: "center",
-                          fontWeight: "bold",
-                          color: "#667eea",
-                        }}
-                      >
-                        {attempt.score}
+                    <tr key={attempt.attemptId || index} style={{ borderBottom: "1px solid #f0f0f0" }}>
+                      <td style={{ padding: "10px 12px", fontSize: '13px' }}>
+                        {attempt.testName}
+                        {attempt.isCourseTest && <span style={{ marginLeft: '6px', fontSize: '10px', background: '#e8f4ff', color: '#667eea', padding: '2px 6px', borderRadius: '3px' }}>Course</span>}
                       </td>
-                      <td style={{ padding: "12px", textAlign: "center" }}>
-                        {attempt.timeTakenMinutes} min
+                      <td style={{ padding: "10px 12px", textAlign: "center", fontWeight: "bold", color: "#667eea", fontSize: '13px' }}>
+                        {attempt.score}{attempt.maxScore > 0 ? `/${attempt.maxScore}` : ''}
                       </td>
-                      <td style={{ padding: "12px", textAlign: "center" }}>
-                        #{attempt.rank || "-"}
+                      <td style={{ padding: "10px 12px", textAlign: "center", fontSize: '13px' }}>
+                        <span style={{ color: attempt.accuracy >= 70 ? '#10b981' : attempt.accuracy >= 40 ? '#f59e0b' : '#ef4444', fontWeight: 'bold' }}>{attempt.accuracy}%</span>
                       </td>
-                      <td style={{ padding: "12px", textAlign: "center" }}>
-                        {new Date(attempt.completedAt).toLocaleDateString(
-                          "en-IN",
-                        )}
-                      </td>
-                      <td style={{ padding: "12px", textAlign: "center" }}>
-                        <button
-                          onClick={() =>
-                            loadLeaderboard(attempt.testId, attempt.testName)
-                          }
-                          style={{
-                            padding: "6px 12px",
-                            background: "#10b981",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            marginRight: "8px",
-                          }}
-                        >
-                          View Leaderboard
+                      <td style={{ padding: "10px 12px", textAlign: "center", fontSize: '13px' }}>{attempt.timeTakenMinutes} min</td>
+                      <td style={{ padding: "10px 12px", textAlign: "center", fontSize: '13px', fontWeight: 'bold' }}>#{attempt.rank || "-"}</td>
+                      <td style={{ padding: "10px 12px", textAlign: "center", fontSize: '13px' }}>{attempt.completedAt ? new Date(attempt.completedAt).toLocaleDateString("en-IN") : '-'}</td>
+                      <td style={{ padding: "10px 12px", textAlign: "center" }}>
+                        <button onClick={() => loadLeaderboard(attempt.testId, attempt.testName)} style={{ padding: "5px 10px", background: "#10b981", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: '12px', marginRight: "5px" }}>
+                          Leaderboard
                         </button>
-                        <button
-                          onClick={() =>
-                            navigate(
-                              `/student/mock-test/review/${attempt.attemptId}`,
-                            )
-                          }
-                          style={{
-                            padding: "6px 12px",
-                            background: "#667eea",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                          }}
-                        >
+                        <button onClick={() => navigate(`/student/mock-test/review/${attempt.attemptId}`)} style={{ padding: "5px 10px", background: "#667eea", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: '12px' }}>
                           Review
                         </button>
                       </td>
@@ -2875,233 +2683,59 @@ const StudentDashboard = () => {
           )}
         </div>
 
-        {/* Leaderboard Modal */}
         {selectedTestForLeaderboard && (
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: "rgba(0,0,0,0.5)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 1000,
-            }}
-          >
-            <div
-              style={{
-                background: "white",
-                borderRadius: "12px",
-                padding: "30px",
-                maxWidth: "700px",
-                width: "90%",
-                maxHeight: "80vh",
-                overflow: "auto",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "20px",
-                }}
-              >
-                <h3 style={{ margin: 0 }}>
-                  Leaderboard: {selectedTestForLeaderboard.name}
-                </h3>
-                <button
-                  onClick={() => {
-                    setSelectedTestForLeaderboard(null);
-                    setLeaderboardData(null);
-                  }}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    fontSize: "24px",
-                    cursor: "pointer",
-                  }}
-                >
-                  ×
-                </button>
+          <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+            <div style={{ background: "white", borderRadius: "12px", padding: "30px", maxWidth: "700px", width: "90%", maxHeight: "80vh", overflow: "auto" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                <h3 style={{ margin: 0 }}>Leaderboard: {selectedTestForLeaderboard.name}</h3>
+                <button onClick={() => { setSelectedTestForLeaderboard(null); setLeaderboardData(null); }} style={{ background: "none", border: "none", fontSize: "24px", cursor: "pointer" }}>x</button>
               </div>
-
               {leaderboardLoading ? (
-                <div style={{ textAlign: "center", padding: "40px" }}>
-                  Loading leaderboard...
-                </div>
+                <div style={{ textAlign: "center", padding: "40px" }}>Loading leaderboard...</div>
               ) : leaderboardData ? (
                 <>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-around",
-                      marginBottom: "20px",
-                      padding: "15px",
-                      background: "#f8f9fa",
-                      borderRadius: "8px",
-                    }}
-                  >
+                  <div style={{ display: "flex", justifyContent: "space-around", marginBottom: "20px", padding: "15px", background: "#f8f9fa", borderRadius: "8px" }}>
                     <div style={{ textAlign: "center" }}>
-                      <div
-                        style={{
-                          fontSize: "24px",
-                          fontWeight: "bold",
-                          color: "#667eea",
-                        }}
-                      >
-                        #{leaderboardData.currentUserRank || "-"}
-                      </div>
-                      <div style={{ fontSize: "12px", color: "#888" }}>
-                        Your Rank
-                      </div>
+                      <div style={{ fontSize: "24px", fontWeight: "bold", color: "#667eea" }}>#{leaderboardData.currentUserRank || "-"}</div>
+                      <div style={{ fontSize: "12px", color: "#888" }}>Your Rank</div>
                     </div>
                     <div style={{ textAlign: "center" }}>
-                      <div
-                        style={{
-                          fontSize: "24px",
-                          fontWeight: "bold",
-                          color: "#10b981",
-                        }}
-                      >
-                        {leaderboardData.currentUserScore || 0}
-                      </div>
-                      <div style={{ fontSize: "12px", color: "#888" }}>
-                        Your Score
-                      </div>
+                      <div style={{ fontSize: "24px", fontWeight: "bold", color: "#10b981" }}>{leaderboardData.currentUserScore || 0}</div>
+                      <div style={{ fontSize: "12px", color: "#888" }}>Your Score</div>
                     </div>
                     <div style={{ textAlign: "center" }}>
-                      <div
-                        style={{
-                          fontSize: "24px",
-                          fontWeight: "bold",
-                          color: "#764ba2",
-                        }}
-                      >
-                        {leaderboardData.totalParticipants || 0}
-                      </div>
-                      <div style={{ fontSize: "12px", color: "#888" }}>
-                        Total Participants
-                      </div>
+                      <div style={{ fontSize: "24px", fontWeight: "bold", color: "#764ba2" }}>{leaderboardData.totalParticipants || 0}</div>
+                      <div style={{ fontSize: "12px", color: "#888" }}>Total Participants</div>
                     </div>
                   </div>
-
                   <h4 style={{ marginBottom: "15px" }}>Top 10 Students</h4>
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <thead>
                       <tr style={{ background: "#f8f9fa" }}>
-                        <th
-                          style={{
-                            padding: "10px",
-                            textAlign: "center",
-                            borderBottom: "2px solid #e0e0e0",
-                          }}
-                        >
-                          Rank
-                        </th>
-                        <th
-                          style={{
-                            padding: "10px",
-                            textAlign: "left",
-                            borderBottom: "2px solid #e0e0e0",
-                          }}
-                        >
-                          Student
-                        </th>
-                        <th
-                          style={{
-                            padding: "10px",
-                            textAlign: "center",
-                            borderBottom: "2px solid #e0e0e0",
-                          }}
-                        >
-                          Score
-                        </th>
-                        <th
-                          style={{
-                            padding: "10px",
-                            textAlign: "center",
-                            borderBottom: "2px solid #e0e0e0",
-                          }}
-                        >
-                          Time
-                        </th>
+                        {["Rank", "Student", "Score", "Time"].map(h => (
+                          <th key={h} style={{ padding: "10px", textAlign: h === "Student" ? "left" : "center", borderBottom: "2px solid #e0e0e0" }}>{h}</th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody>
                       {(leaderboardData.topTen || []).map((student) => (
-                        <tr
-                          key={student.rank}
-                          style={{
-                            background: student.isCurrentUser
-                              ? "#e8f4ff"
-                              : "transparent",
-                            borderBottom: "1px solid #e0e0e0",
-                          }}
-                        >
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            {student.rank === 1
-                              ? "🥇"
-                              : student.rank === 2
-                                ? "🥈"
-                                : student.rank === 3
-                                  ? "🥉"
-                                  : `#${student.rank}`}
+                        <tr key={student.rank} style={{ background: student.isCurrentUser ? "#e8f4ff" : "transparent", borderBottom: "1px solid #e0e0e0" }}>
+                          <td style={{ padding: "10px", textAlign: "center", fontWeight: "bold" }}>
+                            {student.rank === 1 ? "🥇" : student.rank === 2 ? "🥈" : student.rank === 3 ? "🥉" : `#${student.rank}`}
                           </td>
                           <td style={{ padding: "10px" }}>
                             {student.studentName}
-                            {student.isCurrentUser && (
-                              <span
-                                style={{
-                                  marginLeft: "8px",
-                                  fontSize: "12px",
-                                  background: "#667eea",
-                                  color: "white",
-                                  padding: "2px 6px",
-                                  borderRadius: "4px",
-                                }}
-                              >
-                                You
-                              </span>
-                            )}
+                            {student.isCurrentUser && <span style={{ marginLeft: "8px", fontSize: "12px", background: "#667eea", color: "white", padding: "2px 6px", borderRadius: "4px" }}>You</span>}
                           </td>
-                          <td
-                            style={{
-                              padding: "10px",
-                              textAlign: "center",
-                              fontWeight: "bold",
-                              color: "#667eea",
-                            }}
-                          >
-                            {student.score}
-                          </td>
-                          <td style={{ padding: "10px", textAlign: "center" }}>
-                            {student.timeTakenMinutes} min
-                          </td>
+                          <td style={{ padding: "10px", textAlign: "center", fontWeight: "bold", color: "#667eea" }}>{student.score}</td>
+                          <td style={{ padding: "10px", textAlign: "center" }}>{student.timeTakenMinutes} min</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </>
               ) : (
-                <div
-                  style={{
-                    textAlign: "center",
-                    padding: "40px",
-                    color: "#888",
-                  }}
-                >
-                  No leaderboard data available
-                </div>
+                <div style={{ textAlign: "center", padding: "40px", color: "#888" }}>No leaderboard data available</div>
               )}
             </div>
           </div>

@@ -18,7 +18,8 @@ const {
   getTestAnalytics,
   getStudentPerformance,
   getTestLeaderboardAdmin,
-  copySectionQuestions
+  copySectionQuestions,
+  getDashboardAnalytics
 } = require('../controllers/AdminMockTestController');
 const { adminAuth } = require('../middleware/authMiddleware');
 
@@ -43,6 +44,7 @@ router.post('/questions/bulk', adminAuth, bulkUploadQuestions);
 router.post('/copy-section', adminAuth, copySectionQuestions);
 
 // Admin student performance analytics routes
+router.get('/dashboard-analytics', adminAuth, getDashboardAnalytics);
 router.get('/student-performance/:studentId', adminAuth, getStudentPerformance);
 router.get('/test-leaderboard/:testId', adminAuth, getTestLeaderboardAdmin);
 

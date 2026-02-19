@@ -74,7 +74,12 @@ const mockTestAttemptSchema = new Schema(
     sectionWiseStats: [sectionWiseStatsSchema],
 
     rank: { type: Number },
-    percentile: { type: Number }
+    percentile: { type: Number },
+
+    isCourseTest: { type: Boolean, default: false },
+    isSubmitted: { type: Boolean, default: false },
+    endTime: { type: Date },
+    submittedAt: { type: Date }
   },
   { timestamps: true }
 );

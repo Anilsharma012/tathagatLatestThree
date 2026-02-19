@@ -1197,38 +1197,56 @@ const getStudentPerformance = async (req, res) => {
         : 0
     };
 
-    const sectionAverages = { VARC: [], DILR: [], QA: [] };
+    const sectionAverages = {};
     attempts.forEach(attempt => {
       (attempt.sectionWiseStats || []).forEach(stat => {
-        const section = stat.section?.toUpperCase();
-        if (sectionAverages[section]) {
-          sectionAverages[section].push({
-            score: stat.score || 0,
-            accuracy: stat.accuracy || 0
-          });
-        }
+        const section = stat.section || 'General';
+        if (!sectionAverages[section]) sectionAverages[section] = [];
+        sectionAverages[section].push({
+          score: stat.score || 0,
+          accuracy: stat.accuracy || 0
+        });
       });
     });
 
     const sectionAnalysis = Object.entries(sectionAverages).map(([section, stats]) => ({
       section,
       averageScore: stats.length > 0 
-        ? (stats.reduce((a, b) => a + b.score, 0) / stats.length).toFixed(1) 
+        ? parseFloat((stats.reduce((a, b) => a + b.score, 0) / stats.length).toFixed(1)) 
         : 0,
       averageAccuracy: stats.length > 0 
-        ? (stats.reduce((a, b) => a + b.accuracy, 0) / stats.length).toFixed(1) 
+        ? parseFloat((stats.reduce((a, b) => a + b.accuracy, 0) / stats.length).toFixed(1)) 
         : 0
     }));
 
-    const formattedAttempts = attempts.map(a => ({
-      testId: a.testPaperId?._id,
-      testName: a.testPaperId?.title || 'Test',
-      score: a.totalScore || 0,
-      rank: a.rank || null,
-      percentile: a.percentile || 0,
-      timeTakenMinutes: Math.floor((a.totalTimeTakenSeconds || 0) / 60),
-      completedAt: a.completedAt
-    }));
+    const CourseTest = require("../models/course/Test");
+    const courseTestIds = attempts
+      .filter(a => !a.testPaperId?.title)
+      .map(a => a.testPaperId?._id || a.testPaperId);
+    let courseTestMap = {};
+    if (courseTestIds.length > 0) {
+      const courseTests = await CourseTest.find({ _id: { $in: courseTestIds } })
+        .populate('course', 'name').populate('topic', 'name').select('title course topic');
+      courseTests.forEach(ct => { courseTestMap[ct._id.toString()] = ct; });
+    }
+
+    const formattedAttempts = attempts.map(a => {
+      let testName = a.testPaperId?.title;
+      if (!testName) {
+        const tpId = (a.testPaperId?._id || a.testPaperId)?.toString();
+        const ct = courseTestMap[tpId];
+        testName = ct ? (ct.title || `${ct.course?.name || ''} - ${ct.topic?.name || ''}`) : 'Test';
+      }
+      return {
+        testId: a.testPaperId?._id || a.testPaperId,
+        testName,
+        score: a.totalScore || 0,
+        rank: a.rank || null,
+        percentile: a.percentile || 0,
+        timeTakenMinutes: Math.floor((a.totalTimeTakenSeconds || 0) / 60),
+        completedAt: a.completedAt
+      };
+    });
 
     res.json({
       success: true,
@@ -1395,6 +1413,106 @@ const copySectionQuestions = async (req, res) => {
   }
 };
 
+const getDashboardAnalytics = async (req, res) => {
+  try {
+    console.log('📊 Admin fetching dashboard analytics');
+    const User = require('../models/User');
+
+    const totalStudents = await User.countDocuments({ role: 'student' });
+    const totalAttempts = await MockTestAttempt.countDocuments({ status: 'COMPLETED' });
+    const CourseTestModel = require("../models/course/Test");
+    const mockTestCount = await MockTest.countDocuments({ isActive: true });
+    const courseTestCount = await CourseTestModel.countDocuments({ isPublished: true });
+    const totalTests = mockTestCount + courseTestCount;
+
+    const recentAttempts = await MockTestAttempt.find({ status: 'COMPLETED' })
+      .populate('userId', 'name')
+      .populate('testPaperId', 'title')
+      .sort({ completedAt: -1 })
+      .limit(20);
+
+    const CourseTest = require("../models/course/Test");
+    const courseTestIds = recentAttempts
+      .filter(a => !a.testPaperId?.title)
+      .map(a => a.testPaperId?._id || a.testPaperId);
+    let courseTestMap = {};
+    if (courseTestIds.length > 0) {
+      const courseTests = await CourseTest.find({ _id: { $in: courseTestIds } })
+        .populate('course', 'name').populate('topic', 'name').select('title course topic');
+      courseTests.forEach(ct => { courseTestMap[ct._id.toString()] = ct; });
+    }
+
+    const formattedRecent = recentAttempts.map(a => {
+      let testName = a.testPaperId?.title;
+      if (!testName) {
+        const tpId = (a.testPaperId?._id || a.testPaperId)?.toString();
+        const ct = courseTestMap[tpId];
+        testName = ct ? (ct.title || `${ct.course?.name || ''} - ${ct.topic?.name || ''}`) : 'Test';
+      }
+      return {
+        studentName: a.userId?.name || 'Unknown',
+        testName,
+        score: a.totalScore || 0,
+        completedAt: a.completedAt || a.updatedAt,
+        timeTakenMinutes: Math.floor((a.totalTimeTakenSeconds || 0) / 60)
+      };
+    });
+
+    const topPerformers = await MockTestAttempt.aggregate([
+      { $match: { status: 'COMPLETED' } },
+      { $group: { _id: '$userId', avgScore: { $avg: '$totalScore' }, totalTests: { $sum: 1 }, bestScore: { $max: '$totalScore' } } },
+      { $sort: { avgScore: -1 } },
+      { $limit: 10 }
+    ]);
+
+    const topUserIds = topPerformers.map(t => t._id);
+    const topUsers = await User.find({ _id: { $in: topUserIds } }).select('name email phoneNumber');
+    const userMap = {};
+    topUsers.forEach(u => { userMap[u._id.toString()] = u; });
+
+    const topPerformersFormatted = topPerformers.map((p, idx) => ({
+      rank: idx + 1,
+      name: userMap[p._id?.toString()]?.name || 'Unknown',
+      email: userMap[p._id?.toString()]?.email || '',
+      avgScore: Math.round(p.avgScore || 0),
+      totalTests: p.totalTests,
+      bestScore: p.bestScore || 0
+    }));
+
+    const scoreDistribution = await MockTestAttempt.aggregate([
+      { $match: { status: 'COMPLETED', totalScore: { $gt: 0 } } },
+      { $bucket: {
+        groupBy: '$totalScore',
+        boundaries: [0, 25, 50, 75, 100, 125, 150, 200, 300],
+        default: '300+',
+        output: { count: { $sum: 1 } }
+      }}
+    ]);
+
+    const dailyAttempts = await MockTestAttempt.aggregate([
+      { $match: { status: 'COMPLETED', completedAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } } },
+      { $group: {
+        _id: { $dateToString: { format: '%Y-%m-%d', date: '$completedAt' } },
+        count: { $sum: 1 },
+        avgScore: { $avg: '$totalScore' }
+      }},
+      { $sort: { _id: 1 } }
+    ]);
+
+    res.json({
+      success: true,
+      overview: { totalStudents, totalAttempts, totalTests },
+      recentAttempts: formattedRecent,
+      topPerformers: topPerformersFormatted,
+      scoreDistribution,
+      dailyAttempts
+    });
+  } catch (error) {
+    console.error('❌ Error fetching dashboard analytics:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   createSeries,
   getAllSeries,
@@ -1413,5 +1531,6 @@ module.exports = {
   getTestAnalytics,
   getStudentPerformance,
   getTestLeaderboardAdmin,
-  copySectionQuestions
+  copySectionQuestions,
+  getDashboardAnalytics
 };
