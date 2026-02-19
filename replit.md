@@ -96,6 +96,15 @@ TathaGat is a full-stack education platform for CAT/XAT/SNAP exam preparation. I
   - Added image upload with visible preview on left panel of ExamCategory and ExamSelection pages
   - Used shared axiosConfig across all UserDetails components for consistent API calls
   - Added defensive null checks for localStorage user in image upload handlers
+- 2026-02-19: CRM Lead Status Tracking & Action Buttons
+  - Added Action column with status dropdown to All Inquiries, New Enquiries, and Counseling Enquiries tables
+  - Lead statuses: New, Contacted, Hot Lead, Cold Lead, Response Pending, Follow Up, Not Interested, Demo Scheduled, Converted, Lost
+  - Added `leadStatus` field to CRMLead model for persistent status tracking
+  - Updated Enquiry model with expanded status enum and remarks field
+  - Added PUT endpoint for enquiry status/remarks updates (enquiryRoutes.js)
+  - Remarks/Notes modal for adding notes to each inquiry
+  - Color-coded status badges in all inquiry tables
+  - CSS styles for action dropdowns, remarks buttons, and status badges
 - 2026-02-14: Initial Replit setup - migrated from GitHub import
   - Moved sensitive credentials from `.env` to Replit Secrets
   - Configured workflows for frontend and backend
