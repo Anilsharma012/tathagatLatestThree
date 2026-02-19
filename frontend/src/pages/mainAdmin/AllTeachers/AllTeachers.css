@@ -12,6 +12,30 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.teachers-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.teachers-search {
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+  min-width: 250px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.teachers-search:focus {
+  border-color: #0e0e2e;
+  box-shadow: 0 0 0 2px rgba(14, 14, 46, 0.1);
 }
 
 .page-title {

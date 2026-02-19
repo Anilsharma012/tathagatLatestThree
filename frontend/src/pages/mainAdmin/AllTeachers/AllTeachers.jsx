@@ -1,6 +1,4 @@
-// AllTeachers.jsx (Now with Edit & Delete)
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import AdminLayout from "../AdminLayout/AdminLayout";
 import axios from "axios";
 import "./AllTeachers.css";
@@ -9,6 +7,7 @@ import { FaPlus, FaTrashAlt, FaEdit } from "react-icons/fa";
 
 const AllTeachers = () => {
   const [teachers, setTeachers] = useState([]);
+  const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [editingId, setEditingId] = useState(null);
@@ -30,12 +29,21 @@ const AllTeachers = () => {
     fetchTeachers();
   }, []);
 
+  const filteredTeachers = useMemo(() => {
+    if (!search.trim()) return teachers;
+    const q = search.toLowerCase().trim();
+    return teachers.filter(
+      (t) =>
+        (t.name || "").toLowerCase().includes(q) ||
+        (t.email || "").toLowerCase().includes(q)
+    );
+  }, [teachers, search]);
+
   const handleInput = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleCreateOrUpdate = async () => {
     setLoading(true);
     const token = localStorage.getItem("adminToken");
-
     try {
       if (editingId) {
         await axios.put(`/api/subadmin/${editingId}`, form, {
@@ -66,7 +74,6 @@ const AllTeachers = () => {
   const handleDelete = async (id) => {
     const confirm = window.confirm("Are you sure to delete this SubAdmin?");
     if (!confirm) return;
-
     try {
       const token = localStorage.getItem("adminToken");
       await axios.delete(`/api/subadmin/${id}`, {
@@ -83,9 +90,18 @@ const AllTeachers = () => {
       <div className="teachers-page">
         <div className="page-header">
           <h1 className="page-title">All SubAdmins</h1>
-          <button className="create-btn" onClick={() => setIsOpen(true)}>
-            <FaPlus /> Create SubAdmin
-          </button>
+          <div className="teachers-header-actions">
+            <input
+              type="text"
+              className="teachers-search"
+              placeholder="Search by name, email..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <button className="create-btn" onClick={() => setIsOpen(true)}>
+              <FaPlus /> Create SubAdmin
+            </button>
+          </div>
         </div>
 
         <div className="teacher-table-wrapper">
@@ -101,15 +117,13 @@ const AllTeachers = () => {
               </tr>
             </thead>
             <tbody>
-              {teachers.map((teacher, index) => (
+              {filteredTeachers.map((teacher, index) => (
                 <tr key={teacher._id}>
                   <td>{index + 1}</td>
                   <td>{teacher.name || "-"}</td>
                   <td>{teacher.email}</td>
                   <td>{teacher.isActive ? "Active" : "Inactive"}</td>
-                  <td>{
-                    teacher.createdAt ? new Date(teacher.createdAt).toLocaleDateString() : "-"
-                  }</td>
+                  <td>{teacher.createdAt ? new Date(teacher.createdAt).toLocaleDateString() : "-"}</td>
                   <td>
                     <button className="edit-btn" onClick={() => handleEdit(teacher)}>
                       <FaEdit />
@@ -120,6 +134,13 @@ const AllTeachers = () => {
                   </td>
                 </tr>
               ))}
+              {filteredTeachers.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: "center", padding: "40px", color: "#999" }}>
+                    {search ? "No teachers match your search" : "No teachers found"}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

@@ -7,8 +7,109 @@
 .page-title {
   font-size: 24px;
   font-weight: bold;
-  margin-bottom: 30px;
+  margin-bottom: 0;
   color: #2c3e50;
+}
+
+.students-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.students-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.students-search {
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+  min-width: 300px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.students-search:focus {
+  border-color: #0e0e2e;
+  box-shadow: 0 0 0 2px rgba(14, 14, 46, 0.1);
+}
+
+.export-csv-btn {
+  padding: 10px 20px;
+  background: #10b981;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.export-csv-btn:hover {
+  background: #059669;
+}
+
+.students-info-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.search-tag {
+  background: #eef2ff;
+  color: #4338ca;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.students-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.pagination-btn {
+  padding: 8px 14px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #374151;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #0e0e2e;
+}
+
+.pagination-btn.active {
+  background: #0e0e2e;
+  color: #fff;
+  border-color: #0e0e2e;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .student-table-wrapper {

@@ -53,7 +53,6 @@ const AdminTopbar = () => {
     <div className="admin-topbar">
       <h2 className="topbar-title">Welcome, {admin?.name || 'Admin'}</h2>
       <div className="topbar-actions">
-        <input type="text" className="topbar-search" placeholder="Search..." />
         <div className="topbar-profile-wrapper" ref={dropdownRef}>
           <button 
             className="topbar-profile-btn"
