@@ -478,7 +478,7 @@ exports.saveExam = async (req, res) => {
       return res.status(400).json({ status: false, msg: "Exam required" });
     }
 
-    const user = await User.findByIdAndUpdate(userId, { $set: { selectedExam: exam } }, { new: true }).select(
+    const user = await User.findByIdAndUpdate(userId, { $set: { selectedExam: exam, isOnboardingComplete: true } }, { new: true }).select(
       "-password"
     );
 

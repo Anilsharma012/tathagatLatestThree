@@ -1,7 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "../Login/Login.css";
 import "./Signup.css";
-import { FaArrowLeft, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 import axios from "../../utils/axiosConfig";
 import { useNavigate, Link } from "react-router-dom";
 import TGLOGO from "../../images/tgLOGO.png";
@@ -10,13 +10,9 @@ const Signup = ({ setUser }) => {
   const [step, setStep] = useState("details");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [city, setCity] = useState("");
   const [gender, setGender] = useState("");
   const [dob, setDob] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
   const [toastMessage, setToastMessage] = useState("");
@@ -26,35 +22,15 @@ const Signup = ({ setUser }) => {
   const otpRefs = useRef([]);
   const navigate = useNavigate();
 
-  const handlePostLoginRedirect = (serverRedirectTo) => {
-    const pendingCourse = localStorage.getItem('pendingCourse');
-    const redirectAfterLogin = localStorage.getItem('redirectAfterLogin');
-
-    if (pendingCourse) {
-      const course = JSON.parse(pendingCourse);
-      localStorage.removeItem('pendingCourse');
-      navigate('/course-purchase', {
-        state: {
-          ...course,
-          price: course.price || 30000,
-          oldPrice: course.oldPrice || 120000,
-          features: [
-            'Complete CAT preparation material',
-            'Live interactive classes',
-            'Mock tests and practice sets',
-            'Doubt clearing sessions',
-            'Performance analysis',
-            'Study materials download'
-          ]
-        }
-      });
-    } else if (redirectAfterLogin) {
-      localStorage.removeItem('redirectAfterLogin');
-      navigate(redirectAfterLogin);
-    } else {
-      navigate(serverRedirectTo || "/student/dashboard");
+  useEffect(() => {
+    let interval;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => (prev <= 1 ? 0 : prev - 1));
+      }, 1000);
     }
-  };
+    return () => clearInterval(interval);
+  }, [resendTimer]);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -63,15 +39,12 @@ const Signup = ({ setUser }) => {
 
     if (!name.trim()) { setError("Please enter your full name."); return; }
     if (!/^[6-9]\d{9}$/.test(phone)) { setError("Please enter a valid 10-digit Indian mobile number."); return; }
-    if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
-    if (password !== confirmPassword) { setError("Passwords do not match."); return; }
 
     setIsSubmitting(true);
     try {
       await axios.post("/api/auth/phone/register", {
         name: name.trim(),
         phoneNumber: phone,
-        password,
         city: city.trim() || undefined,
         gender: gender || undefined,
         dob: dob || undefined,
@@ -79,7 +52,7 @@ const Signup = ({ setUser }) => {
 
       setToastMessage("OTP sent to your phone!");
       setStep("otp");
-      startResendTimer();
+      setResendTimer(30);
     } catch (err) {
       const msg = err?.response?.data?.message || "Registration failed. Please try again.";
       setError(msg);
@@ -89,16 +62,6 @@ const Signup = ({ setUser }) => {
     }
   };
 
-  const startResendTimer = () => {
-    setResendTimer(30);
-    const interval = setInterval(() => {
-      setResendTimer((prev) => {
-        if (prev <= 1) { clearInterval(interval); return 0; }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
   const handleResendOtp = async () => {
     if (resendTimer > 0) return;
     setError("");
@@ -106,13 +69,12 @@ const Signup = ({ setUser }) => {
       await axios.post("/api/auth/phone/register", {
         name: name.trim(),
         phoneNumber: phone,
-        password,
         city: city.trim() || undefined,
         gender: gender || undefined,
         dob: dob || undefined,
       });
       setToastMessage("OTP resent!");
-      startResendTimer();
+      setResendTimer(30);
       setTimeout(() => setToastMessage(""), 3000);
     } catch (err) {
       setError("Failed to resend OTP. Please try again.");
@@ -143,8 +105,8 @@ const Signup = ({ setUser }) => {
       setToastMessage("Registration successful! Welcome to TathaGat!");
 
       setTimeout(() => {
-        handlePostLoginRedirect(response.data.redirectTo);
-      }, 1500);
+        navigate("/exam-category");
+      }, 1000);
     } catch (err) {
       const msg = err?.response?.data?.message || "OTP verification failed. Please try again.";
       setError(msg);
@@ -163,8 +125,28 @@ const Signup = ({ setUser }) => {
   };
 
   const handleOtpKeyDown = (e, index) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      const newOtp = [...otp];
+      if (otp[index]) {
+        newOtp[index] = "";
+        setOtp(newOtp);
+      } else if (index > 0) {
+        newOtp[index - 1] = "";
+        setOtp(newOtp);
+        otpRefs.current[index - 1]?.focus();
+      }
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const digits = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (digits.length > 0) {
+      const newOtp = [...otp];
+      for (let i = 0; i < 6; i++) newOtp[i] = digits[i] || "";
+      setOtp(newOtp);
+      otpRefs.current[Math.min(digits.length, 5)]?.focus();
     }
   };
 
@@ -232,44 +214,6 @@ const Signup = ({ setUser }) => {
                     maxLength={10}
                   />
 
-                  <div style={{ position: 'relative' }}>
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Password * (min 6 chars)"
-                      className="tlotp-input"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <span
-                      onClick={() => setShowPassword(!showPassword)}
-                      style={{
-                        position: 'absolute', right: '12px', top: '50%',
-                        transform: 'translateY(-50%)', cursor: 'pointer', color: '#888', fontSize: '16px',
-                      }}
-                    >
-                      {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </span>
-                  </div>
-
-                  <div style={{ position: 'relative' }}>
-                    <input
-                      type={showConfirm ? "text" : "password"}
-                      placeholder="Confirm Password *"
-                      className="tlotp-input"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                    <span
-                      onClick={() => setShowConfirm(!showConfirm)}
-                      style={{
-                        position: 'absolute', right: '12px', top: '50%',
-                        transform: 'translateY(-50%)', cursor: 'pointer', color: '#888', fontSize: '16px',
-                      }}
-                    >
-                      {showConfirm ? <FaEyeSlash /> : <FaEye />}
-                    </span>
-                  </div>
-
                   <input
                     type="text"
                     placeholder="City (optional)"
@@ -334,10 +278,13 @@ const Signup = ({ setUser }) => {
                     <input
                       key={i}
                       maxLength="1"
+                      type="text"
+                      inputMode="numeric"
                       className="tlotp-digit tlotp-square"
                       value={d}
                       onChange={(e) => handleOtpChange(e.target.value, i)}
                       onKeyDown={(e) => handleOtpKeyDown(e, i)}
+                      onPaste={handleOtpPaste}
                       ref={(ref) => (otpRefs.current[i] = ref)}
                     />
                   ))}

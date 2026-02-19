@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaUserEdit } from "react-icons/fa";
 import LOGO from "../../../images/tgLOGO.png"
-import axios from "axios";
+import axios from "../../../utils/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import "./UserDetails.css";
 

@@ -180,18 +180,18 @@ exports.registerWithPhone = async (req, res) => {
   try {
     const { name, phoneNumber, password, city, gender, dob } = req.body;
 
-    if (!name || !phoneNumber || !password) {
-      return res.status(400).json({ message: "Name, phone number, and password are required" });
+    if (!name || !phoneNumber) {
+      return res.status(400).json({ message: "Name and phone number are required" });
     }
     if (!/^[6-9]\d{9}$/.test(phoneNumber)) {
       return res.status(400).json({ message: "Please enter a valid 10-digit Indian mobile number" });
     }
-    if (password.length < 6) {
+    if (password && password.length < 6) {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
     }
 
     const existing = await User.findOne({ phoneNumber });
-    if (existing && existing.isPhoneVerified && existing.password) {
+    if (existing && existing.isPhoneVerified) {
       return res.status(400).json({ message: "Account already exists. Please login." });
     }
 
@@ -200,7 +200,7 @@ exports.registerWithPhone = async (req, res) => {
     let user;
     if (existing) {
       existing.name = name;
-      existing.password = password;
+      if (password) existing.password = password;
       existing.city = city || existing.city;
       existing.gender = gender || existing.gender;
       existing.dob = dob || existing.dob;
@@ -208,15 +208,16 @@ exports.registerWithPhone = async (req, res) => {
       await existing.save();
       user = existing;
     } else {
-      user = new User({
+      const userData = {
         name,
         phoneNumber,
-        password,
         city: city || null,
         gender: gender || null,
         dob: dob || null,
         isPhoneVerified: false,
-      });
+      };
+      if (password) userData.password = password;
+      user = new User(userData);
       await user.save();
     }
 
@@ -262,7 +263,7 @@ exports.verifyRegistrationOtp = async (req, res) => {
 
     if (process.env.NODE_ENV === 'development' && /^\d{6}$/.test(otpCode)) {
       user.isPhoneVerified = true;
-      user.isOnboardingComplete = true;
+      user.isOnboardingComplete = false;
       await user.save({ validateBeforeSave: false });
 
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "default_secret_key", { expiresIn: "30d" });
@@ -270,7 +271,7 @@ exports.verifyRegistrationOtp = async (req, res) => {
         message: "Registration successful!",
         token,
         user: { _id: user._id, name: user.name, phoneNumber: user.phoneNumber, email: user.email },
-        redirectTo: "/student/dashboard",
+        redirectTo: "/exam-category",
       });
     }
 
@@ -292,7 +293,7 @@ exports.verifyRegistrationOtp = async (req, res) => {
     await OTP.deleteOne({ _id: otpRecord._id });
 
     user.isPhoneVerified = true;
-    user.isOnboardingComplete = true;
+    user.isOnboardingComplete = false;
     await user.save({ validateBeforeSave: false });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "default_secret_key", { expiresIn: "30d" });
@@ -301,7 +302,7 @@ exports.verifyRegistrationOtp = async (req, res) => {
       message: "Registration successful!",
       token,
       user: { _id: user._id, name: user.name, phoneNumber: user.phoneNumber, email: user.email },
-      redirectTo: "/student/dashboard",
+      redirectTo: "/exam-category",
     });
   } catch (error) {
     console.error("Error verifying registration OTP:", error);
