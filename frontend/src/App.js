@@ -141,6 +141,7 @@ import CoursePurchaseContentManagement from "./pages/mainAdmin/CoursePurchaseCon
 import ResponseSheetSubmissions from "./pages/mainAdmin/ResponseSheetSubmissions/ResponseSheetSubmissions";
 import BillingSettings from "./pages/mainAdmin/BillingSettings/BillingSettings";
 import CouponManagement from "./pages/mainAdmin/CouponManagement/CouponManagement";
+import OnboardingCategoryManagement from "./pages/mainAdmin/OnboardingCategoryManagement/OnboardingCategoryManagement";
 import RoleManagement from "./pages/mainAdmin/RoleManagement/RoleManagement";
 import TeacherLiveClasses from "./pages/MainSubAdmin/LiveClasses/TeacherLiveClasses";
 import StudentLiveClasses from "./pages/Student/LiveClasses/StudentLiveClasses";
@@ -671,6 +672,14 @@ const AppContent = () => {
           element={
             <PrivateRoute tokenName="adminToken">
               <CouponManagement />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/onboarding-categories"
+          element={
+            <PrivateRoute tokenName="adminToken">
+              <OnboardingCategoryManagement />
             </PrivateRoute>
           }
         />

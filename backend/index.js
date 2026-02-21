@@ -598,6 +598,59 @@ if (!process.env.SKIP_SEED) {
   }, 3000);
 }
 
+/* -------------------- Seed Default Onboarding Categories -------------------- */
+const seedOnboardingCategories = async () => {
+  try {
+    const OnboardingCategory = require('./models/OnboardingCategory');
+    const count = await OnboardingCategory.countDocuments();
+    if (count === 0) {
+      const defaults = [
+        {
+          name: 'MBA', displayOrder: 1,
+          exams: [
+            { name: 'CAT', displayOrder: 1 },
+            { name: 'XAT', displayOrder: 2 },
+            { name: 'MAT', displayOrder: 3 },
+            { name: 'SNAP', displayOrder: 4 },
+          ],
+        },
+        {
+          name: 'After 12', displayOrder: 2,
+          exams: [
+            { name: 'CUET UG', displayOrder: 1 },
+            { name: 'IPMAT Indore', displayOrder: 2 },
+            { name: 'IPMAT Rohtak', displayOrder: 3 },
+            { name: 'JIPMAT', displayOrder: 4 },
+          ],
+        },
+        {
+          name: 'GMAT', displayOrder: 3,
+          exams: [
+            { name: 'Study Abroad', displayOrder: 1 },
+            { name: 'GRE', displayOrder: 2 },
+            { name: 'TOEFL', displayOrder: 3 },
+            { name: 'IELTS', displayOrder: 4 },
+          ],
+        },
+        {
+          name: 'Govt Exams', displayOrder: 4,
+          exams: [
+            { name: 'Banking SSC', displayOrder: 1 },
+            { name: 'UPSC', displayOrder: 2 },
+            { name: 'Railway Exams', displayOrder: 3 },
+            { name: 'State PSC', displayOrder: 4 },
+          ],
+        },
+      ];
+      await OnboardingCategory.insertMany(defaults);
+      console.log('✅ Default onboarding categories seeded');
+    }
+  } catch (err) {
+    console.log('⚠️ Skipped onboarding category seed:', err.message);
+  }
+};
+seedOnboardingCategories();
+
 /* -------------------- Request Logging (warn on 4xx/5xx) -------------------- */
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
@@ -788,6 +841,7 @@ safeUse("/api/admin/discussions", "./routes/AdminDiscussionRoute");
 safeUse("/api/mock-tests", "./routes/MockTestRoute");
 safeUse("/api/admin/mock-tests", "./routes/AdminMockTestRoute");
 safeUse("/api/admin/hierarchy", "./routes/hierarchyRoutes");
+safeUse("/api/onboarding-categories", "./routes/onboardingCategoryRoutes");
 safeUse("/api/progress", "./routes/UserProgressRoute");
 safeUse("/api/student", "./routes/StudentCourseRoute");
 safeUse("/api/sample", "./routes/sampleData");

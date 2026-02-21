@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { FaTachometerAlt, FaBookOpen, FaUsers, FaUserGraduate, FaChalkboardTeacher, FaUserCircle, FaSignOutAlt, FaClipboardList, FaFileAlt, FaBullhorn, FaComments, FaGraduationCap, FaUniversity, FaBlog, FaYoutube, FaTrophy, FaFileInvoice, FaDownload, FaStar, FaCog, FaFilePdf, FaImages, FaUserPlus, FaChevronDown, FaChevronRight, FaUserShield, FaVideo, FaChartBar, FaTag } from "react-icons/fa";
+import { FaTachometerAlt, FaBookOpen, FaUsers, FaUserGraduate, FaChalkboardTeacher, FaUserCircle, FaSignOutAlt, FaClipboardList, FaFileAlt, FaBullhorn, FaComments, FaGraduationCap, FaUniversity, FaBlog, FaYoutube, FaTrophy, FaFileInvoice, FaDownload, FaStar, FaCog, FaFilePdf, FaImages, FaUserPlus, FaChevronDown, FaChevronRight, FaUserShield, FaVideo, FaChartBar, FaTag, FaListAlt } from "react-icons/fa";
 import logo from "../../../images/tgLOGO.png";
 import "./AdminSidebar.css";
 
@@ -208,6 +208,9 @@ const AdminSidebar = () => {
             </NavLink>
             <NavLink to="/admin/coupons" className="admin-link">
               <FaTag className="admin-icon" /> Coupon Management
+            </NavLink>
+            <NavLink to="/admin/onboarding-categories" className="admin-link">
+              <FaListAlt className="admin-icon" /> Exam Categories
             </NavLink>
           </div>
         )}

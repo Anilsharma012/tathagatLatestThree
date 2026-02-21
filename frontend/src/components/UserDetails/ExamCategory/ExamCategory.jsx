@@ -10,14 +10,34 @@ const ExamCategory = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [profilePic, setProfilePic] = useState("");
   const [uploading, setUploading] = useState(false);
-
-  const categories = ["MBA", "After 12", "GMAT", "GovtExams"];
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser) {
       setProfilePic(storedUser.profilePic || "");
     }
+
+    const fetchCategories = async () => {
+      try {
+        const res = await axios.get("/api/onboarding-categories/public");
+        if (res.data.success) {
+          setCategories(res.data.categories);
+        }
+      } catch (err) {
+        console.error("Failed to fetch exam categories:", err);
+        setCategories([
+          { _id: "1", name: "MBA" },
+          { _id: "2", name: "After 12" },
+          { _id: "3", name: "GMAT" },
+          { _id: "4", name: "Govt Exams" },
+        ]);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+    fetchCategories();
   }, []);
 
   const handleImageUpload = async (e) => {
@@ -138,17 +158,21 @@ const ExamCategory = () => {
           <h2>Select the category of exam</h2>
           <p>What course are you looking for?</p>
 
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            <option value="">Choose</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+          {loadingCategories ? (
+            <p style={{ textAlign: "center", color: "#888" }}>Loading categories...</p>
+          ) : (
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              <option value="">Choose</option>
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          )}
 
           <button onClick={handleNext} disabled={!selectedCategory}>
             Next

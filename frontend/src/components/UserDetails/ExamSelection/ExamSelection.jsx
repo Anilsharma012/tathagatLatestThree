@@ -11,20 +11,39 @@ const ExamSelection = () => {
   const [selectedExam, setSelectedExam] = useState("");
   const [profilePic, setProfilePic] = useState("");
   const [uploading, setUploading] = useState(false);
-
-  const examOptions = {
-    MBA: ["CAT", "XAT", "MAT", "SNAP"],
-    "After 12": ["CUET UG", "IPMAT Indore", "IPMAT Rohtak", "JIPMAT"],
-    GMAT: ["Study Abroad", "GRE", "TOEFL", "IELTS"],
-    GovtExams: ["Banking SSC", "UPSC", "Railway Exams", "State PSC"],
-  };
+  const [exams, setExams] = useState([]);
+  const [loadingExams, setLoadingExams] = useState(true);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser) {
       setProfilePic(storedUser.profilePic || "");
     }
-  }, []);
+
+    const fetchExams = async () => {
+      try {
+        const res = await axios.get("/api/onboarding-categories/public");
+        if (res.data.success) {
+          const cat = res.data.categories.find((c) => c.name === category);
+          if (cat) {
+            setExams(cat.exams || []);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch exams:", err);
+        const fallback = {
+          MBA: ["CAT", "XAT", "MAT", "SNAP"],
+          "After 12": ["CUET UG", "IPMAT Indore", "IPMAT Rohtak", "JIPMAT"],
+          GMAT: ["Study Abroad", "GRE", "TOEFL", "IELTS"],
+          "Govt Exams": ["Banking SSC", "UPSC", "Railway Exams", "State PSC"],
+        };
+        setExams((fallback[category] || []).map((name, i) => ({ _id: String(i), name })));
+      } finally {
+        setLoadingExams(false);
+      }
+    };
+    fetchExams();
+  }, [category]);
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -145,14 +164,20 @@ const ExamSelection = () => {
           <h2>Select Exam in {category}</h2>
           <p>Choose one of the options below</p>
 
-          <select value={selectedExam} onChange={(e) => setSelectedExam(e.target.value)}>
-            <option value="">Choose</option>
-            {examOptions[category]?.map((exam) => (
-              <option key={exam} value={exam}>
-                {exam}
-              </option>
-            ))}
-          </select>
+          {loadingExams ? (
+            <p style={{ textAlign: "center", color: "#888" }}>Loading exams...</p>
+          ) : exams.length === 0 ? (
+            <p style={{ textAlign: "center", color: "#888" }}>No exams available for this category</p>
+          ) : (
+            <select value={selectedExam} onChange={(e) => setSelectedExam(e.target.value)}>
+              <option value="">Choose</option>
+              {exams.map((exam) => (
+                <option key={exam._id} value={exam.name}>
+                  {exam.name}
+                </option>
+              ))}
+            </select>
+          )}
 
           <button onClick={handleNext} disabled={!selectedExam}>
             Next

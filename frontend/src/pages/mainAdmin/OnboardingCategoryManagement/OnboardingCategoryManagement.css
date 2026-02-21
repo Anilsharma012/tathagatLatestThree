@@ -1,0 +1,361 @@
+.obc-page {
+  padding: 30px;
+  background: #f4f6fc;
+  min-height: 100vh;
+}
+
+.obc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.obc-header .page-title {
+  margin: 0 0 4px 0;
+  font-size: 22px;
+  color: #1a1a2e;
+}
+
+.obc-subtitle {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+}
+
+.obc-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #0e0e2e;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.obc-add-btn:hover {
+  background: #1a1a4e;
+}
+
+.obc-loading,
+.obc-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  background: #fff;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+.obc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.obc-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s;
+}
+
+.obc-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.obc-card.obc-inactive {
+  opacity: 0.6;
+}
+
+.obc-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.obc-card-header:hover {
+  background: #f8f9ff;
+}
+
+.obc-card-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.obc-card-left h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #1a1a2e;
+}
+
+.obc-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.obc-badge.active {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.obc-badge.inactive {
+  background: #fce4ec;
+  color: #c62828;
+}
+
+.obc-badge.small {
+  padding: 2px 8px;
+  font-size: 10px;
+}
+
+.obc-count {
+  color: #999;
+  font-size: 13px;
+}
+
+.obc-card-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.obc-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 16px;
+  color: #666;
+  transition: all 0.15s;
+}
+
+.obc-icon-btn:hover {
+  background: #f0f0f0;
+}
+
+.obc-icon-btn.edit:hover {
+  color: #1565c0;
+}
+
+.obc-icon-btn.delete:hover {
+  color: #c62828;
+}
+
+.toggle-on {
+  color: #2e7d32;
+  font-size: 20px;
+}
+
+.toggle-off {
+  color: #999;
+  font-size: 20px;
+}
+
+.obc-exams {
+  border-top: 1px solid #eee;
+  padding: 16px 20px;
+  background: #fafbff;
+}
+
+.obc-exams-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.obc-add-exam-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #e8eaf6;
+  color: #1a1a2e;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.obc-add-exam-btn:hover {
+  background: #c5cae9;
+}
+
+.obc-exam-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.obc-exam-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.obc-exam-item.obc-inactive {
+  opacity: 0.5;
+}
+
+.obc-exam-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.obc-exam-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.obc-exam-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.obc-no-exams {
+  color: #999;
+  font-size: 13px;
+  text-align: center;
+  padding: 16px;
+}
+
+.obc-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.obc-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px;
+  width: 420px;
+  max-width: 90vw;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.obc-modal h3 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  color: #1a1a2e;
+}
+
+.obc-form-group {
+  margin-bottom: 16px;
+}
+
+.obc-form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+}
+
+.obc-form-group input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.obc-form-group input:focus {
+  outline: none;
+  border-color: #1a1a2e;
+}
+
+.obc-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.obc-cancel-btn {
+  padding: 10px 20px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.obc-cancel-btn:hover {
+  background: #f5f5f5;
+}
+
+.obc-save-btn {
+  padding: 10px 24px;
+  background: #0e0e2e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.obc-save-btn:hover {
+  background: #1a1a4e;
+}
+
+@media (max-width: 768px) {
+  .obc-page {
+    padding: 16px;
+  }
+
+  .obc-header {
+    flex-direction: column;
+  }
+
+  .obc-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .obc-card-actions {
+    align-self: flex-end;
+  }
+}
