@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import AdminLayout from "../AdminLayout/AdminLayout";
 import axios from "axios";
 import { FaPlus, FaEdit, FaTrash, FaUserShield, FaUsers, FaUserTag, FaCheck, FaTimes, FaSave, FaKey } from "react-icons/fa";
@@ -429,112 +430,118 @@ const RoleManagement = () => {
           </div>
         )}
 
-        {showRoleModal && (
-          <div className="modal-overlay" onClick={() => setShowRoleModal(false)}>
-            <div className="modal role-modal" onClick={e => e.stopPropagation()}>
-              <h2>{editingRole ? "Edit Role" : "Create Role"}</h2>
-              <div className="form-group">
-                <label>Role Name *</label>
-                <input type="text" value={roleForm.name} onChange={e => setRoleForm({ ...roleForm, name: e.target.value })} placeholder="e.g., Content Manager" />
-              </div>
-              <div className="form-group">
-                <label>Description</label>
-                <textarea value={roleForm.description} onChange={e => setRoleForm({ ...roleForm, description: e.target.value })} placeholder="Brief description of this role" />
-              </div>
-              <div className="form-group">
-                <label>Login Route (optional)</label>
-                <div className="login-route-input">
-                  <span className="route-prefix">/role/</span>
-                  <input type="text" value={roleForm.loginRoute} onChange={e => setRoleForm({ ...roleForm, loginRoute: e.target.value.replace(/[^a-zA-Z0-9-_]/g, '').toLowerCase() })} placeholder="e.g., lead, counselor" />
+        {showRoleModal && ReactDOM.createPortal(
+          <div className="role-management-portal">
+            <div className="rm-modal-overlay" onClick={() => setShowRoleModal(false)}>
+              <div className="rm-modal rm-role-modal" onClick={e => e.stopPropagation()}>
+                <h2>{editingRole ? "Edit Role" : "Create Role"}</h2>
+                <div className="rm-form-group">
+                  <label>Role Name *</label>
+                  <input type="text" value={roleForm.name} onChange={e => setRoleForm({ ...roleForm, name: e.target.value })} placeholder="e.g., Content Manager" />
                 </div>
-                <small className="form-hint">Users with this role can log in at /role/{roleForm.loginRoute || 'slug'}</small>
-              </div>
-              <div className="permissions-section">
-                <h3>Permissions</h3>
-                <div className="permissions-grid">
-                  <div className="perm-header">
-                    <span>Module</span>
-                    {ACTIONS.map(a => <span key={a} className="action-label">{a}</span>)}
-                    <span>All</span>
+                <div className="rm-form-group">
+                  <label>Description</label>
+                  <textarea value={roleForm.description} onChange={e => setRoleForm({ ...roleForm, description: e.target.value })} placeholder="Brief description of this role" />
+                </div>
+                <div className="rm-form-group">
+                  <label>Login Route (optional)</label>
+                  <div className="rm-login-route-input">
+                    <span className="rm-route-prefix">/role/</span>
+                    <input type="text" value={roleForm.loginRoute} onChange={e => setRoleForm({ ...roleForm, loginRoute: e.target.value.replace(/[^a-zA-Z0-9-_]/g, '').toLowerCase() })} placeholder="e.g., lead, counselor" />
                   </div>
-                  {MODULES.map(mod => (
-                    <div key={mod.key} className="perm-row">
-                      <span className="module-label">{mod.label}</span>
-                      {ACTIONS.map(action => (
-                        <label key={action} className="checkbox-cell">
-                          <input
-                            type="checkbox"
-                            checked={roleForm.permissions[mod.key]?.[action] || false}
-                            onChange={() => handlePermissionChange(mod.key, action)}
-                          />
-                        </label>
-                      ))}
-                      <button className="btn-toggle-all" onClick={() => toggleAllForModule(mod.key)}>Toggle</button>
-                    </div>
-                  ))}
+                  <small className="rm-form-hint">Users with this role can log in at /role/{roleForm.loginRoute || 'slug'}</small>
                 </div>
-              </div>
-              <div className="modal-actions">
-                <button className="btn btn-secondary" onClick={() => setShowRoleModal(false)}>Cancel</button>
-                <button className="btn btn-primary" onClick={saveRole} disabled={loading}>
-                  {loading ? "Saving..." : "Save Role"}
-                </button>
+                <div className="rm-permissions-section">
+                  <h3>Permissions</h3>
+                  <div className="rm-permissions-grid">
+                    <div className="rm-perm-header">
+                      <span>Module</span>
+                      {ACTIONS.map(a => <span key={a} className="rm-action-label">{a}</span>)}
+                      <span>All</span>
+                    </div>
+                    {MODULES.map(mod => (
+                      <div key={mod.key} className="rm-perm-row">
+                        <span className="rm-module-label">{mod.label}</span>
+                        {ACTIONS.map(action => (
+                          <label key={action} className="rm-checkbox-cell">
+                            <input
+                              type="checkbox"
+                              checked={roleForm.permissions[mod.key]?.[action] || false}
+                              onChange={() => handlePermissionChange(mod.key, action)}
+                            />
+                          </label>
+                        ))}
+                        <button className="rm-btn-toggle-all" onClick={() => toggleAllForModule(mod.key)}>Toggle</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="rm-modal-actions">
+                  <button className="rm-btn rm-btn-secondary" onClick={() => setShowRoleModal(false)}>Cancel</button>
+                  <button className="rm-btn rm-btn-primary" onClick={saveRole} disabled={loading}>
+                    {loading ? "Saving..." : "Save Role"}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
-        {showUserModal && (
-          <div className="modal-overlay" onClick={() => setShowUserModal(false)}>
-            <div className="modal user-modal" onClick={e => e.stopPropagation()}>
-              <h2>{editingUser ? "Edit User" : "Create Admin User"}</h2>
-              <div className="form-group">
-                <label>Full Name *</label>
-                <input type="text" value={userForm.fullName} onChange={e => setUserForm({ ...userForm, fullName: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label>Email *</label>
-                <input type="email" value={userForm.email} onChange={e => setUserForm({ ...userForm, email: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label>Phone</label>
-                <input type="text" value={userForm.phone} onChange={e => setUserForm({ ...userForm, phone: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label>{editingUser ? "New Password (leave blank to keep)" : "Password *"}</label>
-                <input type="password" value={userForm.password} onChange={e => setUserForm({ ...userForm, password: e.target.value })} />
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>User Type</label>
-                  <select value={userForm.userType} onChange={e => setUserForm({ ...userForm, userType: e.target.value })}>
-                    <option value="subadmin">Subadmin</option>
-                    <option value="teacher">Teacher</option>
+        {showUserModal && ReactDOM.createPortal(
+          <div className="role-management-portal">
+            <div className="rm-modal-overlay" onClick={() => setShowUserModal(false)}>
+              <div className="rm-modal rm-user-modal" onClick={e => e.stopPropagation()}>
+                <h2>{editingUser ? "Edit User" : "Create Admin User"}</h2>
+                <div className="rm-form-group">
+                  <label>Full Name *</label>
+                  <input type="text" value={userForm.fullName} onChange={e => setUserForm({ ...userForm, fullName: e.target.value })} />
+                </div>
+                <div className="rm-form-group">
+                  <label>Email *</label>
+                  <input type="email" value={userForm.email} onChange={e => setUserForm({ ...userForm, email: e.target.value })} />
+                </div>
+                <div className="rm-form-group">
+                  <label>Phone</label>
+                  <input type="text" value={userForm.phone} onChange={e => setUserForm({ ...userForm, phone: e.target.value })} />
+                </div>
+                <div className="rm-form-group">
+                  <label>{editingUser ? "New Password (leave blank to keep)" : "Password *"}</label>
+                  <input type="password" value={userForm.password} onChange={e => setUserForm({ ...userForm, password: e.target.value })} />
+                </div>
+                <div className="rm-form-row">
+                  <div className="rm-form-group">
+                    <label>User Type</label>
+                    <select value={userForm.userType} onChange={e => setUserForm({ ...userForm, userType: e.target.value })}>
+                      <option value="subadmin">Subadmin</option>
+                      <option value="teacher">Teacher</option>
+                    </select>
+                  </div>
+                  <div className="rm-form-group">
+                    <label>Role</label>
+                    <select value={userForm.role} onChange={e => setUserForm({ ...userForm, role: e.target.value })}>
+                      <option value="">-- No Role --</option>
+                      {roles.map(r => <option key={r._id} value={r._id}>{r.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="rm-form-group">
+                  <label>Status</label>
+                  <select value={userForm.status} onChange={e => setUserForm({ ...userForm, status: e.target.value })}>
+                    <option value="active">Active</option>
+                    <option value="suspended">Suspended</option>
                   </select>
                 </div>
-                <div className="form-group">
-                  <label>Role</label>
-                  <select value={userForm.role} onChange={e => setUserForm({ ...userForm, role: e.target.value })}>
-                    <option value="">-- No Role --</option>
-                    {roles.map(r => <option key={r._id} value={r._id}>{r.name}</option>)}
-                  </select>
+                <div className="rm-modal-actions">
+                  <button className="rm-btn rm-btn-secondary" onClick={() => setShowUserModal(false)}>Cancel</button>
+                  <button className="rm-btn rm-btn-primary" onClick={saveUser} disabled={loading}>
+                    {loading ? "Saving..." : "Save User"}
+                  </button>
                 </div>
-              </div>
-              <div className="form-group">
-                <label>Status</label>
-                <select value={userForm.status} onChange={e => setUserForm({ ...userForm, status: e.target.value })}>
-                  <option value="active">Active</option>
-                  <option value="suspended">Suspended</option>
-                </select>
-              </div>
-              <div className="modal-actions">
-                <button className="btn btn-secondary" onClick={() => setShowUserModal(false)}>Cancel</button>
-                <button className="btn btn-primary" onClick={saveUser} disabled={loading}>
-                  {loading ? "Saving..." : "Save User"}
-                </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </AdminLayout>

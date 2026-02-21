@@ -235,7 +235,7 @@
   font-size: 13px;
 }
 
-.role-management .modal-overlay {
+.rm-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -245,12 +245,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 99999;
   padding: 20px;
 }
 
-.role-management .modal {
-  background: var(--admin-surface-2, #1e293b);
+.rm-modal {
+  background: #1e293b;
   border-radius: 16px;
   padding: 24px;
   max-height: 90vh;
@@ -258,27 +258,27 @@
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-.role-management .role-modal {
+.rm-role-modal {
   width: 900px;
   max-width: 100%;
 }
 
-.role-management .user-modal {
+.rm-user-modal {
   width: 500px;
   max-width: 100%;
 }
 
-.role-management .modal h2 {
+.rm-modal h2 {
   margin: 0 0 20px;
   color: #fff;
   font-size: 20px;
 }
 
-.role-management .form-group {
+.rm-form-group {
   margin-bottom: 16px;
 }
 
-.role-management .form-group label {
+.rm-form-group label {
   display: block;
   margin-bottom: 6px;
   color: rgba(255, 255, 255, 0.8);
@@ -286,9 +286,9 @@
   font-weight: 500;
 }
 
-.role-management .form-group input,
-.role-management .form-group textarea,
-.role-management .form-group select {
+.rm-form-group input,
+.rm-form-group textarea,
+.rm-form-group select {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -296,46 +296,47 @@
   background: rgba(255, 255, 255, 0.05);
   color: #fff;
   font-size: 14px;
+  box-sizing: border-box;
 }
 
-.role-management .form-group input:focus,
-.role-management .form-group textarea:focus,
-.role-management .form-group select:focus {
+.rm-form-group input:focus,
+.rm-form-group textarea:focus,
+.rm-form-group select:focus {
   outline: none;
-  border-color: var(--admin-primary, #14b8a6);
+  border-color: #14b8a6;
 }
 
-.role-management .form-group textarea {
+.rm-form-group textarea {
   min-height: 80px;
   resize: vertical;
 }
 
-.role-management .form-row {
+.rm-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
-.role-management .permissions-section {
+.rm-permissions-section {
   margin-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 20px;
 }
 
-.role-management .permissions-section h3 {
+.rm-permissions-section h3 {
   color: #fff;
   font-size: 16px;
   margin-bottom: 16px;
 }
 
-.role-management .permissions-grid {
+.rm-permissions-grid {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   overflow: hidden;
 }
 
-.role-management .perm-header,
-.role-management .perm-row {
+.rm-perm-header,
+.rm-perm-row {
   display: grid;
   grid-template-columns: 150px repeat(6, 70px) 70px;
   align-items: center;
@@ -343,7 +344,7 @@
   padding: 10px 12px;
 }
 
-.role-management .perm-header {
+.rm-perm-header {
   background: rgba(255, 255, 255, 0.05);
   font-size: 11px;
   font-weight: 600;
@@ -351,41 +352,41 @@
   text-transform: uppercase;
 }
 
-.role-management .perm-row {
+.rm-perm-row {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.role-management .perm-row:last-child {
+.rm-perm-row:last-child {
   border-bottom: none;
 }
 
-.role-management .perm-row:hover {
+.rm-perm-row:hover {
   background: rgba(255, 255, 255, 0.02);
 }
 
-.role-management .module-label {
+.rm-module-label {
   font-size: 13px;
   color: #fff;
 }
 
-.role-management .action-label {
+.rm-action-label {
   text-align: center;
 }
 
-.role-management .checkbox-cell {
+.rm-checkbox-cell {
   display: flex;
   justify-content: center;
   cursor: pointer;
 }
 
-.role-management .checkbox-cell input[type="checkbox"] {
+.rm-checkbox-cell input[type="checkbox"] {
   width: 16px;
   height: 16px;
   cursor: pointer;
-  accent-color: var(--admin-primary, #14b8a6);
+  accent-color: #14b8a6;
 }
 
-.role-management .btn-toggle-all {
+.rm-btn-toggle-all {
   padding: 4px 8px;
   font-size: 10px;
   background: rgba(255, 255, 255, 0.1);
@@ -395,12 +396,12 @@
   cursor: pointer;
 }
 
-.role-management .btn-toggle-all:hover {
+.rm-btn-toggle-all:hover {
   background: rgba(255, 255, 255, 0.15);
   color: #fff;
 }
 
-.role-management .modal-actions {
+.rm-modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -409,7 +410,43 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.role-management .login-route-input {
+.rm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rm-btn-primary {
+  background: #14b8a6;
+  color: #fff;
+}
+
+.rm-btn-primary:hover {
+  background: #0d9488;
+}
+
+.rm-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rm-btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.rm-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.rm-login-route-input {
   display: flex;
   align-items: center;
   background: rgba(255, 255, 255, 0.05);
@@ -418,35 +455,40 @@
   overflow: hidden;
 }
 
-.role-management .login-route-input .route-prefix {
+.rm-route-prefix {
   padding: 10px 12px;
   background: rgba(255, 255, 255, 0.08);
-  color: var(--admin-text-secondary, #aaa);
+  color: #aaa;
   font-size: 14px;
   font-family: monospace;
   white-space: nowrap;
   border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.role-management .login-route-input input {
-  border: none;
-  background: transparent;
+.rm-login-route-input input {
+  border: none !important;
+  background: transparent !important;
   flex: 1;
   padding: 10px 12px;
-  color: var(--admin-text, #fff);
+  color: #fff;
   font-size: 14px;
   font-family: monospace;
 }
 
-.role-management .login-route-input input:focus {
+.rm-login-route-input input:focus {
   outline: none;
 }
 
-.role-management .form-hint {
+.rm-form-hint {
   display: block;
   margin-top: 4px;
-  color: var(--admin-text-secondary, #888);
+  color: #888;
   font-size: 12px;
+}
+
+.rm-form-group select option {
+  background: #1e293b;
+  color: #fff;
 }
 
 .role-management code {
@@ -459,12 +501,12 @@
 }
 
 @media (max-width: 768px) {
-  .role-management .form-row {
+  .rm-form-row {
     grid-template-columns: 1fr;
   }
   
-  .role-management .perm-header,
-  .role-management .perm-row {
+  .rm-perm-header,
+  .rm-perm-row {
     grid-template-columns: 120px repeat(6, 50px) 60px;
     font-size: 10px;
     padding: 8px;
