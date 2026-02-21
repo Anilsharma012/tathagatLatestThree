@@ -4,7 +4,6 @@ import axios from '../../utils/axiosConfig';
 import DOMPurify from 'isomorphic-dompurify';
 import { FaLock, FaUnlock, FaTimes, FaPlay } from 'react-icons/fa';
 import LoginModal from '../LoginModal/LoginModal';
-import SignupModal from '../SignupModal/SignupModal';
 import './CoursePreviewModal.css';
 
 const CoursePreviewModal = ({ course, onClose, isEnrolled }) => {
@@ -13,8 +12,6 @@ const CoursePreviewModal = ({ course, onClose, isEnrolled }) => {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSignupModal, setShowSignupModal] = useState(false);
-  const [prefillPhone, setPrefillPhone] = useState("");
   const [pendingPayment, setPendingPayment] = useState(false);
   const navigate = useNavigate();
 
@@ -601,31 +598,12 @@ const CoursePreviewModal = ({ course, onClose, isEnrolled }) => {
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
         setUser={() => {}}
-        onSwitchToSignup={(phoneFromLogin) => {
+        onSwitchToSignup={() => {
           setShowLoginModal(false);
-          setPrefillPhone(phoneFromLogin || "");
-          setShowSignupModal(true);
+          navigate("/signup");
         }}
         onLoginSuccess={() => {
           setShowLoginModal(false);
-          if (pendingPayment) {
-            setPendingPayment(false);
-            setTimeout(() => handlePayment(), 500);
-          }
-        }}
-      />
-      <SignupModal
-        isOpen={showSignupModal}
-        onClose={() => setShowSignupModal(false)}
-        setUser={() => {}}
-        onSwitchToLogin={() => {
-          setShowSignupModal(false);
-          setPrefillPhone("");
-          setShowLoginModal(true);
-        }}
-        prefillPhone={prefillPhone}
-        onSignupSuccess={() => {
-          setShowSignupModal(false);
           if (pendingPayment) {
             setPendingPayment(false);
             setTimeout(() => handlePayment(), 500);

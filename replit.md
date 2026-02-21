@@ -147,6 +147,12 @@ TathaGat is a full-stack education platform for CAT/XAT/SNAP exam preparation. I
   - Shared PolicyPages.css with professional styling: clean white cards, indigo accents, highlighted notices, responsive design
   - Added 3 links under "Explore" section in Footer component
   - Routes added in App.js for all 3 policy pages
+- 2026-02-21: Signup Flow Reverted to Original Page-Based Flow
+  - Removed SignupModal from Header, CoursePurchase, and CoursePreviewModal
+  - Login flow remains modal-based (LoginModal with OTP verification)
+  - When login detects unregistered user, redirects to /signup page instead of opening SignupModal
+  - Signup uses original /signup page: Fill details → Sign Up → Account created → /exam-category onboarding
+  - Course display updated: Mycourse shows 4 courses initially, "Show More" button for >4 courses
 - 2026-02-14: Initial Replit setup - migrated from GitHub import
   - Moved sensitive credentials from `.env` to Replit Secrets
   - Configured workflows for frontend and backend

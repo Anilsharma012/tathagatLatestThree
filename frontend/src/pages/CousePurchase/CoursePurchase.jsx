@@ -9,7 +9,6 @@ import review from "../../images/REVIEW5.PNG";
 import frame from "../../images/frameCourse.png";
 
 import LoginModal from "../../components/LoginModal/LoginModal";
-import SignupModal from "../../components/SignupModal/SignupModal";
 
 import Chatbox from "../../components/Chat/Chatbox";
 
@@ -42,8 +41,6 @@ const CoursePurchase = () => {
   const [couponError, setCouponError] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSignupModal, setShowSignupModal] = useState(false);
-  const [prefillPhone, setPrefillPhone] = useState("");
   const [pendingPayment, setPendingPayment] = useState(false);
 
   const navigate = useNavigate();
@@ -830,33 +827,12 @@ const handlePayment = async () => {
         setUser={(u) => {
           localStorage.setItem("user", JSON.stringify(u));
         }}
-        onSwitchToSignup={(phoneFromLogin) => {
+        onSwitchToSignup={() => {
           setShowLoginModal(false);
-          setPrefillPhone(phoneFromLogin || "");
-          setShowSignupModal(true);
+          navigate("/signup");
         }}
         onLoginSuccess={() => {
           setShowLoginModal(false);
-          if (pendingPayment) {
-            setPendingPayment(false);
-            setTimeout(() => handlePayment(), 500);
-          }
-        }}
-      />
-      <SignupModal
-        isOpen={showSignupModal}
-        onClose={() => setShowSignupModal(false)}
-        setUser={(u) => {
-          localStorage.setItem("user", JSON.stringify(u));
-        }}
-        onSwitchToLogin={() => {
-          setShowSignupModal(false);
-          setPrefillPhone("");
-          setShowLoginModal(true);
-        }}
-        prefillPhone={prefillPhone}
-        onSignupSuccess={() => {
-          setShowSignupModal(false);
           if (pendingPayment) {
             setPendingPayment(false);
             setTimeout(() => handlePayment(), 500);
