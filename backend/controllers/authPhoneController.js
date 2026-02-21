@@ -106,11 +106,6 @@ exports.verifyPhoneOtp = async (req, res) => {
     );
 
     let redirectTo = "/student/dashboard";
-    if (!user.isOnboardingComplete) {
-      redirectTo = "/user-details";
-    } else if (!user.name || !user.email) {
-      redirectTo = "/user-details";
-    }
 
     console.log(`OTP verified for ${phoneNumber}, user exists, logging in`);
 
