@@ -147,6 +147,19 @@ TathaGat is a full-stack education platform for CAT/XAT/SNAP exam preparation. I
   - Shared PolicyPages.css with professional styling: clean white cards, indigo accents, highlighted notices, responsive design
   - Added 3 links under "Explore" section in Footer component
   - Routes added in App.js for all 3 policy pages
+- 2026-02-21: Complete RBAC (Role-Based Access Control) System
+  - Backend: Added `loginRoute` field to Role model with duplicate slug validation
+  - Public API endpoints: GET /api/admin/roles/by-slug/:slug, GET /api/admin/roles/all-slugs
+  - PermissionGuard component wraps all admin routes, checks module permissions before rendering
+  - permissionMap.js: Centralized route-to-module mapping for ~40 admin routes
+  - Unauthorized (403) page at /admin/unauthorized with "Go Back" and "Go to Dashboard" buttons
+  - RoleLogin component at /role/:roleSlug: branded login page per role (fetches role info by slug)
+  - AdminSidebar filters menu items based on stored permissions (only shows modules with view=true)
+  - AdminLogin now fetches /admin-users/me after login to store permissions and user data in localStorage
+  - RoleManagement UI: loginRoute field in create/edit forms, displayed in roles table
+  - SuperAdmin bypasses all permission checks; subadmin permissions stored as adminPermissions in localStorage
+  - Always-allowed routes: /admin/dashboard, /admin/profile, /admin (no permission check needed)
+  - Storage keys: adminToken, adminPermissions (JSON), adminUser (JSON) in localStorage
 - 2026-02-21: Signup Flow Reverted to Original Page-Based Flow
   - Removed SignupModal from Header, CoursePurchase, and CoursePreviewModal
   - Login flow remains modal-based (LoginModal with OTP verification)
