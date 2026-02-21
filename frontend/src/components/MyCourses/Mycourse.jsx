@@ -61,7 +61,7 @@ const Mycourse = () => {
 
   const isEnrolled = (courseId) => enrolledCourses.includes(courseId);
 
-  const visibleCourses = showAll ? courses : courses.slice(0, 2);
+  const visibleCourses = showAll ? courses : courses.slice(0, 4);
 
   return (
     <section className="tsp-programs-section">
@@ -179,9 +179,9 @@ const Mycourse = () => {
         </div>
       )}
 
-      {!showAll && courses.length > 2 && (
+      {!showAll && courses.length > 4 && (
         <div className="tsp-show-all-button">
-          <button onClick={() => setShowAll(true)}>Show All</button>
+          <button onClick={() => setShowAll(true)}>Show More</button>
         </div>
       )}
 
