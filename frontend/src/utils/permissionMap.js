@@ -33,6 +33,7 @@ const ROUTE_PERMISSION_MAP = {
   "/admin/coupons": "coupons",
   "/admin/onboarding-categories": "dashboard",
   "/admin/payments": "payments",
+  "/admin/offline-admission": "payments",
   "/admin/all-students": "students",
   "/admin/all-users": "students",
   "/admin/all-teachers": "faculty",

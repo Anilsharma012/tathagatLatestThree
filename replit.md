@@ -1,185 +1,49 @@
 # TathaGat - CAT Exam Preparation Platform
 
 ## Overview
-TathaGat is a full-stack education platform for CAT/XAT/SNAP exam preparation. It includes course management, mock tests, live classes, study materials, discussion forums, and payment integration.
+TathaGat is a comprehensive full-stack education platform designed for students preparing for competitive exams like CAT, XAT, and SNAP. Its primary purpose is to provide a complete ecosystem for exam preparation, offering features such as course management, mock tests, live classes, study materials, discussion forums, and integrated payment solutions. The platform aims to enhance the learning experience through structured content, interactive tools, and robust administrative capabilities, positioning itself as a leading solution in the online test preparation market.
 
-## Project Architecture
+## User Preferences
+I prefer clear and concise communication.
+I value an iterative development approach with frequent, small updates.
+I like to be asked before major architectural changes or significant feature removals.
+I expect detailed explanations for complex implementations.
+Do not make changes to folder `node_modules`.
+Do not make changes to file `package-lock.json`.
 
-### Frontend (React CRA)
-- **Location**: `/frontend`
-- **Port**: 5000 (bound to 0.0.0.0)
-- **Framework**: Create React App (React 18)
-- **Key Libraries**: react-router-dom, axios, chart.js, recharts, framer-motion, react-toastify, razorpay integration
-- **Proxy**: `/api` and `/uploads` requests are proxied to the backend at `http://127.0.0.1:3001` via `src/setupProxy.js`
+## System Architecture
 
-### Backend (Express.js)
-- **Location**: `/backend`
-- **Port**: 3001 (bound to 0.0.0.0)
-- **Framework**: Express.js with Mongoose ORM
-- **Database**: MongoDB Atlas (external)
-- **Key Features**: JWT authentication, file uploads (multer), Razorpay payments, email (nodemailer), SMS (Karix), rate limiting, CORS
+### Frontend
+The frontend is built using Create React App (React 18) and located in the `/frontend` directory, running on port 5000. It utilizes `react-router-dom` for navigation, `axios` for API calls, `chart.js` and `recharts` for data visualization, `framer-motion` for animations, and `react-toastify` for notifications. Razorpay is integrated for payment processing. API and upload requests are proxied to the backend.
+
+### Backend
+The backend, located in `/backend`, is an Express.js application running on port 3001, using Mongoose for MongoDB ORM. Key functionalities include JWT authentication, `multer` for file uploads, Razorpay payment gateway integration, `nodemailer` for email services, Karix for SMS notifications, rate limiting, and CORS handling.
 
 ### Database
-- **Type**: MongoDB Atlas (cloud-hosted)
-- **Connection**: Via `MONGO_URI` environment secret
-- **ORM**: Mongoose
+MongoDB Atlas serves as the cloud-hosted database, connected via a `MONGO_URI` secret. Mongoose is used as the ORM.
 
-## Environment Variables & Secrets
+### UI/UX Decisions
+The platform features a clean, professional design with consistent styling across student and admin interfaces. Policy pages utilize a modern aesthetic with white cards and indigo accents. Admin dashboards are designed for comprehensive management with features like searchable, paginated tables, CSV export, and clear action buttons for various entities (users, courses, inquiries). Role-Based Access Control (RBAC) is implemented for granular permissions. The student experience focuses on intuitive navigation, clear presentation of course content, and accessible mock test interfaces.
 
-### Secrets (stored in Replit Secrets)
-- `MONGO_URI` - MongoDB Atlas connection string
-- `JWT_SECRET` - JWT signing key
-- `RAZORPAY_KEY_ID` - Razorpay payment key
-- `RAZORPAY_KEY_SECRET` - Razorpay payment secret
-- `EMAIL_PASSWORD` - Gmail SMTP app password
-- `KARIX_API_KEY` - Karix SMS API key
+### Core Features
+- **Course Management**: Creation, organization, and delivery of study materials, video lectures, and quizzes.
+- **Mock Tests**: Comprehensive testing module with detailed analytics, score distribution, and performance tracking.
+- **Live Classes**: Integration for conducting and managing live online sessions.
+- **User Authentication & Authorization**: JWT-based authentication with password-based login and OTP verification flows. Robust RBAC system for admin and super-admin roles.
+- **Payment & Enrollment**: Integrated Razorpay for online payments, with support for manual UPI payments and offline admission processing. Coupon code system for discounts.
+- **CRM**: Lead status tracking, inquiry management, and follow-up functionalities for sales and support.
+- **Reporting & Analytics**: Admin dashboards for student performance, daily activity, and comprehensive user management.
+- **Content Delivery**: Optimized display of course content, including support for rich media in questions.
+- **Policy Pages**: Dedicated pages for Privacy Policy, Refund & Cancellation Policy, and Terms & Conditions.
+- **Offline Admission System**: Admin interface for walk-in student enrollment, course selection, payment recording, and invoice generation.
+- **Invoice System**: HTML-based professional tax invoice generation with GST breakdown, downloadable as PDF.
 
-### Environment Variables
-- `EMAIL` - Gmail address for SMTP
-- `KARIX_SENDER_ID`, `KARIX_DLT_ENTITY_ID`, `KARIX_DLT_TEMPLATE_ID` - SMS config
-- `KARIX_SMS_URL` - SMS API endpoint
-- `NODE_ENV` - development/production
-- `SKIP_SEED` - Skip database seeding (set to 1)
+## External Dependencies
 
-## Workflows
-- **Backend Server**: `cd backend && node index.js` (port 3001)
-- **Frontend**: `cd frontend && react-scripts start` (port 5000, webview)
-
-## Recent Changes
-- 2026-02-21: Dual Payment System (Razorpay + Manual UPI)
-  - CoursePurchase page: "Buy Now" replaced with "Continue with Razorpay" + "Continue with UPI ID" buttons
-  - UPI modal: shows admin-uploaded QR code, UPI ID with copy button, amount display, UTR number input (required), screenshot upload (required)
-  - Backend models: UpiSettings (upiId, qrCodeImage, isActive), ManualPaymentRequest (userId, courseId, utrNumber, screenshotUrl, status, couponCode)
-  - Backend routes at /api/manual-payment: GET/POST upi-settings, POST submit (student), GET requests (admin), PUT verify/:id (admin)
-  - On admin verify: creates Enrollment (course unlock) + Payment record with UTR reference
-  - Admin UPI Settings page at /admin/upi-settings: upload QR code, set UPI ID
-  - Admin Manual Payment Verification page at /admin/manual-payment-verification: table with pending/verified/rejected tabs, search, detail modal with screenshot, verify/reject actions
-  - Admin sidebar links added under Analytics & CRM section
-- 2026-02-21: Student Course Content Page Updates
-  - Removed purple gradient header/banner section from course content page (StudentCourseContentManager)
-  - Increased font sizes across entire page for desktop view: tabs, section headers, curriculum stats, tree nodes, buttons, video titles, mock test cards
-- 2026-02-16: Authentication Flow Migration (Password-Based)
-  - Added password field to UserSchema with bcrypt hashing (pre-save hook) and comparePassword method
-  - New backend endpoints: /api/auth/phone/register (signup with OTP), /api/auth/phone/verify-registration, /api/auth/phone/login-password
-  - Login page redesigned: mobile + password fields, show/hide password toggle, links to Signup
-  - New Signup page: Full Name, Mobile, Password, Confirm Password, City, Gender, DOB, OTP verification step
-  - Signup route added at /signup in App.js
-  - AdminLayout import fix in App.js (was undefined)
-  - Ban enforcement in password-based login
-  - Development mode OTP bypass for testing
-- 2026-02-16: Navigation & Scroll Fixes
-  - Student Dashboard: Auto-scroll to top when switching sidebar sections (Analysis & Reports, etc.)
-  - Admin Sidebar: Scroll position and collapsed/expanded state persisted across page navigations via sessionStorage
-  - Role Management: Added loading states and error feedback for API calls; improved empty state messaging
-- 2026-02-16: Admin UI/UX Fixes
-  - Collapsible sidebar sections (Courses, Tests, Content, Live Classes, Analytics, Users & Permissions)
-  - LiveBatchManagement wrapped with AdminLayout
-  - User Management search icon alignment fix
-  - Student Reports scroll control
-  - All Teachers and Permissions sidebar links
-- 2026-02-16: Comprehensive Super Admin User Management
-  - 3-tab UI: All Users, Pending Registrations, Payments with search/filters/pagination
-  - Backend endpoints: user CRUD, ban/unban, pending registrations, payments (aggregation pipeline), bulk CSV upload, approve/reject payment
-  - Enrollment modal with full course details (price, type, validity, dates, status)
-  - User detail side panel with personal info, enrollments, payment history
-  - Bulk CSV upload with row-by-row validation and error reporting
-  - Ban enforcement in all OTP login flows (verifyPhoneOtp, verifyEmailOtp, loginWithPhone, dev mode)
-  - Admin create endpoint now requires adminAuth
-  - Payment search uses MongoDB aggregation for accurate pagination
-  - AdminSidebar link with FaUserPlus icon at `/admin/user-management`
-- 2026-02-19: Modal-Based OTP Authentication Flow
-  - Created LoginModal component: phone entry → OTP send → 6-digit verification → dashboard redirect
-  - Created SignupModal component: user details → OTP verification → course category selection → exam selection → dashboard
-  - Backend sendPhoneOtp now returns 404 "User not registered" for unknown numbers (login-only flow)
-  - Header shows profile avatar with dropdown (name, phone, dashboard link, logout) when logged in
-  - Header shows "Log In" button that opens LoginModal when not logged in
-  - Profile dropdown with initials circle (orange) when no profile image available
-  - Logout clears localStorage token/user and resets header state
-  - Mobile-responsive: profile info and logout button in hamburger menu
-  - Course categories in signup: MBA, After 12, GMAT, Govt Exams with exam sub-selections
-  - Existing /Login and /signup page routes maintained for backward compatibility
-- 2026-02-19: Signup & Onboarding Flow Updates
-  - Removed password, confirm password fields and OTP step from Signup page
-  - Signup flow: Fill details → Click Sign Up → Account created directly → Navigate to /exam-category
-  - OTP is only used during Login, not during Signup
-  - Backend registerWithPhone creates user and returns token immediately (no OTP)
-  - After signup, redirects to /exam-category → /exam-selection → dashboard
-  - isOnboardingComplete set to false during registration, true after exam selection (save-exam)
-  - Added image upload with visible preview on left panel of ExamCategory and ExamSelection pages
-  - Used shared axiosConfig across all UserDetails components for consistent API calls
-  - Added defensive null checks for localStorage user in image upload handlers
-- 2026-02-19: CRM Lead Status Tracking & Action Buttons
-  - Added Action column with status dropdown to All Inquiries, New Enquiries, and Counseling Enquiries tables
-  - Lead statuses: New, Contacted, Hot Lead, Cold Lead, Response Pending, Follow Up, Not Interested, Demo Scheduled, Converted, Lost
-  - Added `leadStatus` field to CRMLead model for persistent status tracking
-  - Updated Enquiry model with expanded status enum and remarks field
-  - Added PUT endpoint for enquiry status/remarks updates (enquiryRoutes.js)
-  - Remarks/Notes modal for adding notes to each inquiry
-  - Color-coded status badges in all inquiry tables
-  - CSS styles for action dropdowns, remarks buttons, and status badges
-- 2026-02-19: Invoice Download System
-  - Replaced puppeteer-based PDF generation with HTML-based invoice rendering (browser print-to-PDF)
-  - Invoice opens in new tab with professional toolbar (Download/Print PDF + Close buttons)
-  - Uses existing taxInvoice.hbs Handlebars template with company details from BillingSettings
-  - Auth via query token parameter for new-tab opens (tokenFromQuery middleware)
-  - Full tax invoice with GST breakdown (CGST/SGST or IGST), student details, payment info
-  - Amount calculations handle paise-to-rupees conversion, discount display
-  - PurchaseHistory "Tax Invoice" button opens invoice in new tab
-  - Installed handlebars dependency; removed puppeteer dependency
-- 2026-02-19: Coupon Code System & Admin Management
-  - Coupon model: code, discountPercent, applicableTo (all/specific), courses array, maxUses, maxUsesPerUser, expiryDate, isActive, usedBy tracking
-  - Backend CRUD endpoints at /api/coupons (create, all, validate, toggle, update, delete)
-  - Coupon validation in createOrder: discount applied, originalAmount saved, usedBy updated
-  - Payment model extended with couponCode, discountPercent, originalAmount fields
-  - CouponManagement admin page at /admin/coupons with full CRUD, course selection, status toggle
-  - CoursePurchase page: coupon input field with apply/remove, discounted price display
-  - Admin sidebar: Coupon Management link under Analytics section (FaTag icon)
-- 2026-02-19: Email Sender Configuration
-  - Changed email sender from tathagat949@gmail.com to payment@tathagat.co.in
-  - Added SENDER_EMAIL environment variable for configurable sender address
-- 2026-02-19: Admin User List Enhancements
-  - AllStudents, AllUsers, AllTeachers: search, pagination (20/page), CSV export
-- 2026-02-19: Course Test Options Display Fix
-  - Fixed data format mismatch: backend was sending options as `[{ id, text }]` array but frontend expected `{ A, B, C, D }` object format
-  - Changed `startTest` and `getAttemptData` in MockTestController to return options as `{ A, B, C, D }` object for course tests
-  - Added `option.text` fallback in MockTestAttempt.jsx for backward compatibility with any cached `{ id, text }` format data
-  - Images uploaded via JoditEditor in question options now display correctly in student test view
-- 2026-02-19: Admin Student Performance Analytics Enhancement
-  - Added getDashboardAnalytics endpoint: overview stats (students, tests, attempts), daily activity chart, score distribution, top 10 performers, recent attempts
-  - Dashboard counts include both MockTest and CourseTest models for accurate totals
-  - Fixed hardcoded VARC/DILR/QA sections in getStudentPerformance to be dynamic (supports any section names)
-  - Added CourseTest model lookup for resolving test names in admin student performance view
-  - Enhanced StudentPerformance.jsx with 3-tab layout: Dashboard (charts + tables), By Student (split panel with charts), By Test (leaderboard)
-  - Chart.js integration: Line chart for daily activity, Bar charts for score distribution and section performance, score trend charts per student
-  - Modern CSS with card-based design, medal badges for top 3, avatar sidebar, responsive grid layouts
-- 2026-02-19: Policy Pages & Footer Links
-  - Created Privacy Policy page at /privacy-policy with full content (8 sections: Registration, Cookies, User Communications, Log Info, Confidential, Feedback, Improvement, Queries)
-  - Created Refund & Cancellation Policy page at /refund-policy with Important Notice callout (offline-only refund, no online refunds)
-  - Created Terms & Conditions page at /terms-and-conditions with full content (Trademark, Copyright, Shipping, Order, Payment, Refund, Electronic Communication, Reviews, Terms of Use, Applicable Law)
-  - Shared PolicyPages.css with professional styling: clean white cards, indigo accents, highlighted notices, responsive design
-  - Added 3 links under "Explore" section in Footer component
-  - Routes added in App.js for all 3 policy pages
-- 2026-02-21: Complete RBAC (Role-Based Access Control) System
-  - Backend: Added `loginRoute` field to Role model with duplicate slug validation
-  - Public API endpoints: GET /api/admin/roles/by-slug/:slug, GET /api/admin/roles/all-slugs
-  - PermissionGuard component wraps all admin routes, checks module permissions before rendering
-  - permissionMap.js: Centralized route-to-module mapping for ~40 admin routes
-  - Unauthorized (403) page at /admin/unauthorized with "Go Back" and "Go to Dashboard" buttons
-  - RoleLogin component at /role/:roleSlug: branded login page per role (fetches role info by slug)
-  - AdminSidebar filters menu items based on stored permissions (only shows modules with view=true)
-  - AdminLogin now fetches /admin-users/me after login to store permissions and user data in localStorage
-  - RoleManagement UI: loginRoute field in create/edit forms, displayed in roles table
-  - SuperAdmin bypasses all permission checks; subadmin permissions stored as adminPermissions in localStorage
-  - Always-allowed routes: /admin/dashboard, /admin/profile, /admin (no permission check needed)
-  - Storage keys: adminToken, adminPermissions (JSON), adminUser (JSON) in localStorage
-- 2026-02-21: Signup Flow Reverted to Original Page-Based Flow
-  - Removed SignupModal from Header, CoursePurchase, and CoursePreviewModal
-  - Login flow remains modal-based (LoginModal with OTP verification)
-  - When login detects unregistered user, redirects to /signup page instead of opening SignupModal
-  - Signup uses original /signup page: Fill details → Sign Up → Account created → /exam-category onboarding
-  - Course display updated: Mycourse shows 4 courses initially, "Show More" button for >4 courses
-- 2026-02-14: Initial Replit setup - migrated from GitHub import
-  - Moved sensitive credentials from `.env` to Replit Secrets
-  - Configured workflows for frontend and backend
-  - Set up `.gitignore`
-  - Backend binds to 0.0.0.0:3001, frontend to 0.0.0.0:5000
+- **MongoDB Atlas**: Cloud-hosted NoSQL database.
+- **Razorpay**: Payment gateway for online transactions.
+- **Nodemailer**: Email sending service (SMTP via Gmail).
+- **Karix**: SMS notification service.
+- **Chart.js**: JavaScript charting library for data visualization.
+- **Recharts**: Redesigned charting library built with React and D3.
+- **Handlebars**: Templating engine used for invoice generation.

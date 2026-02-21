@@ -1,0 +1,555 @@
+.oa-container {
+  padding: 24px;
+  max-width: 960px;
+}
+
+.oa-header {
+  margin-bottom: 20px;
+}
+
+.oa-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 6px 0;
+  display: flex;
+  align-items: center;
+}
+
+.oa-header p {
+  color: #666;
+  margin: 0;
+  font-size: 14px;
+}
+
+.oa-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.oa-tab {
+  padding: 10px 24px;
+  border: none;
+  background: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.oa-tab.active {
+  color: #1a237e;
+  border-bottom-color: #1a237e;
+}
+
+.oa-tab:hover {
+  color: #1a237e;
+}
+
+.oa-message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.oa-message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.oa-message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.oa-form {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.oa-section {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.oa-section:last-of-type {
+  border-bottom: none;
+}
+
+.oa-section h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a237e;
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e8eaf6;
+}
+
+.oa-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.oa-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.oa-field.full-width {
+  grid-column: 1 / -1;
+}
+
+.oa-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 6px;
+}
+
+.oa-field label .req {
+  color: #e53935;
+}
+
+.oa-field input,
+.oa-field select {
+  padding: 10px 12px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  background: #fafafa;
+}
+
+.oa-field input:focus,
+.oa-field select:focus {
+  outline: none;
+  border-color: #1a237e;
+  background: #fff;
+}
+
+.phone-field .oa-phone-input {
+  display: flex;
+  gap: 8px;
+}
+
+.phone-field .oa-phone-input input {
+  flex: 1;
+}
+
+.oa-btn-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  background: #1a237e;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.oa-btn-check:hover {
+  background: #0d1557;
+}
+
+.oa-phone-status {
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.oa-phone-status.existing {
+  color: #1565c0;
+}
+
+.oa-phone-status.new {
+  color: #2e7d32;
+}
+
+.oa-course-info {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 24px;
+  background: #e8eaf6;
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+
+.oa-course-detail {
+  display: flex;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.oa-course-detail span {
+  color: #666;
+}
+
+.oa-course-detail strong {
+  color: #1a237e;
+}
+
+.coupon-field .oa-coupon-input {
+  display: flex;
+  gap: 8px;
+}
+
+.coupon-field .oa-coupon-input input {
+  flex: 1;
+}
+
+.oa-btn-coupon {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.oa-btn-coupon.apply {
+  background: #1a237e;
+  color: #fff;
+}
+
+.oa-btn-coupon.apply:hover {
+  background: #0d1557;
+}
+
+.oa-btn-coupon.remove {
+  background: #e53935;
+  color: #fff;
+}
+
+.oa-btn-coupon.remove:hover {
+  background: #c62828;
+}
+
+.oa-coupon-status {
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.oa-coupon-status.success {
+  color: #2e7d32;
+}
+
+.oa-coupon-status.error {
+  color: #c62828;
+}
+
+.oa-amount-summary {
+  margin-top: 16px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.oa-summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.oa-summary-row.discount {
+  color: #2e7d32;
+}
+
+.oa-summary-row.total {
+  border-top: 2px solid #ddd;
+  margin-top: 6px;
+  padding-top: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a237e;
+}
+
+.oa-form-actions {
+  padding: 20px 24px;
+  display: flex;
+  gap: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.oa-btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.oa-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.oa-btn-primary {
+  background: #1a237e;
+  color: #fff;
+}
+
+.oa-btn-primary:hover:not(:disabled) {
+  background: #0d1557;
+}
+
+.oa-btn-secondary {
+  background: #f0f0f0;
+  color: #444;
+}
+
+.oa-btn-secondary:hover {
+  background: #e0e0e0;
+}
+
+.oa-success-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  padding: 40px;
+  text-align: center;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.oa-success-icon {
+  font-size: 64px;
+  color: #2e7d32;
+  margin-bottom: 16px;
+}
+
+.oa-success-card h2 {
+  color: #1a237e;
+  margin: 0 0 8px 0;
+  font-size: 24px;
+}
+
+.oa-success-msg {
+  color: #666;
+  margin: 0 0 24px 0;
+}
+
+.oa-success-details {
+  background: #f5f5f5;
+  border-radius: 10px;
+  padding: 16px 20px;
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+.oa-detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.oa-detail-row:last-child {
+  border-bottom: none;
+}
+
+.oa-detail-row span {
+  color: #888;
+}
+
+.oa-detail-row strong {
+  color: #333;
+}
+
+.oa-success-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.oa-list-section {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.oa-list-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.oa-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 8px 12px;
+  max-width: 500px;
+}
+
+.oa-search-box svg {
+  color: #999;
+}
+
+.oa-search-box input {
+  flex: 1;
+  border: none;
+  background: none;
+  font-size: 14px;
+  outline: none;
+}
+
+.oa-search-box button {
+  padding: 6px 16px;
+  border: none;
+  background: #1a237e;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.oa-loading,
+.oa-empty {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+  font-size: 15px;
+}
+
+.oa-table-wrapper {
+  overflow-x: auto;
+}
+
+.oa-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.oa-table th {
+  background: #f5f5f5;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  border-bottom: 2px solid #eee;
+}
+
+.oa-table td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.oa-table tbody tr:hover {
+  background: #f8f9ff;
+}
+
+.oa-btn-invoice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid #1a237e;
+  background: #fff;
+  color: #1a237e;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.oa-btn-invoice:hover {
+  background: #1a237e;
+  color: #fff;
+}
+
+.oa-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.oa-pagination button {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.oa-pagination button:hover:not(:disabled) {
+  background: #f5f5f5;
+}
+
+.oa-pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.oa-pagination span {
+  font-size: 14px;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .oa-container {
+    padding: 16px;
+  }
+
+  .oa-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .oa-course-info {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .oa-success-actions {
+    flex-direction: column;
+  }
+
+  .oa-form-actions {
+    flex-direction: column;
+  }
+
+  .oa-btn {
+    justify-content: center;
+  }
+}
