@@ -68,6 +68,8 @@ const SECTIONS = [
       { path: "/admin/enquiries", label: "New Enquiries", icon: "FaChartBar", module: "crm" },
       { path: "/admin/counseling-enquiries", label: "Counseling Enquiries", icon: "FaChartBar", module: "crm" },
       { path: "/admin/billing-settings", label: "Billing Settings", icon: "FaCog", module: "billing" },
+      { path: "/admin/upi-settings", label: "UPI Settings", icon: "FaCog", module: "billing" },
+      { path: "/admin/manual-payment-verification", label: "Manual Payments", icon: "FaFileInvoice", module: "payments" },
       { path: "/admin/coupons", label: "Coupon Management", icon: "FaTag", module: "coupons" },
       { path: "/admin/onboarding-categories", label: "Exam Categories", icon: "FaListAlt", module: null },
     ]

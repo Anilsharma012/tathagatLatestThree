@@ -46,6 +46,15 @@ TathaGat is a full-stack education platform for CAT/XAT/SNAP exam preparation. I
 - **Frontend**: `cd frontend && react-scripts start` (port 5000, webview)
 
 ## Recent Changes
+- 2026-02-21: Dual Payment System (Razorpay + Manual UPI)
+  - CoursePurchase page: "Buy Now" replaced with "Continue with Razorpay" + "Continue with UPI ID" buttons
+  - UPI modal: shows admin-uploaded QR code, UPI ID with copy button, amount display, UTR number input (required), screenshot upload (required)
+  - Backend models: UpiSettings (upiId, qrCodeImage, isActive), ManualPaymentRequest (userId, courseId, utrNumber, screenshotUrl, status, couponCode)
+  - Backend routes at /api/manual-payment: GET/POST upi-settings, POST submit (student), GET requests (admin), PUT verify/:id (admin)
+  - On admin verify: creates Enrollment (course unlock) + Payment record with UTR reference
+  - Admin UPI Settings page at /admin/upi-settings: upload QR code, set UPI ID
+  - Admin Manual Payment Verification page at /admin/manual-payment-verification: table with pending/verified/rejected tabs, search, detail modal with screenshot, verify/reject actions
+  - Admin sidebar links added under Analytics & CRM section
 - 2026-02-21: Student Course Content Page Updates
   - Removed purple gradient header/banner section from course content page (StudentCourseContentManager)
   - Increased font sizes across entire page for desktop view: tabs, section headers, curriculum stats, tree nodes, buttons, video titles, mock test cards

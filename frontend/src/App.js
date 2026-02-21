@@ -143,6 +143,8 @@ import BillingSettings from "./pages/mainAdmin/BillingSettings/BillingSettings";
 import CouponManagement from "./pages/mainAdmin/CouponManagement/CouponManagement";
 import OnboardingCategoryManagement from "./pages/mainAdmin/OnboardingCategoryManagement/OnboardingCategoryManagement";
 import RoleManagement from "./pages/mainAdmin/RoleManagement/RoleManagement";
+import UpiSettingsPage from "./pages/mainAdmin/UpiSettings/UpiSettings";
+import ManualPaymentVerification from "./pages/mainAdmin/ManualPaymentVerification/ManualPaymentVerification";
 import PermissionGuard from "./components/PermissionGuard/PermissionGuard";
 import Unauthorized from "./components/Unauthorized/Unauthorized";
 import RoleLogin from "./pages/mainAdmin/RoleLogin/RoleLogin";
@@ -306,6 +308,8 @@ const AppContent = () => {
         <Route path="/admin/onboarding-categories" element={<PrivateRoute tokenName="adminToken"><OnboardingCategoryManagement /></PrivateRoute>} />
         <Route path="/admin/role-management" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="roleManagement"><RoleManagement /></PermissionGuard></PrivateRoute>} />
         <Route path="/admin/roles" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="roleManagement"><RoleManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/upi-settings" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="billing"><UpiSettingsPage /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/manual-payment-verification" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="payments"><ManualPaymentVerification /></PermissionGuard></PrivateRoute>} />
 
         {/* SubAdmin routes */}
         <Route path="/subadmin" element={<SubAdminLogin />} />

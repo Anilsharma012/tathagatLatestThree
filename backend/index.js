@@ -876,6 +876,7 @@ safeUse("/api/gallery", "./routes/galleryRoutes");
 safeUse("/api/admin/roles", "./routes/roleRoutes");
 safeUse("/api/admin/admin-users", "./routes/adminUserRoutes");
 safeUse("/api/coupons", "./routes/couponRoutes");
+safeUse("/api/manual-payment", "./routes/manualPaymentRoutes");
 
 /* -------------------- Production Static -------------------- */
 if (process.env.NODE_ENV === "production") {

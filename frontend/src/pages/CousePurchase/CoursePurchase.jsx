@@ -42,6 +42,12 @@ const CoursePurchase = () => {
   const [couponLoading, setCouponLoading] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [pendingPayment, setPendingPayment] = useState(false);
+  const [showUpiModal, setShowUpiModal] = useState(false);
+  const [upiSettings, setUpiSettings] = useState(null);
+  const [utrNumber, setUtrNumber] = useState("");
+  const [paymentScreenshot, setPaymentScreenshot] = useState(null);
+  const [upiSubmitting, setUpiSubmitting] = useState(false);
+  const [upiSuccess, setUpiSuccess] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -365,6 +371,77 @@ const handlePayment = async () => {
 };
 
 
+
+const handleUpiClick = async () => {
+  const token = localStorage.getItem("authToken");
+  if (!token) {
+    setPendingPayment(false);
+    setShowLoginModal(true);
+    return;
+  }
+  try {
+    const res = await axios.get("/api/manual-payment/upi-settings");
+    if (res.data.success && res.data.settings && res.data.settings.upiId) {
+      setUpiSettings(res.data.settings);
+      setShowUpiModal(true);
+      setUtrNumber("");
+      setPaymentScreenshot(null);
+      setUpiSuccess(false);
+    } else {
+      alert("UPI payment is not available right now. Please use Razorpay.");
+    }
+  } catch (err) {
+    alert("UPI payment is not available right now. Please use Razorpay.");
+  }
+};
+
+const handleUpiSubmit = async () => {
+  if (!utrNumber.trim()) {
+    alert("Please enter UTR number");
+    return;
+  }
+  if (!paymentScreenshot) {
+    alert("Please upload payment screenshot");
+    return;
+  }
+
+  const token = localStorage.getItem("authToken");
+  const activeCourseId = courseId || course?._id;
+  const currentPrice = couponApplied
+    ? Math.round(displayPrice - (displayPrice * couponApplied.discountPercent / 100))
+    : displayPrice;
+
+  setUpiSubmitting(true);
+  try {
+    const formData = new FormData();
+    formData.append("courseId", activeCourseId);
+    formData.append("utrNumber", utrNumber.trim());
+    formData.append("amount", currentPrice);
+    formData.append("screenshot", paymentScreenshot);
+    if (couponApplied) {
+      formData.append("couponCode", couponApplied.code);
+      formData.append("discountPercent", couponApplied.discountPercent);
+      formData.append("originalAmount", displayPrice);
+    }
+
+    const res = await axios.post("/api/manual-payment/submit", formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    if (res.data.success) {
+      setUpiSuccess(true);
+    } else {
+      alert(res.data.message || "Failed to submit. Please try again.");
+    }
+  } catch (err) {
+    alert(err.response?.data?.message || "Failed to submit. Please try again.");
+  } finally {
+    setUpiSubmitting(false);
+  }
+};
 
   const toggleCurriculum = (index) => {
     setOpenCurriculumIndex(index === openCurriculumIndex ? null : index);
@@ -752,7 +829,30 @@ const handlePayment = async () => {
               }}
               onClick={handlePayment}
             >
-              Buy Now
+              Continue with Razorpay
+            </button>
+            <button
+              className="buy-btn"
+              style={{
+                backgroundColor: "#059669",
+                fontSize: "16px",
+                padding: "12px",
+                fontWeight: "600",
+                borderRadius: "8px",
+                marginTop: "10px",
+                transition: "0.3s",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+              }}
+              onClick={handleUpiClick}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                <line x1="1" y1="10" x2="23" y2="10"/>
+              </svg>
+              Continue with UPI ID
             </button>
             
             <a
@@ -820,6 +920,98 @@ const handlePayment = async () => {
         <img src={frame} alt="CAT Learning Journey" className="journey-image" />
       </div>
       <Chatbox />
+
+      {showUpiModal && (
+        <div className="upi-modal-overlay" onClick={() => { if (!upiSubmitting) setShowUpiModal(false); }}>
+          <div className="upi-modal-content" onClick={(e) => e.stopPropagation()}>
+            {upiSuccess ? (
+              <div className="upi-success-box">
+                <div style={{ fontSize: "48px", marginBottom: "16px" }}>&#10003;</div>
+                <h3>Payment Submitted Successfully!</h3>
+                <p>Your payment details have been sent for verification. Your course will be unlocked once the admin verifies your payment.</p>
+                <button
+                  className="upi-submit-btn"
+                  onClick={() => { setShowUpiModal(false); setUpiSuccess(false); }}
+                >
+                  Close
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="upi-modal-header">
+                  <h3>Pay via UPI</h3>
+                  <button className="upi-modal-close" onClick={() => setShowUpiModal(false)}>&times;</button>
+                </div>
+                <div className="upi-modal-body">
+                  {upiSettings?.qrCodeImage && (
+                    <div className="upi-qr-section">
+                      <p style={{ fontWeight: "600", marginBottom: "10px", color: "#333" }}>Scan QR Code to Pay</p>
+                      <img
+                        src={upiSettings.qrCodeImage}
+                        alt="UPI QR Code"
+                        className="upi-qr-image"
+                      />
+                    </div>
+                  )}
+                  {upiSettings?.upiId && (
+                    <div className="upi-id-section">
+                      <p style={{ fontWeight: "600", color: "#333", marginBottom: "6px" }}>UPI ID</p>
+                      <div className="upi-id-display">
+                        <span>{upiSettings.upiId}</span>
+                        <button
+                          onClick={() => { navigator.clipboard.writeText(upiSettings.upiId); alert("UPI ID copied!"); }}
+                          className="upi-copy-btn"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  <div className="upi-amount-display">
+                    <span>Amount to Pay:</span>
+                    <strong>
+                      &#8377;{couponApplied
+                        ? Math.round(displayPrice - (displayPrice * couponApplied.discountPercent / 100))
+                        : displayPrice}/-
+                    </strong>
+                  </div>
+                  <div className="upi-form-group">
+                    <label>Enter UTR Number <span style={{ color: "red" }}>*</span></label>
+                    <input
+                      type="text"
+                      value={utrNumber}
+                      onChange={(e) => setUtrNumber(e.target.value)}
+                      placeholder="Enter 12-digit UTR number"
+                      className="upi-input"
+                    />
+                  </div>
+                  <div className="upi-form-group">
+                    <label>Upload Screenshot of Payment <span style={{ color: "red" }}>*</span></label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setPaymentScreenshot(e.target.files[0])}
+                      className="upi-file-input"
+                    />
+                    {paymentScreenshot && (
+                      <p style={{ fontSize: "12px", color: "#059669", marginTop: "4px" }}>
+                        Selected: {paymentScreenshot.name}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    className="upi-submit-btn"
+                    onClick={handleUpiSubmit}
+                    disabled={upiSubmitting || !utrNumber.trim() || !paymentScreenshot}
+                  >
+                    {upiSubmitting ? "Submitting..." : "Submit for Verification"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       <LoginModal
         isOpen={showLoginModal}
