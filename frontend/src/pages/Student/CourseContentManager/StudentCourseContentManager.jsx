@@ -317,51 +317,6 @@ const StudentCourseContentManager = () => {
 
   return (
     <div className="scm-page">
-      {/* HEADER */}
-      <header className="scm-header">
-        <div className="scm-header-left">
-          <p className="scm-badge-live">Enrolled Course</p>
-          <h1 className="scm-title">
-            {course?.name || "Recorded Course"}
-          </h1>
-          <div
-            className="scm-description"
-            dangerouslySetInnerHTML={{
-              __html: sanitizeHtml(course?.description),
-            }}
-          />
-        </div>
-        <div className="scm-header-right">
-          <div className="scm-stat-pill">
-            <FaVideo />
-            <div>
-              <span className="scm-stat-label">Videos</span>
-              <span className="scm-stat-value">
-                {stats.totalVideos || 0}
-              </span>
-            </div>
-          </div>
-          <div className="scm-stat-pill">
-            <FaClipboardList />
-            <div>
-              <span className="scm-stat-label">Mock Tests</span>
-              <span className="scm-stat-value">
-                {stats.totalMockTests || 0}
-              </span>
-            </div>
-          </div>
-          <div className="scm-stat-pill">
-            <FaBook />
-            <div>
-              <span className="scm-stat-label">Practice Tests</span>
-              <span className="scm-stat-value">
-                {stats.totalTests || 0}
-              </span>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* TABS */}
       <div className="scm-tabs">
         <button

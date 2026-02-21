@@ -34,7 +34,7 @@
 
 .scm-muted {
   color: #64748b;
-  font-size: 0.88rem;
+  font-size: 1rem;
   line-height: 1.5;
 }
 
@@ -176,13 +176,13 @@
   border: none;
   outline: none;
   border-radius: 10px;
-  padding: 12px 16px;
+  padding: 14px 20px;
   background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 0.88rem;
+  gap: 10px;
+  font-size: 1.05rem;
   font-weight: 500;
   color: #64748b;
   cursor: pointer;
@@ -190,14 +190,14 @@
 }
 
 .scm-tab svg {
-  font-size: 15px;
+  font-size: 18px;
 }
 
 .scm-tab-count {
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 999px;
   background: #f1f5f9;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #64748b;
 }
@@ -238,9 +238,9 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   color: #1e293b;
 }
 
@@ -249,7 +249,7 @@
 }
 
 .scm-section-header .scm-muted {
-  font-size: 0.85rem;
+  font-size: 1rem;
   margin: 0;
 }
 
@@ -270,14 +270,14 @@
 }
 
 .scm-empty h3 {
-  font-size: 1.05rem;
+  font-size: 1.25rem;
   color: #475569;
-  margin: 0 0 6px;
+  margin: 0 0 8px;
 }
 
 .scm-empty p {
   color: #94a3b8;
-  font-size: 0.88rem;
+  font-size: 1rem;
   margin: 0 0 16px;
 }
 
@@ -316,14 +316,14 @@
 }
 
 .scm-topic-header h3 {
-  font-size: 0.92rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #334155;
 }
 
 .scm-topic-chip {
-  font-size: 0.65rem;
-  padding: 2px 8px;
+  font-size: 0.78rem;
+  padding: 3px 10px;
   border-radius: 999px;
   background: #eef2ff;
   color: #4f46e5;
@@ -333,7 +333,7 @@
 }
 
 .scm-topic-count {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   color: #94a3b8;
   margin-left: auto;
 }
@@ -410,7 +410,7 @@
 }
 
 .scm-video-title {
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 500;
   margin: 0;
   white-space: nowrap;
@@ -419,7 +419,7 @@
 }
 
 .scm-video-sub {
-  font-size: 0.75rem;
+  font-size: 0.88rem;
   color: #94a3b8;
   margin: 2px 0 0;
 }
@@ -442,7 +442,7 @@
 }
 
 .scm-player-header h3 {
-  font-size: 1.05rem;
+  font-size: 1.25rem;
   margin: 4px 0;
   color: #1e293b;
 }
@@ -450,10 +450,10 @@
 .scm-pill {
   display: inline-flex;
   align-items: center;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 999px;
   background: #eef2ff;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   color: #4f46e5;
   font-weight: 600;
 }
@@ -485,15 +485,15 @@
 .scm-player-notes {
   background: #f8fafc;
   border-radius: 10px;
-  padding: 12px 14px;
-  font-size: 0.85rem;
+  padding: 14px 16px;
+  font-size: 1rem;
   border: 1px solid #e2e8f0;
 }
 
 .scm-player-notes h4 {
   font-weight: 600;
   margin: 0 0 4px;
-  font-size: 0.9rem;
+  font-size: 1.05rem;
   color: #334155;
 }
 
@@ -540,14 +540,14 @@
 }
 
 .scm-mock-card-header h3 {
-  font-size: 1.02rem;
+  font-size: 1.2rem;
   margin: 4px 0;
   color: #1e293b;
 }
 
 .scm-pill-light {
-  font-size: 0.72rem;
-  padding: 3px 10px;
+  font-size: 0.85rem;
+  padding: 4px 12px;
   border-radius: 999px;
   background: #e0f2fe;
   color: #0369a1;
@@ -597,13 +597,13 @@
 
 .scm-mock-test-left p {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 1.02rem;
   font-weight: 500;
   color: #334155;
 }
 
 .scm-muted-small {
-  font-size: 0.75rem;
+  font-size: 0.88rem;
   color: #94a3b8;
 }
 
@@ -638,14 +638,14 @@
 
 .scm-curr-stat span {
   font-weight: 700;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   color: #4f46e5;
   display: block;
 }
 
 .scm-curr-stat label {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.92rem;
   color: #64748b;
   margin-top: 4px;
   text-transform: uppercase;
@@ -671,13 +671,13 @@
 .scm-tree-node {
   width: 100%;
   border: none;
-  padding: 14px 18px;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
   gap: 10px;
   cursor: pointer;
   text-align: left;
-  font-size: 0.92rem;
+  font-size: 1.05rem;
   font-weight: 500;
   transition: background 0.15s ease;
 }
@@ -686,7 +686,7 @@
   background: linear-gradient(135deg, #4f46e5, #6366f1);
   color: #ffffff;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   border-radius: 0;
 }
 
@@ -701,9 +701,9 @@
 .scm-tree-node-subject .scm-node-count {
   color: rgba(255, 255, 255, 0.7);
   background: rgba(255, 255, 255, 0.15);
-  padding: 2px 10px;
+  padding: 3px 12px;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
 }
 
 /* CHAPTER NODE */
@@ -753,14 +753,14 @@
 
 .scm-node-count {
   margin-left: auto;
-  font-size: 0.78rem;
+  font-size: 0.92rem;
   color: #94a3b8;
 }
 
 .scm-node-badge {
   margin-left: 6px;
-  font-size: 0.7rem;
-  padding: 2px 8px;
+  font-size: 0.82rem;
+  padding: 3px 10px;
   border-radius: 999px;
   font-weight: 500;
 }
@@ -809,10 +809,10 @@
 
 .scm-topic-item {
   border-radius: 8px;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border: 1px solid #e2e8f0;
   background: #ffffff;
-  font-size: 0.82rem;
+  font-size: 0.98rem;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -852,12 +852,12 @@
 .scm-btn {
   border-radius: 10px;
   border: none;
-  padding: 10px 18px;
-  font-size: 0.88rem;
+  padding: 12px 22px;
+  font-size: 1.02rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-weight: 500;
   transition: all 0.15s;
 }
@@ -883,8 +883,8 @@
 }
 
 .scm-btn-sm {
-  padding: 7px 12px;
-  font-size: 0.8rem;
+  padding: 8px 14px;
+  font-size: 0.95rem;
   border-radius: 8px;
 }
 
@@ -903,7 +903,7 @@
   border: none;
   background: transparent;
   color: #4f46e5;
-  font-size: 0.82rem;
+  font-size: 0.98rem;
   cursor: pointer;
   padding: 0;
   font-weight: 500;

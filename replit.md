@@ -46,6 +46,9 @@ TathaGat is a full-stack education platform for CAT/XAT/SNAP exam preparation. I
 - **Frontend**: `cd frontend && react-scripts start` (port 5000, webview)
 
 ## Recent Changes
+- 2026-02-21: Student Course Content Page Updates
+  - Removed purple gradient header/banner section from course content page (StudentCourseContentManager)
+  - Increased font sizes across entire page for desktop view: tabs, section headers, curriculum stats, tree nodes, buttons, video titles, mock test cards
 - 2026-02-16: Authentication Flow Migration (Password-Based)
   - Added password field to UserSchema with bcrypt hashing (pre-save hook) and comparePassword method
   - New backend endpoints: /api/auth/phone/register (signup with OTP), /api/auth/phone/verify-registration, /api/auth/phone/login-password
