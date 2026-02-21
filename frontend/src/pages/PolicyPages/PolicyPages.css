@@ -15,7 +15,7 @@
 }
 
 .policy-title {
-  font-size: 2rem;
+  font-size: 3rem;
   font-weight: 700;
   color: #1e293b;
   margin: 0 0 8px;
@@ -25,14 +25,14 @@
 }
 
 .policy-intro {
-  font-size: 1.05rem;
+  font-size: 2rem;
   color: #475569;
   font-weight: 500;
   margin-top: 24px;
 }
 
 .policy-container h2 {
-  font-size: 1.35rem;
+  font-size: 2.1rem;
   font-weight: 700;
   color: #1e293b;
   margin: 36px 0 14px;
@@ -41,14 +41,14 @@
 }
 
 .policy-container h3 {
-  font-size: 1.08rem;
+  font-size: 1.8rem;
   font-weight: 600;
   color: #334155;
   margin: 28px 0 10px;
 }
 
 .policy-container p {
-  font-size: 0.95rem;
+  font-size: 1.5rem;
   color: #475569;
   line-height: 1.75;
   margin: 0 0 14px;
@@ -60,7 +60,7 @@
 }
 
 .policy-container li {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: #475569;
   line-height: 1.75;
   margin-bottom: 6px;
@@ -94,14 +94,14 @@
 }
 
 .policy-notice h3 {
-  font-size: 1.05rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: #dc2626;
   margin: 0 0 10px;
 }
 
 .policy-notice p {
-  font-size: 0.92rem;
+  font-size: 1.5rem;
   color: #7f1d1d;
   margin: 0 0 8px;
 }

@@ -17,28 +17,22 @@ exports.sendPhoneOtp = async (req, res) => {
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
     let user = await User.findOne({ phoneNumber });
-    if (!user) {
-      return res.status(404).json({ message: "User not registered. Please sign up first." });
-    }
 
-    // Delete any existing OTPs for this user
-    await OTP.deleteMany({ userId: user._id });
+    await OTP.deleteMany(user ? { userId: user._id } : { phoneNumber });
 
-    // Store OTP in database with 5-minute expiry
     await OTP.create({ 
-      userId: user._id, 
+      userId: user ? user._id : undefined, 
+      phoneNumber,
       otpCode,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
     });
 
-    // Send OTP via SMS
     await sendOtpPhoneUtil(phoneNumber, otpCode);
 
     console.log(`OTP sent to ${phoneNumber}`);
 
     res.status(200).json({ 
       message: "OTP sent successfully!",
-      phoneNumber: phoneNumber.slice(0, 5) + "XXXXX" // Masked for response
+      phoneNumber: phoneNumber.slice(0, 5) + "XXXXX"
     });
   } catch (error) {
     console.error("Error sending OTP:", error);
@@ -60,54 +54,57 @@ exports.verifyPhoneOtp = async (req, res) => {
     }
 
     let user = await User.findOne({ phoneNumber });
-    console.log(`[OTP Verify] User found: ${user ? user._id : 'NOT FOUND'}`);
+
+    let otpRecord;
+    if (user) {
+      otpRecord = await OTP.findOne({ userId: user._id }).sort({ createdAt: -1 });
+      if (!otpRecord) {
+        otpRecord = await OTP.findOne({ phoneNumber }).sort({ createdAt: -1 });
+      }
+    } else {
+      otpRecord = await OTP.findOne({ phoneNumber }).sort({ createdAt: -1 });
+    }
+
+    console.log(`[OTP Verify] User found: ${user ? user._id : 'NOT FOUND'}, OTP record: ${otpRecord ? 'YES' : 'NONE'}`);
     
+    if (!otpRecord) {
+      return res.status(400).json({ message: "No OTP found. Please request a new OTP." });
+    }
+
+    const otpAge = Date.now() - new Date(otpRecord.createdAt).getTime();
+    if (otpAge > 5 * 60 * 1000) {
+      await OTP.deleteOne({ _id: otpRecord._id });
+      return res.status(400).json({ message: "OTP has expired. Please request a new OTP." });
+    }
+
+    if (otpRecord.otpCode !== otpCode) {
+      return res.status(400).json({ message: "Invalid OTP. Please check and try again." });
+    }
+
+    await OTP.deleteOne({ _id: otpRecord._id });
+
     if (!user) {
-      return res.status(404).json({ message: "User not found. Please request a new OTP." });
+      console.log(`[OTP Verify] No user for ${phoneNumber}, redirecting to signup`);
+      return res.status(200).json({
+        message: "OTP verified! Please complete your registration.",
+        userExists: false,
+        phoneNumber,
+      });
     }
 
     if (user.isBanned) {
       return res.status(403).json({ message: "Your account has been suspended. Please contact support." });
     }
 
-    // Find the most recent OTP for this user
-    const otpRecord = await OTP.findOne({ userId: user._id }).sort({ createdAt: -1 });
-    console.log(`[OTP Verify] OTP in DB: ${otpRecord ? otpRecord.otpCode : 'NONE'}, User entered: ${otpCode}`);
-    
-    if (!otpRecord) {
-      return res.status(400).json({ message: "No OTP found. Please request a new OTP." });
-    }
-
-    // Check if OTP has expired (5 minutes)
-    const otpAge = Date.now() - new Date(otpRecord.createdAt).getTime();
-    console.log(`[OTP Verify] OTP age: ${otpAge/1000}s, Expired: ${otpAge > 5 * 60 * 1000}`);
-    
-    if (otpAge > 5 * 60 * 1000) {
-      await OTP.deleteOne({ _id: otpRecord._id });
-      return res.status(400).json({ message: "OTP has expired. Please request a new OTP." });
-    }
-
-    // Verify OTP
-    console.log(`[OTP Verify] Comparing: stored='${otpRecord.otpCode}' vs entered='${otpCode}' - Match: ${otpRecord.otpCode === otpCode}`);
-    if (otpRecord.otpCode !== otpCode) {
-      return res.status(400).json({ message: "Invalid OTP. Please check and try again." });
-    }
-
-    // OTP verified - delete it to prevent reuse
-    await OTP.deleteOne({ _id: otpRecord._id });
-
-    // Update user verification status
     user.isPhoneVerified = true;
     await user.save({ validateBeforeSave: false });
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET || "default_secret_key",
       { expiresIn: "30d" }
     );
 
-    // Determine redirect based on user profile completion
     let redirectTo = "/student/dashboard";
     if (!user.isOnboardingComplete) {
       redirectTo = "/user-details";
@@ -115,10 +112,11 @@ exports.verifyPhoneOtp = async (req, res) => {
       redirectTo = "/user-details";
     }
 
-    console.log(`OTP verified for ${phoneNumber}`);
+    console.log(`OTP verified for ${phoneNumber}, user exists, logging in`);
 
     res.status(200).json({
       message: "Login successful!",
+      userExists: true,
       token,
       user: {
         _id: user._id,

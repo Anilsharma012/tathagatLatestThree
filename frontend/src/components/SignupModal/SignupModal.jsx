@@ -13,7 +13,7 @@ const EXAM_OPTIONS = {
 
 const CATEGORIES = Object.keys(EXAM_OPTIONS);
 
-const SignupModal = ({ isOpen, onClose, setUser, onSwitchToLogin }) => {
+const SignupModal = ({ isOpen, onClose, setUser, onSwitchToLogin, prefillPhone }) => {
   const [step, setStep] = useState("details");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -51,8 +51,10 @@ const SignupModal = ({ isOpen, onClose, setUser, onSwitchToLogin }) => {
       setSuccess("");
       setLoading(false);
       setResendTimer(0);
+    } else if (prefillPhone) {
+      setPhone(prefillPhone);
     }
-  }, [isOpen]);
+  }, [isOpen, prefillPhone]);
 
   useEffect(() => {
     let interval;

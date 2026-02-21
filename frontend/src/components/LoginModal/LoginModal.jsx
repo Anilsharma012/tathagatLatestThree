@@ -79,6 +79,15 @@ const LoginModal = ({ isOpen, onClose, setUser, onSwitchToSignup }) => {
         otpCode,
       });
 
+      if (response.data.userExists === false) {
+        setSuccess("OTP verified! Redirecting to Sign Up...");
+        setTimeout(() => {
+          onClose();
+          if (onSwitchToSignup) onSwitchToSignup(phone);
+        }, 800);
+        return;
+      }
+
       if (response.data.token) {
         localStorage.setItem("authToken", response.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.user));

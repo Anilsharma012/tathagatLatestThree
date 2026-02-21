@@ -3,8 +3,12 @@
 const otpSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // Change 'LoginAccounts' to 'User'
-        required: true,
+        ref: 'User',
+        required: false,
+      },
+    phoneNumber: {
+        type: String,
+        required: false,
       },
     otpCode: {
       type: String,
@@ -13,7 +17,7 @@ const otpSchema = new mongoose.Schema({
     createdAt: {
       type: Date,
       default: Date.now,
-      expires: 300, // Document will automatically delete after 5 minutes
+      expires: 300,
     },
   });
   

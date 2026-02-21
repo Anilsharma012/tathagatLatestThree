@@ -1,6 +1,6 @@
 import React from "react";
 import "./PolicyPages.css";
-import Footer from "../../components/Footer/Footer";
+
 
 const PrivacyPolicy = () => {
   return (
@@ -61,7 +61,7 @@ const PrivacyPolicy = () => {
           </p>
         </div>
       </div>
-      <Footer />
+  
     </>
   );
 };

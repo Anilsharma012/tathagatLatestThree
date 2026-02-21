@@ -9,11 +9,16 @@ import fbIcon from "../../images/f_logo_RGB-Blue_1024.png";
 import waIcon from "../../images/whatsapp-icon-3.png";
 import quantPdf from "../../images/pdf/Important Concepts for CAT.pdf";
 import varcPdf from "../../images/100 RC.pdf";
+import LoginModal from "../LoginModal/LoginModal";
+import SignupModal from "../SignupModal/SignupModal";
 
 export default function Header({ user, setUser }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false);
+  const [prefillPhone, setPrefillPhone] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
@@ -201,9 +206,7 @@ export default function Header({ user, setUser }) {
                     )}
                   </div>
                 ) : (
-                  <Link to="/Login">
-                    <button className="btn-orange">Log In</button>
-                  </Link>
+                  <button className="btn-orange" onClick={() => { setPrefillPhone(""); setShowLoginModal(true); }}>Log In</button>
                 )}
               </div>
 
@@ -251,9 +254,7 @@ export default function Header({ user, setUser }) {
                         </div>
                       </>
                     ) : (
-                      <Link to="/Login" onClick={closeMenu}>
-                        <button className="mobile-btn-orange">Log In</button>
-                      </Link>
+                      <button className="mobile-btn-orange" onClick={() => { closeMenu(); setPrefillPhone(""); setShowLoginModal(true); }}>Log In</button>
                     )}
                   </div>
                 </nav>
@@ -262,6 +263,28 @@ export default function Header({ user, setUser }) {
           </div>
         </div>
       </header>
+
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        setUser={(u) => { setCurrentUser(u); if (setUser) setUser(u); }}
+        onSwitchToSignup={(phoneFromLogin) => {
+          setShowLoginModal(false);
+          setPrefillPhone(phoneFromLogin || "");
+          setShowSignupModal(true);
+        }}
+      />
+      <SignupModal
+        isOpen={showSignupModal}
+        onClose={() => setShowSignupModal(false)}
+        setUser={(u) => { setCurrentUser(u); if (setUser) setUser(u); }}
+        onSwitchToLogin={() => {
+          setShowSignupModal(false);
+          setPrefillPhone("");
+          setShowLoginModal(true);
+        }}
+        prefillPhone={prefillPhone}
+      />
     </>
   );
 }

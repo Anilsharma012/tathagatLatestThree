@@ -7,10 +7,10 @@ import {
   useLocation,
   Form,
 } from "react-router-dom";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import './styles/global-responsive.css';
-import './utils/razorpayBuy';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./styles/global-responsive.css";
+import "./utils/razorpayBuy";
 import DevNotification from "./components/DevNotification/DevNotification";
 
 // Import sab pages yaha rakh de
@@ -158,25 +158,22 @@ import GMAT from "./footerPages/GMAT";
 import MAT from "./footerPages/MAT";
 import MICA from "./footerPages/MICA";
 import TISSNET from "./footerPages/TISSNET";
-import IIMIndore from "./footerPages/IIMIndore"
-import IIMRohtak from "./footerPages/IIMRohtak"
-import JIPMAT from "./footerPages/JIPMAT"
-import IPUCET from "./footerPages/IPUCET"
-import AboutCUET from "./footerPages/AboutCUET"
-import NPAT from "./footerPages/NPAT"
-import SET from "./footerPages/SET"
-import ChristUniversity from "./footerPages/ChristUniversity"
+import IIMIndore from "./footerPages/IIMIndore";
+import IIMRohtak from "./footerPages/IIMRohtak";
+import JIPMAT from "./footerPages/JIPMAT";
+import IPUCET from "./footerPages/IPUCET";
+import AboutCUET from "./footerPages/AboutCUET";
+import NPAT from "./footerPages/NPAT";
+import SET from "./footerPages/SET";
+import ChristUniversity from "./footerPages/ChristUniversity";
 
+import Cat26Online from "./CoursePurchasepage/Cat26Online";
+import Cat2026Classes from "./CoursePurchasepage/Cat2026Classes";
+import Cat26AdvanceCurse from "./CoursePurchasepage/Cat26AdvanceCourse";
+import Cat26OMETOnline from "./CoursePurchasepage/Cat26OMETOnline";
 
-import Cat26Online from "./CoursePurchasepage/Cat26Online"
-import Cat2026Classes from "./CoursePurchasepage/Cat2026Classes"
-import Cat26AdvanceCurse from "./CoursePurchasepage/Cat26AdvanceCourse"
-import Cat26OMETOnline from "./CoursePurchasepage/Cat26OMETOnline"
-
-
-import Staticourse from "./components/StaticCourse/Staticourse"
+import Staticourse from "./components/StaticCourse/Staticourse";
 import Chatbox from "./components/Chat/Chatbox";
-
 
 // Auto-login functionality is handled in AppContent useEffect
 
@@ -206,12 +203,12 @@ const AppContent = () => {
 
   // Development mode: Auto-set admin token if not present
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      const existingToken = localStorage.getItem('adminToken');
+    if (process.env.NODE_ENV === "development") {
+      const existingToken = localStorage.getItem("adminToken");
       if (!existingToken) {
-        const devAdminToken = 'dev_admin_token_12345';
-        localStorage.setItem('adminToken', devAdminToken);
-        console.log('🔧 Development: Auto-set admin token');
+        const devAdminToken = "dev_admin_token_12345";
+        localStorage.setItem("adminToken", devAdminToken);
+        console.log("🔧 Development: Auto-set admin token");
       }
     }
   }, []);
@@ -233,7 +230,10 @@ const AppContent = () => {
       <Routes>
         {/* Public and user routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/Login" element={<Login setUser={setUser} onClose={() => {}} />} />
+        <Route
+          path="/Login"
+          element={<Login setUser={setUser} onClose={() => {}} />}
+        />
         <Route path="/signup" element={<Signup setUser={setUser} />} />
 
         {/* Admin routes */}
@@ -746,7 +746,7 @@ const AppContent = () => {
         <Route path="/resource" element={<FinalResource />} />
         <Route path="/ourBlog" element={<OurBlogs />} />
         <Route path="/blog/:slug" element={<BlogView />} />
-        <Route path="/myteam" element={<Myteam/>}/>
+        <Route path="/myteam" element={<Myteam />} />
         <Route path="/why" element={<WhySection />} />
         <Route path="/cat" element={<Cat />} />
         <Route path="/compare" element={<CourseComprasion />} />
@@ -755,18 +755,30 @@ const AppContent = () => {
         <Route path="/explore-blog" element={<ExploreBlog />} />
         <Route path="/instruction" element={<Instruction />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="/refund" element={<RefundPolicy />} />
         <Route path="/terms-and-conditions" element={<TermsConditions />} />
 
         <Route path="/student" element={<StudentLayout />}>
           <Route path="/student/dashboard" element={<StudentDashboard />} />
           <Route path="practice-tests" element={<StudentPracticeTests />} />
-          <Route path="practice-tests/:testId/instructions" element={<TestInstructions />} />
+          <Route
+            path="practice-tests/:testId/instructions"
+            element={<TestInstructions />}
+          />
           <Route path="mock-tests" element={<MockTestPage />} />
-          <Route path="mock-test/:testId/instructions" element={<MockTestInstructions />} />
+          <Route
+            path="mock-test/:testId/instructions"
+            element={<MockTestInstructions />}
+          />
           <Route path="mock-test/:testId/terms" element={<MockTestTerms />} />
-          <Route path="mock-test/:testId/attempt/:attemptId" element={<MockTestAttempt />} />
-          <Route path="mock-test/review/:attemptId" element={<MockTestReview />} />
+          <Route
+            path="mock-test/:testId/attempt/:attemptId"
+            element={<MockTestAttempt />}
+          />
+          <Route
+            path="mock-test/review/:attemptId"
+            element={<MockTestReview />}
+          />
           <Route path="my-courses" element={<MyCourses />} />
           <Route path="my-progress" element={<StudentMyProgress />} />
           <Route path="ocr-upload" element={<StudentOCRUpload />} />
@@ -774,7 +786,10 @@ const AppContent = () => {
           <Route path="reports" element={<StudentReports />} />
           <Route path="profile" element={<StudentProfile />} />
           <Route path="course/:courseId" element={<CourseViewer />} />
-          <Route path="course-content/:courseId" element={<StudentCourseContentManager />} />
+          <Route
+            path="course-content/:courseId"
+            element={<StudentCourseContentManager />}
+          />
           <Route path="continue-learning" element={<ContinueLearning />} />
           <Route path="live-class" element={<LiveClassPage />} />
           <Route path="live-classes" element={<StudentLiveClasses />} />
@@ -783,35 +798,32 @@ const AppContent = () => {
 
         {/* Redirect all unknown routes to admin login */}
         {/* <Route path="*" element={<Navigate to="/admin" />} /> */}
-        <Route path="/cet2026" element={<Cet2026/>}/>
-        <Route path="/XAT" element={<XAT/>} />
-        <Route path="/TISSNET"  element={<TISSNET/>}   />
-        <Route path="/MICA" element={<MICA/>}       />
-        <Route path="/MAT"  element={<MAT/>}     />
-        <Route path="/GMAT"  element={<GMAT/>}   />
-        <Route path="/SNAP" element={<SNAP/>}    />
-        <Route path="/SRCC" element={<SRCC2025/>}    />
-        <Route path="/CAT2026"  element={<CAT2026/>}   />
+        <Route path="/cet2026" element={<Cet2026 />} />
+        <Route path="/XAT" element={<XAT />} />
+        <Route path="/TISSNET" element={<TISSNET />} />
+        <Route path="/MICA" element={<MICA />} />
+        <Route path="/MAT" element={<MAT />} />
+        <Route path="/GMAT" element={<GMAT />} />
+        <Route path="/SNAP" element={<SNAP />} />
+        <Route path="/SRCC" element={<SRCC2025 />} />
+        <Route path="/CAT2026" element={<CAT2026 />} />
 
-       <Route path="/AboutCUET" element={<AboutCUET/>}/>
-        <Route path="/NPAT" element={<NPAT/>} />
-        <Route path="/SET"  element={<SET/>}   />
-        <Route path="/ChristUniversity" element={<ChristUniversity/>}       />
-        <Route path="/IIMIndore"  element={<IIMIndore/>}     />
-        <Route path="/IIMRohtak"  element={<IIMRohtak/>}   />
-        <Route path="/IPUCET" element={<IPUCET/>}    />
-        <Route path="/JIPMAT" element={<JIPMAT/>}    />
-         
+        <Route path="/AboutCUET" element={<AboutCUET />} />
+        <Route path="/NPAT" element={<NPAT />} />
+        <Route path="/SET" element={<SET />} />
+        <Route path="/ChristUniversity" element={<ChristUniversity />} />
+        <Route path="/IIMIndore" element={<IIMIndore />} />
+        <Route path="/IIMRohtak" element={<IIMRohtak />} />
+        <Route path="/IPUCET" element={<IPUCET />} />
+        <Route path="/JIPMAT" element={<JIPMAT />} />
 
-         <Route path="/Cat26Online" element={<Cat26Online/>}/>
-         <Route path="/Cat2026Classes" element={<Cat2026Classes/>}/>
-         <Route path="/Cat26Advance" element={<Cat26AdvanceCurse/>}/>
-         <Route path="/Cat26OMETOnline" element={<Cat26OMETOnline/>}/>
-         
+        <Route path="/Cat26Online" element={<Cat26Online />} />
+        <Route path="/Cat2026Classes" element={<Cat2026Classes />} />
+        <Route path="/Cat26Advance" element={<Cat26AdvanceCurse />} />
+        <Route path="/Cat26OMETOnline" element={<Cat26OMETOnline />} />
 
-        <Route path="/Staticcourse" element={<Staticourse/>}/>
-         <Route path="/Chat" element={<Chatbox/>}/>
-
+        <Route path="/Staticcourse" element={<Staticourse />} />
+        <Route path="/Chat" element={<Chatbox />} />
       </Routes>
 
       {!isAdminRoute && !isSubAdminRoute && !isStudentDashboard && <Footer />}
