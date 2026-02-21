@@ -305,6 +305,7 @@ const AppContent = () => {
         <Route path="/admin/coupons" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="coupons"><CouponManagement /></PermissionGuard></PrivateRoute>} />
         <Route path="/admin/onboarding-categories" element={<PrivateRoute tokenName="adminToken"><OnboardingCategoryManagement /></PrivateRoute>} />
         <Route path="/admin/role-management" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="roleManagement"><RoleManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/roles" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="roleManagement"><RoleManagement /></PermissionGuard></PrivateRoute>} />
 
         {/* SubAdmin routes */}
         <Route path="/subadmin" element={<SubAdminLogin />} />
