@@ -291,6 +291,7 @@ const StudentDashboard = () => {
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileImageUploading, setProfileImageUploading] = useState(false);
   const profileImageInputRef = useRef(null);
+  const profileDropdownRef = useRef(null);
 
   // Load user data from localStorage
   useEffect(() => {
@@ -424,7 +425,18 @@ const StudentDashboard = () => {
     }
   };
 
-  // Logout handler
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(e.target)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    if (profileDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [profileDropdownOpen]);
+
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("token");
@@ -3300,7 +3312,7 @@ const StudentDashboard = () => {
           </div>
 
           <div className="header-right">
-            <div className="profile-dropdown">
+            <div className="profile-dropdown" ref={profileDropdownRef}>
               <button
                 className="profile-btn"
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
