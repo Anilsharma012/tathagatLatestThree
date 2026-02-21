@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../../utils/axiosConfig';
 import DOMPurify from 'isomorphic-dompurify';
 import { FaLock, FaUnlock, FaTimes, FaPlay } from 'react-icons/fa';
+import LoginModal from '../LoginModal/LoginModal';
+import SignupModal from '../SignupModal/SignupModal';
 import './CoursePreviewModal.css';
 
 const CoursePreviewModal = ({ course, onClose, isEnrolled }) => {
@@ -10,6 +12,10 @@ const CoursePreviewModal = ({ course, onClose, isEnrolled }) => {
   const [loading, setLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false);
+  const [prefillPhone, setPrefillPhone] = useState("");
+  const [pendingPayment, setPendingPayment] = useState(false);
   const navigate = useNavigate();
 
   const isValidObjectId = (id) => /^[a-fA-F0-9]{24}$/.test(id);
@@ -18,7 +24,8 @@ const CoursePreviewModal = ({ course, onClose, isEnrolled }) => {
     const token = localStorage.getItem("authToken");
 
     if (!token) {
-      alert("Please login first! Use the user button in the top notification bar.");
+      setPendingPayment(true);
+      setShowLoginModal(true);
       return;
     }
 
@@ -589,6 +596,42 @@ const CoursePreviewModal = ({ course, onClose, isEnrolled }) => {
           )}
         </div>
       </div>
+
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        setUser={() => {}}
+        onSwitchToSignup={(phoneFromLogin) => {
+          setShowLoginModal(false);
+          setPrefillPhone(phoneFromLogin || "");
+          setShowSignupModal(true);
+        }}
+        onLoginSuccess={() => {
+          setShowLoginModal(false);
+          if (pendingPayment) {
+            setPendingPayment(false);
+            setTimeout(() => handlePayment(), 500);
+          }
+        }}
+      />
+      <SignupModal
+        isOpen={showSignupModal}
+        onClose={() => setShowSignupModal(false)}
+        setUser={() => {}}
+        onSwitchToLogin={() => {
+          setShowSignupModal(false);
+          setPrefillPhone("");
+          setShowLoginModal(true);
+        }}
+        prefillPhone={prefillPhone}
+        onSignupSuccess={() => {
+          setShowSignupModal(false);
+          if (pendingPayment) {
+            setPendingPayment(false);
+            setTimeout(() => handlePayment(), 500);
+          }
+        }}
+      />
     </div>
   );
 };

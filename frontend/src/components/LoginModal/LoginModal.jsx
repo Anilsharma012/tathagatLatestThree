@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import "./LoginModal.css";
 
-const LoginModal = ({ isOpen, onClose, setUser, onSwitchToSignup }) => {
+const LoginModal = ({ isOpen, onClose, setUser, onSwitchToSignup, onLoginSuccess }) => {
   const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -97,18 +97,22 @@ const LoginModal = ({ isOpen, onClose, setUser, onSwitchToSignup }) => {
 
         setTimeout(() => {
           onClose();
-          const pendingCourse = localStorage.getItem("pendingCourse");
-          const redirectAfterLogin = localStorage.getItem("redirectAfterLogin");
-
-          if (pendingCourse) {
-            const course = JSON.parse(pendingCourse);
-            localStorage.removeItem("pendingCourse");
-            navigate("/course-purchase", { state: course });
-          } else if (redirectAfterLogin) {
-            localStorage.removeItem("redirectAfterLogin");
-            navigate(redirectAfterLogin);
+          if (onLoginSuccess) {
+            onLoginSuccess(response.data.user);
           } else {
-            navigate(response.data.redirectTo || "/student/dashboard");
+            const pendingCourse = localStorage.getItem("pendingCourse");
+            const redirectAfterLogin = localStorage.getItem("redirectAfterLogin");
+
+            if (pendingCourse) {
+              const course = JSON.parse(pendingCourse);
+              localStorage.removeItem("pendingCourse");
+              navigate("/course-purchase", { state: course });
+            } else if (redirectAfterLogin) {
+              localStorage.removeItem("redirectAfterLogin");
+              navigate(redirectAfterLogin);
+            } else {
+              navigate(response.data.redirectTo || "/student/dashboard");
+            }
           }
         }, 800);
       }

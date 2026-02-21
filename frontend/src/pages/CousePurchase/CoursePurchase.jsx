@@ -8,7 +8,8 @@ import three from "../../images/three3.png";
 import review from "../../images/REVIEW5.PNG";
 import frame from "../../images/frameCourse.png";
 
-
+import LoginModal from "../../components/LoginModal/LoginModal";
+import SignupModal from "../../components/SignupModal/SignupModal";
 
 import Chatbox from "../../components/Chat/Chatbox";
 
@@ -40,6 +41,10 @@ const CoursePurchase = () => {
   const [couponApplied, setCouponApplied] = useState(null);
   const [couponError, setCouponError] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false);
+  const [prefillPhone, setPrefillPhone] = useState("");
+  const [pendingPayment, setPendingPayment] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -205,7 +210,8 @@ const handlePayment = async () => {
   const token = localStorage.getItem("authToken");
 
   if (!token) {
-    alert("Please login first! Use the user button in the top notification bar.");
+    setPendingPayment(true);
+    setShowLoginModal(true);
     return;
   }
 
@@ -817,9 +823,47 @@ const handlePayment = async () => {
         <img src={frame} alt="CAT Learning Journey" className="journey-image" />
       </div>
       <Chatbox />
+
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        setUser={(u) => {
+          localStorage.setItem("user", JSON.stringify(u));
+        }}
+        onSwitchToSignup={(phoneFromLogin) => {
+          setShowLoginModal(false);
+          setPrefillPhone(phoneFromLogin || "");
+          setShowSignupModal(true);
+        }}
+        onLoginSuccess={() => {
+          setShowLoginModal(false);
+          if (pendingPayment) {
+            setPendingPayment(false);
+            setTimeout(() => handlePayment(), 500);
+          }
+        }}
+      />
+      <SignupModal
+        isOpen={showSignupModal}
+        onClose={() => setShowSignupModal(false)}
+        setUser={(u) => {
+          localStorage.setItem("user", JSON.stringify(u));
+        }}
+        onSwitchToLogin={() => {
+          setShowSignupModal(false);
+          setPrefillPhone("");
+          setShowLoginModal(true);
+        }}
+        prefillPhone={prefillPhone}
+        onSignupSuccess={() => {
+          setShowSignupModal(false);
+          if (pendingPayment) {
+            setPendingPayment(false);
+            setTimeout(() => handlePayment(), 500);
+          }
+        }}
+      />
     </div>
-
-
   );
 };
 

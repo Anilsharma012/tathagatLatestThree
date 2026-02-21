@@ -13,7 +13,7 @@ const EXAM_OPTIONS = {
 
 const CATEGORIES = Object.keys(EXAM_OPTIONS);
 
-const SignupModal = ({ isOpen, onClose, setUser, onSwitchToLogin, prefillPhone }) => {
+const SignupModal = ({ isOpen, onClose, setUser, onSwitchToLogin, prefillPhone, onSignupSuccess }) => {
   const [step, setStep] = useState("details");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -114,6 +114,13 @@ const SignupModal = ({ isOpen, onClose, setUser, onSwitchToLogin, prefillPhone }
       if (setUser) setUser(response.data.user);
 
       setSuccess("Registration successful!");
+      if (onSignupSuccess) {
+        setTimeout(() => {
+          onClose();
+          onSignupSuccess(response.data.user);
+        }, 800);
+        return;
+      }
       setStep("course");
     } catch (err) {
       setError(err?.response?.data?.message || "OTP verification failed.");
