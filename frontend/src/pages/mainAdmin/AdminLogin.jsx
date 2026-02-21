@@ -23,6 +23,25 @@ const AdminLogin = () => {
 
       if (res.data && res.data.token) {
         localStorage.setItem("adminToken", res.data.token);
+        if (res.data.permissions) {
+          localStorage.setItem("adminPermissions", JSON.stringify(res.data.permissions));
+        }
+        if (res.data.user) {
+          localStorage.setItem("adminUser", JSON.stringify(res.data.user));
+        }
+
+        try {
+          const meRes = await axios.get("/api/admin/admin-users/me", {
+            headers: { Authorization: `Bearer ${res.data.token}` }
+          });
+          if (meRes.data.permissions) {
+            localStorage.setItem("adminPermissions", JSON.stringify(meRes.data.permissions));
+          }
+          if (meRes.data.user) {
+            localStorage.setItem("adminUser", JSON.stringify(meRes.data.user));
+          }
+        } catch {}
+
         console.log("Admin login successful, redirecting...");
         window.location.href = "/admin/dashboard";
       } else {

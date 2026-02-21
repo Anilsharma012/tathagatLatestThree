@@ -295,7 +295,8 @@ router.post("/login", async (req, res) => {
         role: user.role,
         status: user.status
       },
-      permissions
+      permissions,
+      loginRoute: user.role?.loginRoute || ""
     });
   } catch (error) {
     console.error("Error during login:", error);

@@ -1,0 +1,111 @@
+.role-login__container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  font-family: "Georgia", serif;
+}
+
+.role-login__left {
+  flex: 1;
+  background: #0f1b3d;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  padding: 40px;
+}
+
+.role-login__welcome {
+  font-size: 28px;
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
+.role-login__brand {
+  font-size: 42px;
+  font-weight: 700;
+}
+
+.role-login__right {
+  flex: 1;
+  background: #e8625a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.role-login__form {
+  background: white;
+  padding: 50px 40px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.role-login__form h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 24px;
+  color: #333;
+}
+
+.role-login__input {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 15px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.role-login__input:focus {
+  outline: none;
+  border-color: #e8625a;
+}
+
+.role-login__button {
+  width: 100%;
+  padding: 14px;
+  background: #e8625a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.role-login__button:hover {
+  background: #d4524a;
+}
+
+.role-login__button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.role-login__error {
+  color: #e74c3c;
+  text-align: center;
+  margin-top: 14px;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .role-login__container {
+    flex-direction: column;
+  }
+  .role-login__left {
+    padding: 30px;
+    flex: 0 0 auto;
+  }
+  .role-login__right {
+    flex: 1;
+  }
+}

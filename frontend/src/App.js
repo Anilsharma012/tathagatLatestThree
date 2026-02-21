@@ -143,6 +143,9 @@ import BillingSettings from "./pages/mainAdmin/BillingSettings/BillingSettings";
 import CouponManagement from "./pages/mainAdmin/CouponManagement/CouponManagement";
 import OnboardingCategoryManagement from "./pages/mainAdmin/OnboardingCategoryManagement/OnboardingCategoryManagement";
 import RoleManagement from "./pages/mainAdmin/RoleManagement/RoleManagement";
+import PermissionGuard from "./components/PermissionGuard/PermissionGuard";
+import Unauthorized from "./components/Unauthorized/Unauthorized";
+import RoleLogin from "./pages/mainAdmin/RoleLogin/RoleLogin";
 import TeacherLiveClasses from "./pages/MainSubAdmin/LiveClasses/TeacherLiveClasses";
 import StudentLiveClasses from "./pages/Student/LiveClasses/StudentLiveClasses";
 import ContinueLearning from "./pages/Student/ContinueLearning/ContinueLearning";
@@ -202,20 +205,20 @@ const AppContent = () => {
   const location = useLocation();
   const [user, setUser] = useState(null);
 
-  // Development mode: Auto-set admin token if not present
   useEffect(() => {
     if (process.env.NODE_ENV === "development") {
       const existingToken = localStorage.getItem("adminToken");
       if (!existingToken) {
         const devAdminToken = "dev_admin_token_12345";
         localStorage.setItem("adminToken", devAdminToken);
+        localStorage.setItem("adminUser", JSON.stringify({ userType: "superadmin", fullName: "Dev Admin" }));
         console.log("🔧 Development: Auto-set admin token");
       }
     }
   }, []);
 
   // Check if current route is admin/subadmin login page to hide header/footer
-  const isAdminRoute = location.pathname.startsWith("/admin");
+  const isAdminRoute = location.pathname.startsWith("/admin") || location.pathname.startsWith("/role/");
   const isSubAdminRoute =
     location.pathname.startsWith("/subadmin") &&
     !location.pathname.startsWith("/subadmin/dashboard");
@@ -239,466 +242,69 @@ const AppContent = () => {
 
         {/* Admin routes */}
         <Route path="/admin" element={<AdminLogin />} />
-        <Route
-          path="/admin/dashboard"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <AdminDashboard />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/all-students"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <AllStudents />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/all-teachers"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <AllTeachers />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/profile"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <AdminProfile />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/add-courses"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <AddCourse />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/all-users"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <AllUsers />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/user-management"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <UserManagement />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/course-content-manager"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <CourseContentManager />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/view-courses"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <CourseTreeView />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/courses/:courseId/structure"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <CourseStructure />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/practice-tests"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <PracticeTestManagement />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/study-materials"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <StudyMaterials />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/pdf-management"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <PdfManagement />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/announcements"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <Announcements />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/discussions"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <DiscussionManagement />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/blogs"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <BlogManagement />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/demo-videos"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <DemoVideoManagement />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/image-gallery"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <ImageGalleryManagement />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/downloads"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <DownloadsManagement />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/scorecard-management"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <ScoreCardManagement />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/success-stories"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <SuccessStoryManagement />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/top-performers"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <TopPerformerManagement />
-            </PrivateRoute>
-          }
-        />
-
+        <Route path="/admin/unauthorized" element={<Unauthorized />} />
+        <Route path="/admin/dashboard" element={<PrivateRoute tokenName="adminToken"><PermissionGuard><AdminDashboard /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/all-students" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="students"><AllStudents /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/all-teachers" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="faculty"><AllTeachers /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/profile" element={<PrivateRoute tokenName="adminToken"><AdminProfile /></PrivateRoute>} />
+        <Route path="/admin/add-courses" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="courses"><AddCourse /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/all-users" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="students"><AllUsers /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/user-management" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="students"><UserManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/course-content-manager" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="courses"><CourseContentManager /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/view-courses" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="courses"><CourseTreeView /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/courses/:courseId/structure" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="courses"><CourseStructure /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/practice-tests" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="practiceTests"><PracticeTestManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/study-materials" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="studyMaterials"><StudyMaterials /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/pdf-management" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="pdfManagement"><PdfManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/announcements" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="announcements"><Announcements /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/discussions" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="discussions"><DiscussionManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/blogs" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="blogs"><BlogManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/demo-videos" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="demoVideos"><DemoVideoManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/image-gallery" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="gallery"><ImageGalleryManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/downloads" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="downloads"><DownloadsManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/scorecard-management" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="scoreCards"><ScoreCardManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/success-stories" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="successStories"><SuccessStoryManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/top-performers" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="topPerformers"><TopPerformerManagement /></PermissionGuard></PrivateRoute>} />
         <Route
           path="/admin/course-purchase-content"
           element={
             <PrivateRoute tokenName="adminToken">
+              <PermissionGuard module="coursePurchaseContent">
               <CoursePurchaseContentManagement />
+              </PermissionGuard>
             </PrivateRoute>
           }
         />
 
-        <Route
-          path="/admin/mock-tests"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <MockTestManagement />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/mock-test-feedback"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <MockTestFeedback />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/student-performance"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <StudentPerformance />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/iim-colleges"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <IIMCollegeManagement />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/response-sheet-submissions"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <ResponseSheetSubmissions />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/admin/bschools"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <BSchoolManagement />
-            </PrivateRoute>
-          }
-        />
-
-        {/* Popup Announcements */}
-        <Route
-          path="/admin/popup-announcements"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <PopupAnnouncementManagement />
-            </PrivateRoute>
-          }
-        />
-
-        {/* Admin student detail */}
-        <Route
-          path="/admin/students/:id"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <AdminStudentDetail />
-            </PrivateRoute>
-          }
-        />
-
-        {/* Admin Live Classes */}
-        <Route
-          path="/admin/live-classes"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <AdminLiveClasses />
-            </PrivateRoute>
-          }
-        />
-
-        {/* Live Batch Management */}
-        <Route
-          path="/admin/live-batches"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <AdminLayout>
-                <LiveBatchManagement />
-              </AdminLayout>
-            </PrivateRoute>
-          }
-        />
-
-        {/* Batch Management */}
-        <Route
-          path="/admin/batch-management"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <BatchManagement />
-            </PrivateRoute>
-          }
-        />
-
-        {/* Evaluation */}
-        <Route
-          path="/admin/evaluation"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <AdminEvaluateAnswers />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/ocr"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <OCRDashboard />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/evaluate-answers"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <AdminEvaluateAnswers />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/reports"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <AdminReports />
-            </PrivateRoute>
-          }
-        />
-
-        {/* CRM routes */}
-        <Route
-          path="/admin/inquiries"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <InquiryManagement />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/enquiries"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <NewEnquiries />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/counseling-enquiries"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <CounselingEnquiries />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/crm/leads"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <CRMLeads />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/crm/leads/new"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <CRMLeadForm />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/crm/leads/:id"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <CRMLeadDetail />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/crm/pipeline"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <CRMPipeline />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/crm/invoices"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <CRMInvoices />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/crm/settings"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <CRMSettings />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/payments"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <PaymentManagement />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/billing-settings"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <BillingSettings />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/coupons"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <CouponManagement />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/onboarding-categories"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <OnboardingCategoryManagement />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/crm/settings"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <CRMSettings />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/role-management"
-          element={
-            <PrivateRoute tokenName="adminToken">
-              <RoleManagement />
-            </PrivateRoute>
-          }
-        />
+        <Route path="/admin/mock-tests" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="mockTests"><MockTestManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/mock-test-feedback" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="mockTestFeedback"><MockTestFeedback /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/student-performance" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="reports"><StudentPerformance /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/iim-colleges" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="iimPredictor"><IIMCollegeManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/response-sheet-submissions" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="responseSheets"><ResponseSheetSubmissions /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/bschools" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="bschools"><BSchoolManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/popup-announcements" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="popupAnnouncements"><PopupAnnouncementManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/students/:id" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="students"><AdminStudentDetail /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/live-classes" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="liveClasses"><AdminLiveClasses /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/live-batches" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="liveBatches"><AdminLayout><LiveBatchManagement /></AdminLayout></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/batch-management" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="batches"><BatchManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/evaluation" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="mockTests"><AdminEvaluateAnswers /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/ocr" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="mockTests"><OCRDashboard /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/evaluate-answers" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="mockTests"><AdminEvaluateAnswers /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/reports" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="reports"><AdminReports /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/inquiries" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="crm"><InquiryManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/enquiries" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="crm"><NewEnquiries /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/counseling-enquiries" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="crm"><CounselingEnquiries /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/crm/leads" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="crm"><CRMLeads /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/crm/leads/new" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="crm"><CRMLeadForm /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/crm/leads/:id" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="crm"><CRMLeadDetail /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/crm/pipeline" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="crm"><CRMPipeline /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/crm/invoices" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="crm"><CRMInvoices /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/crm/settings" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="crm"><CRMSettings /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/payments" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="payments"><PaymentManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/billing-settings" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="billing"><BillingSettings /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/coupons" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="coupons"><CouponManagement /></PermissionGuard></PrivateRoute>} />
+        <Route path="/admin/onboarding-categories" element={<PrivateRoute tokenName="adminToken"><OnboardingCategoryManagement /></PrivateRoute>} />
+        <Route path="/admin/role-management" element={<PrivateRoute tokenName="adminToken"><PermissionGuard module="roleManagement"><RoleManagement /></PermissionGuard></PrivateRoute>} />
 
         {/* SubAdmin routes */}
         <Route path="/subadmin" element={<SubAdminLogin />} />
@@ -833,6 +439,9 @@ const AppContent = () => {
 
         <Route path="/Staticcourse" element={<Staticourse />} />
         <Route path="/Chat" element={<Chatbox />} />
+
+        {/* Dynamic role-based login routes */}
+        <Route path="/role/:roleSlug" element={<RoleLogin />} />
       </Routes>
 
       {!isAdminRoute && !isSubAdminRoute && !isStudentDashboard && <Footer />}

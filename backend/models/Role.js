@@ -57,6 +57,12 @@ const RoleSchema = new mongoose.Schema(
       billing: PermissionSchema,
       roleManagement: PermissionSchema
     },
+    loginRoute: {
+      type: String,
+      default: "",
+      trim: true,
+      lowercase: true
+    },
     isDefault: {
       type: Boolean,
       default: false

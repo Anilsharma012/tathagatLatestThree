@@ -409,6 +409,55 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.role-management .login-route-input {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.role-management .login-route-input .route-prefix {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--admin-text-secondary, #aaa);
+  font-size: 14px;
+  font-family: monospace;
+  white-space: nowrap;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.role-management .login-route-input input {
+  border: none;
+  background: transparent;
+  flex: 1;
+  padding: 10px 12px;
+  color: var(--admin-text, #fff);
+  font-size: 14px;
+  font-family: monospace;
+}
+
+.role-management .login-route-input input:focus {
+  outline: none;
+}
+
+.role-management .form-hint {
+  display: block;
+  margin-top: 4px;
+  color: var(--admin-text-secondary, #888);
+  font-size: 12px;
+}
+
+.role-management code {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+}
+
 @media (max-width: 768px) {
   .role-management .form-row {
     grid-template-columns: 1fr;

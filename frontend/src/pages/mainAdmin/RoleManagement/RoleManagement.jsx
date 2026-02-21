@@ -61,7 +61,7 @@ const RoleManagement = () => {
 
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
-  const [roleForm, setRoleForm] = useState({ name: "", description: "", permissions: getDefaultPermissions() });
+  const [roleForm, setRoleForm] = useState({ name: "", description: "", loginRoute: "", permissions: getDefaultPermissions() });
 
   const [showUserModal, setShowUserModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -113,7 +113,7 @@ const RoleManagement = () => {
 
   const openCreateRole = () => {
     setEditingRole(null);
-    setRoleForm({ name: "", description: "", permissions: getDefaultPermissions() });
+    setRoleForm({ name: "", description: "", loginRoute: "", permissions: getDefaultPermissions() });
     setShowRoleModal(true);
   };
 
@@ -122,6 +122,7 @@ const RoleManagement = () => {
     setRoleForm({
       name: role.name,
       description: role.description || "",
+      loginRoute: role.loginRoute || "",
       permissions: role.permissions || getDefaultPermissions()
     });
     setShowRoleModal(true);
@@ -306,6 +307,7 @@ const RoleManagement = () => {
                   <tr>
                     <th>Name</th>
                     <th>Description</th>
+                    <th>Login Route</th>
                     <th>Created</th>
                     <th>Actions</th>
                   </tr>
@@ -315,6 +317,7 @@ const RoleManagement = () => {
                     <tr key={role._id}>
                       <td><strong>{role.name}</strong></td>
                       <td>{role.description || "-"}</td>
+                      <td>{role.loginRoute ? <code>/role/{role.loginRoute}</code> : "-"}</td>
                       <td>{new Date(role.createdAt).toLocaleDateString()}</td>
                       <td>
                         <button className="btn-icon" title="Edit" onClick={() => openEditRole(role)}><FaEdit /></button>
@@ -322,8 +325,8 @@ const RoleManagement = () => {
                       </td>
                     </tr>
                   ))}
-                  {loading && roles.length === 0 && <tr><td colSpan="4" className="empty">Loading roles...</td></tr>}
-                  {!loading && roles.length === 0 && <tr><td colSpan="4" className="empty">No roles found. Click "Create Role" to add one.</td></tr>}
+                  {loading && roles.length === 0 && <tr><td colSpan="5" className="empty">Loading roles...</td></tr>}
+                  {!loading && roles.length === 0 && <tr><td colSpan="5" className="empty">No roles found. Click "Create Role" to add one.</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -437,6 +440,14 @@ const RoleManagement = () => {
               <div className="form-group">
                 <label>Description</label>
                 <textarea value={roleForm.description} onChange={e => setRoleForm({ ...roleForm, description: e.target.value })} placeholder="Brief description of this role" />
+              </div>
+              <div className="form-group">
+                <label>Login Route (optional)</label>
+                <div className="login-route-input">
+                  <span className="route-prefix">/role/</span>
+                  <input type="text" value={roleForm.loginRoute} onChange={e => setRoleForm({ ...roleForm, loginRoute: e.target.value.replace(/[^a-zA-Z0-9-_]/g, '').toLowerCase() })} placeholder="e.g., lead, counselor" />
+                </div>
+                <small className="form-hint">Users with this role can log in at /role/{roleForm.loginRoute || 'slug'}</small>
               </div>
               <div className="permissions-section">
                 <h3>Permissions</h3>

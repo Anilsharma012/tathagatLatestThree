@@ -2,10 +2,87 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { FaTachometerAlt, FaBookOpen, FaUsers, FaUserGraduate, FaChalkboardTeacher, FaUserCircle, FaSignOutAlt, FaClipboardList, FaFileAlt, FaBullhorn, FaComments, FaGraduationCap, FaUniversity, FaBlog, FaYoutube, FaTrophy, FaFileInvoice, FaDownload, FaStar, FaCog, FaFilePdf, FaImages, FaUserPlus, FaChevronDown, FaChevronRight, FaUserShield, FaVideo, FaChartBar, FaTag, FaListAlt } from "react-icons/fa";
 import logo from "../../../images/tgLOGO.png";
+import { getStoredPermissions, isSuperAdmin } from "../../../utils/permissionMap";
 import "./AdminSidebar.css";
 
 const STORAGE_KEY_SCROLL = "adminSidebarScrollPos";
 const STORAGE_KEY_SECTIONS = "adminSidebarSections";
+
+const ICON_MAP = {
+  FaTachometerAlt, FaBookOpen, FaUsers, FaUserGraduate, FaChalkboardTeacher,
+  FaClipboardList, FaFileAlt, FaBullhorn, FaComments, FaGraduationCap,
+  FaUniversity, FaBlog, FaYoutube, FaTrophy, FaFileInvoice, FaDownload,
+  FaStar, FaCog, FaFilePdf, FaImages, FaUserPlus, FaUserShield, FaVideo,
+  FaChartBar, FaTag, FaListAlt, FaUserCircle, FaSignOutAlt,
+};
+
+const SECTIONS = [
+  {
+    key: "courses", label: "Courses",
+    items: [
+      { path: "/admin/add-courses", label: "Add Courses", icon: "FaBookOpen", module: "courses" },
+      { path: "/admin/course-content-manager", label: "Manage Subjects", icon: "FaBookOpen", module: "courses" },
+      { path: "/admin/view-courses", label: "View Courses", icon: "FaBookOpen", module: "courses" },
+    ]
+  },
+  {
+    key: "tests", label: "Tests & Performance",
+    items: [
+      { path: "/admin/practice-tests", label: "Practice Tests", icon: "FaClipboardList", module: "practiceTests" },
+      { path: "/admin/mock-tests", label: "Mock Tests", icon: "FaGraduationCap", module: "mockTests" },
+      { path: "/admin/mock-test-feedback", label: "Test Feedback", icon: "FaComments", module: "mockTestFeedback" },
+      { path: "/admin/student-performance", label: "Student Performance", icon: "FaUserGraduate", module: "reports" },
+      { path: "/admin/iim-colleges", label: "IIM Predictor", icon: "FaUniversity", module: "iimPredictor" },
+      { path: "/admin/response-sheet-submissions", label: "Response Sheets", icon: "FaFileInvoice", module: "responseSheets" },
+      { path: "/admin/bschools", label: "B-Schools", icon: "FaUniversity", module: "bschools" },
+    ]
+  },
+  {
+    key: "content", label: "Content Management",
+    items: [
+      { path: "/admin/study-materials", label: "Study Materials", icon: "FaFileAlt", module: "studyMaterials" },
+      { path: "/admin/pdf-management", label: "PDF Management", icon: "FaFilePdf", module: "pdfManagement" },
+      { path: "/admin/announcements", label: "Announcements", icon: "FaBullhorn", module: "announcements" },
+      { path: "/admin/popup-announcements", label: "Homepage Popups", icon: "FaBullhorn", module: "popupAnnouncements" },
+      { path: "/admin/discussions", label: "Discussions", icon: "FaComments", module: "discussions" },
+      { path: "/admin/blogs", label: "Blog Management", icon: "FaBlog", module: "blogs" },
+      { path: "/admin/demo-videos", label: "Demo Videos", icon: "FaYoutube", module: "demoVideos" },
+      { path: "/admin/image-gallery", label: "Image Gallery", icon: "FaImages", module: "gallery" },
+      { path: "/admin/downloads", label: "Downloads", icon: "FaDownload", module: "downloads" },
+      { path: "/admin/scorecard-management", label: "Score Cards", icon: "FaTrophy", module: "scoreCards" },
+      { path: "/admin/success-stories", label: "Success Stories", icon: "FaTrophy", module: "successStories" },
+      { path: "/admin/top-performers", label: "Best Results", icon: "FaStar", module: "topPerformers" },
+      { path: "/admin/course-purchase-content", label: "Course Page Content", icon: "FaFileAlt", module: "coursePurchaseContent" },
+    ]
+  },
+  {
+    key: "liveClasses", label: "Live Classes",
+    items: [
+      { path: "/admin/live-batches", label: "Live Batches", icon: "FaVideo", module: "liveBatches" },
+    ]
+  },
+  {
+    key: "analytics", label: "Analytics & CRM",
+    items: [
+      { path: "/admin/inquiries", label: "All Inquiries", icon: "FaChartBar", module: "crm" },
+      { path: "/admin/enquiries", label: "New Enquiries", icon: "FaChartBar", module: "crm" },
+      { path: "/admin/counseling-enquiries", label: "Counseling Enquiries", icon: "FaChartBar", module: "crm" },
+      { path: "/admin/billing-settings", label: "Billing Settings", icon: "FaCog", module: "billing" },
+      { path: "/admin/coupons", label: "Coupon Management", icon: "FaTag", module: "coupons" },
+      { path: "/admin/onboarding-categories", label: "Exam Categories", icon: "FaListAlt", module: null },
+    ]
+  },
+  {
+    key: "users", label: "Users & Permissions",
+    items: [
+      { path: "/admin/user-management", label: "User Management", icon: "FaUserPlus", module: "students" },
+      { path: "/admin/all-users", label: "All Users", icon: "FaUsers", module: "students" },
+      { path: "/admin/all-students", label: "All Students", icon: "FaUserGraduate", module: "students" },
+      { path: "/admin/all-teachers", label: "All Teachers", icon: "FaChalkboardTeacher", module: "faculty" },
+      { path: "/admin/role-management", label: "Permissions", icon: "FaUserShield", module: "roleManagement" },
+    ]
+  },
+];
 
 const getInitialSections = () => {
   try {
@@ -29,6 +106,15 @@ const AdminSidebar = () => {
   const location = useLocation();
   const sidebarRef = useRef(null);
   const [expandedSections, setExpandedSections] = useState(getInitialSections);
+
+  const superAdmin = isSuperAdmin();
+  const permissions = getStoredPermissions();
+
+  const canView = (module) => {
+    if (!module) return true;
+    if (superAdmin || !permissions) return true;
+    return permissions[module]?.view === true;
+  };
 
   useEffect(() => {
     const el = sidebarRef.current;
@@ -65,9 +151,16 @@ const AdminSidebar = () => {
   const handleLogout = (e) => {
     e.preventDefault();
     localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminPermissions");
+    localStorage.removeItem("adminUser");
     sessionStorage.removeItem(STORAGE_KEY_SCROLL);
     sessionStorage.removeItem(STORAGE_KEY_SECTIONS);
     navigate("/admin/login");
+  };
+
+  const renderIcon = (iconName) => {
+    const IconComp = ICON_MAP[iconName];
+    return IconComp ? <IconComp className="admin-icon" /> : null;
   };
 
   return (
@@ -80,164 +173,28 @@ const AdminSidebar = () => {
           <FaTachometerAlt className="admin-icon" /> Dashboard
         </NavLink>
 
-        <div className="admin-group-title" onClick={() => toggleSection("courses")}>
-          <span>Courses</span>
-          {expandedSections.courses ? <FaChevronDown className="chevron" /> : <FaChevronRight className="chevron" />}
-        </div>
-        {expandedSections.courses && (
-          <div className="admin-group-items">
-            <NavLink to="/admin/add-courses" className="admin-link">
-              <FaBookOpen className="admin-icon" /> Add Courses
-            </NavLink>
-            <NavLink to="/admin/course-content-manager" className="admin-link">
-              <FaBookOpen className="admin-icon" /> Manage Subjects
-            </NavLink>
-            <NavLink to="/admin/view-courses" className="admin-link">
-              <FaBookOpen className="admin-icon" /> View Courses
-            </NavLink>
-          </div>
-        )}
+        {SECTIONS.map((section) => {
+          const visibleItems = section.items.filter((item) => canView(item.module));
+          if (visibleItems.length === 0) return null;
 
-        <div className="admin-group-title" onClick={() => toggleSection("tests")}>
-          <span>Tests & Performance</span>
-          {expandedSections.tests ? <FaChevronDown className="chevron" /> : <FaChevronRight className="chevron" />}
-        </div>
-        {expandedSections.tests && (
-          <div className="admin-group-items">
-            <NavLink to="/admin/practice-tests" className="admin-link">
-              <FaClipboardList className="admin-icon" /> Practice Tests
-            </NavLink>
-            <NavLink to="/admin/mock-tests" className="admin-link">
-              <FaGraduationCap className="admin-icon" /> Mock Tests
-            </NavLink>
-            <NavLink to="/admin/mock-test-feedback" className="admin-link">
-              <FaComments className="admin-icon" /> Test Feedback
-            </NavLink>
-            <NavLink to="/admin/student-performance" className="admin-link">
-              <FaUserGraduate className="admin-icon" /> Student Performance
-            </NavLink>
-            <NavLink to="/admin/iim-colleges" className="admin-link">
-              <FaUniversity className="admin-icon" /> IIM Predictor
-            </NavLink>
-            <NavLink to="/admin/response-sheet-submissions" className="admin-link">
-              <FaFileInvoice className="admin-icon" /> Response Sheets
-            </NavLink>
-            <NavLink to="/admin/bschools" className="admin-link">
-              <FaUniversity className="admin-icon" /> B-Schools
-            </NavLink>
-          </div>
-        )}
-
-        <div className="admin-group-title" onClick={() => toggleSection("content")}>
-          <span>Content Management</span>
-          {expandedSections.content ? <FaChevronDown className="chevron" /> : <FaChevronRight className="chevron" />}
-        </div>
-        {expandedSections.content && (
-          <div className="admin-group-items">
-            <NavLink to="/admin/study-materials" className="admin-link">
-              <FaFileAlt className="admin-icon" /> Study Materials
-            </NavLink>
-            <NavLink to="/admin/pdf-management" className="admin-link">
-              <FaFilePdf className="admin-icon" /> PDF Management
-            </NavLink>
-            <NavLink to="/admin/announcements" className="admin-link">
-              <FaBullhorn className="admin-icon" /> Announcements
-            </NavLink>
-            <NavLink to="/admin/popup-announcements" className="admin-link">
-              <FaBullhorn className="admin-icon" /> Homepage Popups
-            </NavLink>
-            <NavLink to="/admin/discussions" className="admin-link">
-              <FaComments className="admin-icon" /> Discussions
-            </NavLink>
-            <NavLink to="/admin/blogs" className="admin-link">
-              <FaBlog className="admin-icon" /> Blog Management
-            </NavLink>
-            <NavLink to="/admin/demo-videos" className="admin-link">
-              <FaYoutube className="admin-icon" /> Demo Videos
-            </NavLink>
-            <NavLink to="/admin/image-gallery" className="admin-link">
-              <FaImages className="admin-icon" /> Image Gallery
-            </NavLink>
-            <NavLink to="/admin/downloads" className="admin-link">
-              <FaDownload className="admin-icon" /> Downloads
-            </NavLink>
-            <NavLink to="/admin/scorecard-management" className="admin-link">
-              <FaTrophy className="admin-icon" /> Score Cards
-            </NavLink>
-            <NavLink to="/admin/success-stories" className="admin-link">
-              <FaTrophy className="admin-icon" /> Success Stories
-            </NavLink>
-            <NavLink to="/admin/top-performers" className="admin-link">
-              <FaStar className="admin-icon" /> Best Results
-            </NavLink>
-            <NavLink to="/admin/course-purchase-content" className="admin-link">
-              <FaFileAlt className="admin-icon" /> Course Page Content
-            </NavLink>
-          </div>
-        )}
-
-        <div className="admin-group-title" onClick={() => toggleSection("liveClasses")}>
-          <span>Live Classes</span>
-          {expandedSections.liveClasses ? <FaChevronDown className="chevron" /> : <FaChevronRight className="chevron" />}
-        </div>
-        {expandedSections.liveClasses && (
-          <div className="admin-group-items">
-            <NavLink to="/admin/live-batches" className="admin-link">
-              <FaVideo className="admin-icon" /> Live Batches
-            </NavLink>
-          </div>
-        )}
-
-        <div className="admin-group-title" onClick={() => toggleSection("analytics")}>
-          <span>Analytics & CRM</span>
-          {expandedSections.analytics ? <FaChevronDown className="chevron" /> : <FaChevronRight className="chevron" />}
-        </div>
-        {expandedSections.analytics && (
-          <div className="admin-group-items">
-            <NavLink to="/admin/inquiries" className="admin-link">
-              <FaChartBar className="admin-icon" /> All Inquiries
-            </NavLink>
-            <NavLink to="/admin/enquiries" className="admin-link">
-              <FaChartBar className="admin-icon" /> New Enquiries
-            </NavLink>
-            <NavLink to="/admin/counseling-enquiries" className="admin-link">
-              <FaChartBar className="admin-icon" /> Counseling Enquiries
-            </NavLink>
-            <NavLink to="/admin/billing-settings" className="admin-link">
-              <FaCog className="admin-icon" /> Billing Settings
-            </NavLink>
-            <NavLink to="/admin/coupons" className="admin-link">
-              <FaTag className="admin-icon" /> Coupon Management
-            </NavLink>
-            <NavLink to="/admin/onboarding-categories" className="admin-link">
-              <FaListAlt className="admin-icon" /> Exam Categories
-            </NavLink>
-          </div>
-        )}
-
-        <div className="admin-group-title" onClick={() => toggleSection("users")}>
-          <span>Users & Permissions</span>
-          {expandedSections.users ? <FaChevronDown className="chevron" /> : <FaChevronRight className="chevron" />}
-        </div>
-        {expandedSections.users && (
-          <div className="admin-group-items">
-            <NavLink to="/admin/user-management" className="admin-link">
-              <FaUserPlus className="admin-icon" /> User Management
-            </NavLink>
-            <NavLink to="/admin/all-users" className="admin-link">
-              <FaUsers className="admin-icon" /> All Users
-            </NavLink>
-            <NavLink to="/admin/all-students" className="admin-link">
-              <FaUserGraduate className="admin-icon" /> All Students
-            </NavLink>
-            <NavLink to="/admin/all-teachers" className="admin-link">
-              <FaChalkboardTeacher className="admin-icon" /> All Teachers
-            </NavLink>
-            <NavLink to="/admin/role-management" className="admin-link">
-              <FaUserShield className="admin-icon" /> Permissions
-            </NavLink>
-          </div>
-        )}
+          return (
+            <React.Fragment key={section.key}>
+              <div className="admin-group-title" onClick={() => toggleSection(section.key)}>
+                <span>{section.label}</span>
+                {expandedSections[section.key] ? <FaChevronDown className="chevron" /> : <FaChevronRight className="chevron" />}
+              </div>
+              {expandedSections[section.key] && (
+                <div className="admin-group-items">
+                  {visibleItems.map((item) => (
+                    <NavLink key={item.path} to={item.path} className="admin-link">
+                      {renderIcon(item.icon)} {item.label}
+                    </NavLink>
+                  ))}
+                </div>
+              )}
+            </React.Fragment>
+          );
+        })}
 
         <div className="admin-group-divider" />
 
