@@ -613,7 +613,7 @@ const OfflineAdmission = () => {
                         <tr key={p._id}>
                           <td>{new Date(p.createdAt).toLocaleDateString('en-IN')}</td>
                           <td>&#8377;{p.amount?.toLocaleString('en-IN')}</td>
-                          <td>{p.invoiceNumber ? `STX${p.invoiceNumber}` : p.receiptNumber || '-'}</td>
+                          <td>{p.invoiceNumber ? p.invoiceNumber : p.receiptNumber || '-'}</td>
                           <td>
                             <button type="button" className="oa-btn-sm" onClick={() => openInvoice(p._id)}>
                               <FaFileInvoice /> Invoice
@@ -807,9 +807,21 @@ const OfflineAdmission = () => {
                               <div className="oa-ledger-info-card">
                                 <h4><FaBookOpen style={{ marginRight: 6 }} /> Course Fee Breakdown</h4>
                                 <div className="oa-info-row">
-                                  <span>Total Course Fee</span>
+                                  <span>Course MRP</span>
                                   <strong>&#8377;{formatINR(entry.coursePrice)}</strong>
                                 </div>
+                                {entry.discountApplied > 0 && (
+                                  <div className="oa-info-row" style={{ color: '#2e7d32' }}>
+                                    <span>Discount {entry.couponUsed ? `(${entry.couponUsed})` : ''}</span>
+                                    <strong>- &#8377;{formatINR(entry.discountApplied)}</strong>
+                                  </div>
+                                )}
+                                {entry.discountApplied > 0 && (
+                                  <div className="oa-info-row" style={{ fontWeight: 600 }}>
+                                    <span>Effective Fee</span>
+                                    <strong style={{ color: '#1a237e' }}>&#8377;{formatINR(entry.effectiveFee)}</strong>
+                                  </div>
+                                )}
                                 {entry.studyMaterialPrice > 0 && (
                                   <div className="oa-info-row">
                                     <span>Study Material (HSN 4901 - No GST)</span>
@@ -851,6 +863,12 @@ const OfflineAdmission = () => {
                                   <div className="oa-info-row">
                                     <span>Email</span>
                                     <strong>{entry.studentEmail}</strong>
+                                  </div>
+                                )}
+                                {entry.studentCity && (
+                                  <div className="oa-info-row">
+                                    <span>City</span>
+                                    <strong>{entry.studentCity}{entry.studentState ? `, ${entry.studentState}` : ''}</strong>
                                   </div>
                                 )}
                               </div>

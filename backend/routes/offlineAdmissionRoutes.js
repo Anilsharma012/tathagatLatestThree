@@ -206,6 +206,9 @@ router.get('/payment-history', adminAuth, async (req, res) => {
       status: 'paid'
     }).sort({ createdAt: -1 }).lean();
 
+    const billingSettings = await BillingSettings.findOne({ isActive: true }).lean();
+    const invoicePrefix = billingSettings?.invoicePrefix || 'STX';
+
     const totalPaid = payments.reduce((sum, p) => sum + (p.amount >= 100 ? p.amount / 100 : p.amount), 0);
 
     res.json({
@@ -215,7 +218,7 @@ router.get('/payment-history', adminAuth, async (req, res) => {
         amount: p.amount >= 100 ? p.amount / 100 : p.amount,
         paymentMethod: p.paymentMethod,
         receiptNumber: p.receiptNumber,
-        invoiceNumber: p.invoiceNumber,
+        invoiceNumber: p.invoiceNumber ? `${invoicePrefix}${p.invoiceNumber}` : null,
         notes: p.notes,
         createdAt: p.createdAt
       })),

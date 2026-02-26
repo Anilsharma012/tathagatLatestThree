@@ -5,12 +5,14 @@ import {
   FaVideo,
   FaFileAlt,
   FaChevronDown,
-  FaChevronRight,
   FaBook,
   FaClipboardList,
   FaGraduationCap,
   FaClock,
   FaLock,
+  FaArrowLeft,
+  FaLayerGroup,
+  FaListUl,
 } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import DOMPurify from "dompurify";
@@ -317,6 +319,11 @@ const StudentCourseContentManager = () => {
 
   return (
     <div className="scm-page">
+      {/* BACK BUTTON */}
+      <button className="scm-back-btn" onClick={() => navigate(-1)}>
+        <FaArrowLeft /> <span>Back</span>
+      </button>
+
       {/* TABS */}
       <div className="scm-tabs">
         <button
@@ -624,41 +631,22 @@ const StudentCourseContentManager = () => {
         {/* FULL COURSE CONTENT */}
         {activeSection === "fullcourse" && (
           <section className="scm-section scm-fc-section">
-            <div className="scm-fc-hero">
-              <div className="scm-fc-hero-text">
-                <h2><FaGraduationCap /> Full Course Curriculum</h2>
-                <p>Subject &rarr; Chapter &rarr; Topic wise breakdown of your complete course.</p>
-              </div>
-            </div>
-
-            <div className="scm-fc-stats">
-              <div className="scm-fc-stat">
-                <div className="scm-fc-stat-icon subjects"><FaBook /></div>
-                <div className="scm-fc-stat-info">
-                  <span className="scm-fc-stat-num">{fullCourseContent.totalSubjects || 0}</span>
-                  <span className="scm-fc-stat-label">Subjects</span>
+            <div className="scm-fc-top-bar">
+              <div className="scm-fc-top-left">
+                <FaLayerGroup className="scm-fc-top-icon" />
+                <div>
+                  <h2>Course Curriculum</h2>
+                  <p>Subject &rarr; Chapter &rarr; Topic</p>
                 </div>
               </div>
-              <div className="scm-fc-stat">
-                <div className="scm-fc-stat-icon chapters"><FaFileAlt /></div>
-                <div className="scm-fc-stat-info">
-                  <span className="scm-fc-stat-num">{fullCourseContent.totalChapters || 0}</span>
-                  <span className="scm-fc-stat-label">Chapters</span>
-                </div>
-              </div>
-              <div className="scm-fc-stat">
-                <div className="scm-fc-stat-icon topics"><FaGraduationCap /></div>
-                <div className="scm-fc-stat-info">
-                  <span className="scm-fc-stat-num">{fullCourseContent.totalTopics || 0}</span>
-                  <span className="scm-fc-stat-label">Topics</span>
-                </div>
-              </div>
-              <div className="scm-fc-stat">
-                <div className="scm-fc-stat-icon tests"><FaClipboardList /></div>
-                <div className="scm-fc-stat-info">
-                  <span className="scm-fc-stat-num">{fullCourseContent.totalTests || 0}</span>
-                  <span className="scm-fc-stat-label">Tests</span>
-                </div>
+              <div className="scm-fc-top-stats">
+                <span><strong>{fullCourseContent.totalSubjects || 0}</strong> Subjects</span>
+                <span className="scm-fc-dot-sep"></span>
+                <span><strong>{fullCourseContent.totalChapters || 0}</strong> Chapters</span>
+                <span className="scm-fc-dot-sep"></span>
+                <span><strong>{fullCourseContent.totalTopics || 0}</strong> Topics</span>
+                <span className="scm-fc-dot-sep"></span>
+                <span><strong>{fullCourseContent.totalTests || 0}</strong> Tests</span>
               </div>
             </div>
 
@@ -671,90 +659,96 @@ const StudentCourseContentManager = () => {
             ) : (
               <div className="scm-fc-tree">
                 {fullCourseContent.structure.map((subject, sIdx) => (
-                  <div key={subject._id} className={`scm-fc-subject-block ${expandedSubjects[subject._id] ? 'is-open' : ''}`}>
+                  <div key={subject._id} className={`scm-fc-subject-card ${expandedSubjects[subject._id] ? 'is-open' : ''}`}>
                     <button
                       type="button"
-                      className="scm-fc-subject-header"
+                      className="scm-fc-subject-row"
                       aria-expanded={!!expandedSubjects[subject._id]}
                       onClick={() => toggleSubject(subject._id)}
                     >
-                      <span className="scm-fc-subject-num">{String(sIdx + 1).padStart(2, '0')}</span>
-                      <FaBook className="scm-fc-subject-icon" />
-                      <span className="scm-fc-subject-name">{subject.name}</span>
-                      <span className="scm-fc-pill">{subject.chapters?.length || 0} chapters</span>
-                      <span className="scm-fc-chevron">
-                        {expandedSubjects[subject._id] ? <FaChevronDown /> : <FaChevronRight />}
-                      </span>
+                      <div className="scm-fc-subject-left">
+                        <span className="scm-fc-snum">{String(sIdx + 1).padStart(2, '0')}</span>
+                        <span className="scm-fc-sname">{subject.name}</span>
+                      </div>
+                      <div className="scm-fc-subject-right">
+                        <span className="scm-fc-count-tag">{subject.chapters?.length || 0} chapters</span>
+                        <span className={`scm-fc-arrow ${expandedSubjects[subject._id] ? 'open' : ''}`}>
+                          <FaChevronDown />
+                        </span>
+                      </div>
                     </button>
 
                     {expandedSubjects[subject._id] && subject.chapters && (
-                      <div className="scm-fc-chapters">
+                      <div className="scm-fc-ch-list">
                         {subject.chapters.map((chapter, cIdx) => (
-                          <div key={chapter._id} className={`scm-fc-chapter-block ${expandedChapters[chapter._id] ? 'is-open' : ''}`}>
+                          <div key={chapter._id} className={`scm-fc-ch-item ${expandedChapters[chapter._id] ? 'is-open' : ''}`}>
                             <button
                               type="button"
-                              className="scm-fc-chapter-header"
+                              className="scm-fc-ch-row"
                               aria-expanded={!!expandedChapters[chapter._id]}
                               onClick={() => toggleChapter(chapter._id)}
                             >
-                              <span className="scm-fc-chapter-dot"></span>
-                              <FaFileAlt className="scm-fc-chapter-icon" />
-                              <span className="scm-fc-chapter-name">{chapter.name}</span>
-                              <span className="scm-fc-chapter-meta">{chapter.topics?.length || 0} topics</span>
-                              <span className="scm-fc-chevron-sm">
-                                {expandedChapters[chapter._id] ? <FaChevronDown /> : <FaChevronRight />}
-                              </span>
+                              <div className="scm-fc-ch-left">
+                                <span className="scm-fc-ch-idx">{sIdx + 1}.{cIdx + 1}</span>
+                                <FaListUl className="scm-fc-ch-icon" />
+                                <span className="scm-fc-ch-name">{chapter.name}</span>
+                              </div>
+                              <div className="scm-fc-ch-right">
+                                {chapter.topics?.length > 0 && (
+                                  <span className="scm-fc-ch-meta">{chapter.topics.length} topics</span>
+                                )}
+                                <span className={`scm-fc-arrow-sm ${expandedChapters[chapter._id] ? 'open' : ''}`}>
+                                  <FaChevronDown />
+                                </span>
+                              </div>
                             </button>
 
                             {expandedChapters[chapter._id] && (
-                              <div className="scm-fc-topics">
+                              <div className="scm-fc-tp-list">
                                 {chapter.topics?.map((topic) => (
-                                  <div key={topic._id} className="scm-fc-topic-block">
+                                  <div key={topic._id} className="scm-fc-tp-item">
                                     <button
                                       type="button"
-                                      className="scm-fc-topic-header"
+                                      className="scm-fc-tp-row"
                                       aria-expanded={!!expandedTopics[topic._id]}
                                       onClick={() => toggleTopic(topic._id)}
                                     >
-                                      <span className="scm-fc-topic-line"></span>
-                                      <FaGraduationCap className="scm-fc-topic-icon" />
-                                      <span className="scm-fc-topic-name">{topic.name}</span>
-                                      <div className="scm-fc-topic-badges">
+                                      <div className="scm-fc-tp-left">
+                                        <span className="scm-fc-tp-dot"></span>
+                                        <span className="scm-fc-tp-name">{topic.name}</span>
+                                      </div>
+                                      <div className="scm-fc-tp-right">
                                         {topic.videos?.length > 0 && (
-                                          <span className="scm-fc-badge video-badge">
-                                            <FaVideo /> {topic.videos.length}
-                                          </span>
+                                          <span className="scm-fc-tag vid"><FaVideo /> {topic.videos.length}</span>
                                         )}
                                         {topic.tests?.length > 0 && (
-                                          <span className="scm-fc-badge test-badge">
-                                            <FaClipboardList /> {topic.tests.length}
+                                          <span className="scm-fc-tag tst"><FaClipboardList /> {topic.tests.length}</span>
+                                        )}
+                                        {(topic.tests?.length > 0 || topic.videos?.length > 0) && (
+                                          <span className={`scm-fc-arrow-sm ${expandedTopics[topic._id] ? 'open' : ''}`}>
+                                            <FaChevronDown />
                                           </span>
                                         )}
                                       </div>
-                                      {(topic.tests?.length > 0 || topic.videos?.length > 0) && (
-                                        <span className="scm-fc-chevron-sm">
-                                          {expandedTopics[topic._id] ? <FaChevronDown /> : <FaChevronRight />}
-                                        </span>
-                                      )}
                                     </button>
 
                                     {expandedTopics[topic._id] && (
-                                      <div className="scm-fc-topic-content">
+                                      <div className="scm-fc-res-panel">
                                         {topic.videos?.length > 0 && (
-                                          <div className="scm-fc-resource-group">
-                                            <span className="scm-fc-resource-label"><FaVideo /> Videos</span>
-                                            <div className="scm-fc-resource-list">
+                                          <div className="scm-fc-res-section">
+                                            <p className="scm-fc-res-title"><FaVideo /> Videos</p>
+                                            <div className="scm-fc-res-grid">
                                               {topic.videos.map((video) => (
                                                 <button
                                                   key={video._id}
                                                   type="button"
-                                                  className="scm-fc-resource-item video-item"
+                                                  className="scm-fc-res-card vid"
                                                   onClick={() => {
                                                     setPlayingVideo(video);
                                                     setActiveSection("recorded");
                                                   }}
                                                 >
-                                                  <FaVideo />
+                                                  <FaPlay className="scm-fc-res-icon" />
                                                   <span>{video.title}</span>
                                                 </button>
                                               ))}
@@ -762,19 +756,19 @@ const StudentCourseContentManager = () => {
                                           </div>
                                         )}
                                         {topic.tests?.length > 0 && (
-                                          <div className="scm-fc-resource-group">
-                                            <span className="scm-fc-resource-label"><FaClipboardList /> Tests</span>
-                                            <div className="scm-fc-resource-list">
+                                          <div className="scm-fc-res-section">
+                                            <p className="scm-fc-res-title"><FaClipboardList /> Tests</p>
+                                            <div className="scm-fc-res-grid">
                                               {topic.tests.map((test) => (
                                                 <button
                                                   key={test._id}
                                                   type="button"
-                                                  className="scm-fc-resource-item test-item"
+                                                  className="scm-fc-res-card tst"
                                                   onClick={() => navigate(`/student/mock-test/${test._id}/instructions`)}
                                                 >
-                                                  <FaClipboardList />
+                                                  <FaClipboardList className="scm-fc-res-icon" />
                                                   <span>{test.title}</span>
-                                                  <span className="scm-fc-duration">{test.duration} min</span>
+                                                  {test.duration && <small>{test.duration} min</small>}
                                                 </button>
                                               ))}
                                             </div>
@@ -786,21 +780,23 @@ const StudentCourseContentManager = () => {
                                 ))}
 
                                 {chapter.directTests && chapter.directTests.length > 0 && (
-                                  <div className="scm-fc-chapter-tests">
-                                    <span className="scm-fc-resource-label"><FaClipboardList /> Chapter Tests</span>
-                                    <div className="scm-fc-resource-list">
-                                      {chapter.directTests.map((test) => (
-                                        <button
-                                          key={test._id}
-                                          type="button"
-                                          className="scm-fc-resource-item test-item"
-                                          onClick={() => navigate(`/student/mock-test/${test._id}/instructions`)}
-                                        >
-                                          <FaClipboardList />
-                                          <span>{test.title}</span>
-                                          <span className="scm-fc-duration">{test.duration} min</span>
-                                        </button>
-                                      ))}
+                                  <div className="scm-fc-res-panel" style={{borderLeft: '3px solid #fee2e2', marginLeft: 18}}>
+                                    <div className="scm-fc-res-section">
+                                      <p className="scm-fc-res-title"><FaClipboardList /> Chapter Tests</p>
+                                      <div className="scm-fc-res-grid">
+                                        {chapter.directTests.map((test) => (
+                                          <button
+                                            key={test._id}
+                                            type="button"
+                                            className="scm-fc-res-card tst"
+                                            onClick={() => navigate(`/student/mock-test/${test._id}/instructions`)}
+                                          >
+                                            <FaClipboardList className="scm-fc-res-icon" />
+                                            <span>{test.title}</span>
+                                            {test.duration && <small>{test.duration} min</small>}
+                                          </button>
+                                        ))}
+                                      </div>
                                     </div>
                                   </div>
                                 )}
