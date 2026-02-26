@@ -74,6 +74,10 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    invoiceNumber: {
+      type: Number,
+      default: null,
+    },
     // Additional details
     notes: {
       type: String,

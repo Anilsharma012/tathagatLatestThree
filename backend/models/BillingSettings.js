@@ -48,6 +48,7 @@ const BillingSettingsSchema = new mongoose.Schema({
   termsAndConditions: { type: String, default: '1. Cheques/Drafts/Pay Order must be drawn in favour of the company only.\n2. Material will be issued only after the full fee has been received.\n3. Terms & Conditions are printed on the reverse of this receipt.' },
   footerNote: { type: String, default: 'Thank you for your purchase!' },
   invoicePrefix: { type: String, default: 'STX' },
+  invoiceCounter: { type: Number, default: 1000 },
   isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 

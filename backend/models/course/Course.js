@@ -20,6 +20,14 @@ const courseSchema = new mongoose.Schema(
       type: Number,
       default: null,
     },
+    studyMaterialPrice: {
+      type: Number,
+      default: 0,
+    },
+    tuitionFeesPrice: {
+      type: Number,
+      default: 0,
+    },
     thumbnail: {
       type: String,
       default: "",

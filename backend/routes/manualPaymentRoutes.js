@@ -8,6 +8,8 @@ const Enrollment = require('../models/Enrollment');
 const Payment = require('../models/Payment');
 const Course = require('../models/course/Course');
 const User = require('../models/UserSchema');
+const BillingSettings = require('../models/BillingSettings');
+const { generateSequentialInvoiceNumber } = require('../services/invoicePdfService');
 
 router.get('/upi-settings', async (req, res) => {
   try {
@@ -194,6 +196,9 @@ router.put('/verify/:id', adminAuth, async (req, res) => {
         }
       }
 
+      const prefix = (await BillingSettings.findOne({ isActive: true }))?.invoicePrefix || 'STX';
+      const { counter } = await generateSequentialInvoiceNumber(prefix, BillingSettings);
+
       await Payment.create({
         userId: request.userId,
         courseId: request.courseId,
@@ -205,6 +210,7 @@ router.put('/verify/:id', adminAuth, async (req, res) => {
         originalAmount: request.originalAmount ? request.originalAmount * 100 : null,
         discountAmount: request.discountPercent > 0 ? Math.round(request.amount * request.discountPercent) : 0,
         couponCode: request.couponCode,
+        invoiceNumber: counter,
         notes: `UPI Manual Payment | UTR: ${request.utrNumber}`,
       });
     }

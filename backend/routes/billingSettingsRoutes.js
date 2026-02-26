@@ -56,48 +56,53 @@ router.put('/', adminAuth, async (req, res) => {
 
     if (address) {
       settings.address = {
-        street: address.street || settings.address?.street || '',
-        city: address.city || settings.address?.city || '',
-        state: address.state || settings.address?.state || '',
-        pincode: address.pincode || settings.address?.pincode || '',
-        country: address.country || settings.address?.country || 'India'
+        street: address.street !== undefined ? address.street : (settings.address?.street || ''),
+        city: address.city !== undefined ? address.city : (settings.address?.city || ''),
+        state: address.state !== undefined ? address.state : (settings.address?.state || ''),
+        pincode: address.pincode !== undefined ? address.pincode : (settings.address?.pincode || ''),
+        country: address.country !== undefined ? address.country : (settings.address?.country || 'India')
       };
+      settings.markModified('address');
     }
 
     if (centreDetails) {
       settings.centreDetails = {
-        name: centreDetails.name || settings.centreDetails?.name || '',
-        address: centreDetails.address || settings.centreDetails?.address || '',
-        city: centreDetails.city || settings.centreDetails?.city || '',
-        state: centreDetails.state || settings.centreDetails?.state || '',
-        stateCode: centreDetails.stateCode || settings.centreDetails?.stateCode || ''
+        name: centreDetails.name !== undefined ? centreDetails.name : (settings.centreDetails?.name || ''),
+        address: centreDetails.address !== undefined ? centreDetails.address : (settings.centreDetails?.address || ''),
+        city: centreDetails.city !== undefined ? centreDetails.city : (settings.centreDetails?.city || ''),
+        state: centreDetails.state !== undefined ? centreDetails.state : (settings.centreDetails?.state || ''),
+        stateCode: centreDetails.stateCode !== undefined ? centreDetails.stateCode : (settings.centreDetails?.stateCode || '')
       };
+      settings.markModified('centreDetails');
     }
 
     if (taxSettings) {
       settings.taxSettings = {
-        cgstRate: taxSettings.cgstRate ?? settings.taxSettings?.cgstRate ?? 9,
-        sgstRate: taxSettings.sgstRate ?? settings.taxSettings?.sgstRate ?? 9,
-        igstRate: taxSettings.igstRate ?? settings.taxSettings?.igstRate ?? 18,
-        defaultHsnCode: taxSettings.defaultHsnCode || settings.taxSettings?.defaultHsnCode || '999293'
+        cgstRate: taxSettings.cgstRate !== undefined ? Number(taxSettings.cgstRate) : (settings.taxSettings?.cgstRate ?? 9),
+        sgstRate: taxSettings.sgstRate !== undefined ? Number(taxSettings.sgstRate) : (settings.taxSettings?.sgstRate ?? 9),
+        igstRate: taxSettings.igstRate !== undefined ? Number(taxSettings.igstRate) : (settings.taxSettings?.igstRate ?? 18),
+        defaultHsnCode: taxSettings.defaultHsnCode !== undefined ? taxSettings.defaultHsnCode : (settings.taxSettings?.defaultHsnCode || '999293')
       };
+      settings.markModified('taxSettings');
     }
 
     if (authorizedSignatory) {
       settings.authorizedSignatory = {
-        name: authorizedSignatory.name || settings.authorizedSignatory?.name || '',
-        designation: authorizedSignatory.designation || settings.authorizedSignatory?.designation || '',
-        signatureImage: authorizedSignatory.signatureImage || settings.authorizedSignatory?.signatureImage || ''
+        name: authorizedSignatory.name !== undefined ? authorizedSignatory.name : (settings.authorizedSignatory?.name || ''),
+        designation: authorizedSignatory.designation !== undefined ? authorizedSignatory.designation : (settings.authorizedSignatory?.designation || ''),
+        signatureImage: authorizedSignatory.signatureImage !== undefined ? authorizedSignatory.signatureImage : (settings.authorizedSignatory?.signatureImage || '')
       };
+      settings.markModified('authorizedSignatory');
     }
 
     if (bankDetails) {
       settings.bankDetails = {
-        bankName: bankDetails.bankName || settings.bankDetails?.bankName || '',
-        accountNumber: bankDetails.accountNumber || settings.bankDetails?.accountNumber || '',
-        ifscCode: bankDetails.ifscCode || settings.bankDetails?.ifscCode || '',
-        accountHolderName: bankDetails.accountHolderName || settings.bankDetails?.accountHolderName || ''
+        bankName: bankDetails.bankName !== undefined ? bankDetails.bankName : (settings.bankDetails?.bankName || ''),
+        accountNumber: bankDetails.accountNumber !== undefined ? bankDetails.accountNumber : (settings.bankDetails?.accountNumber || ''),
+        ifscCode: bankDetails.ifscCode !== undefined ? bankDetails.ifscCode : (settings.bankDetails?.ifscCode || ''),
+        accountHolderName: bankDetails.accountHolderName !== undefined ? bankDetails.accountHolderName : (settings.bankDetails?.accountHolderName || '')
       };
+      settings.markModified('bankDetails');
     }
 
     await settings.save();

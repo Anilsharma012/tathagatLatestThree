@@ -30,13 +30,14 @@ The platform features a clean, professional design with consistent styling acros
 - **Mock Tests**: Comprehensive testing module with detailed analytics, score distribution, and performance tracking.
 - **Live Classes**: Integration for conducting and managing live online sessions.
 - **User Authentication & Authorization**: JWT-based authentication with password-based login and OTP verification flows. Robust RBAC system for admin and super-admin roles.
-- **Payment & Enrollment**: Integrated Razorpay for online payments, with support for manual UPI payments and offline admission processing. Coupon code system for discounts.
+- **Payment & Enrollment**: Integrated Razorpay for online payments, with support for manual UPI payments and offline admission processing. Coupon code system for discounts. Partial payment support allows multiple installments per course enrollment.
 - **CRM**: Lead status tracking, inquiry management, and follow-up functionalities for sales and support.
 - **Reporting & Analytics**: Admin dashboards for student performance, daily activity, and comprehensive user management.
 - **Content Delivery**: Optimized display of course content, including support for rich media in questions.
 - **Policy Pages**: Dedicated pages for Privacy Policy, Refund & Cancellation Policy, and Terms & Conditions.
-- **Offline Admission System**: Admin interface for walk-in student enrollment, course selection, payment recording, and invoice generation.
-- **Invoice System**: HTML-based professional tax invoice generation with GST breakdown, downloadable as PDF.
+- **Offline Admission System**: Admin interface for walk-in student enrollment, course selection, payment recording, and invoice generation. Supports partial payments with payment history tracking per student/course.
+- **Invoice System**: HTML-based professional tax invoice generation with sequential invoice numbering (starting from 1001 via BillingSettings.invoiceCounter). Supports split line items: Study Material (HSN 4901, no GST) and Tuition Fees (HSN 999293, with GST). Each payment gets its own invoice number.
+- **Course Pricing**: Courses have a main `price` field plus optional `studyMaterialPrice` and `tuitionFeesPrice` fields for invoice line item breakdown.
 
 ## External Dependencies
 

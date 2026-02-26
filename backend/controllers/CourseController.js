@@ -30,13 +30,12 @@ const createCourse = async (req, res) => {
   try {
     console.log("📥 Received course creation request");
 
-    const { name, description, price, oldPrice, courseType, startDate, endDate, keepAccessAfterEnd } = req.body;
+    const { name, description, price, oldPrice, studyMaterialPrice, tuitionFeesPrice, courseType, startDate, endDate, keepAccessAfterEnd } = req.body;
     const thumbnail = req.file ? req.file.filename : "";
 
     console.log("✅ req.body:", req.body);
     console.log("✅ req.file:", req.file);
 
-    // Check for required fields
     if (!name || !description || !price || !thumbnail) {
       console.warn("⚠️ Missing required fields");
       return res.status(400).json({
@@ -45,10 +44,9 @@ const createCourse = async (req, res) => {
       });
     }
 
-    // Check for duplicate
     const existing = await Course.findOne({ name });
     if (existing) {
-      console.warn("��️ Course with same name already exists:", name);
+      console.warn("⚠️ Course with same name already exists:", name);
       return res.status(400).json({ success: false, message: "Course already exists" });
     }
 
@@ -57,6 +55,8 @@ const createCourse = async (req, res) => {
       description,
       price,
       oldPrice: oldPrice ? Number(oldPrice) : null,
+      studyMaterialPrice: studyMaterialPrice ? Number(studyMaterialPrice) : 0,
+      tuitionFeesPrice: tuitionFeesPrice ? Number(tuitionFeesPrice) : 0,
       thumbnail,
       courseType: courseType || 'full_course',
       createdBy: req.user.id,
@@ -109,14 +109,15 @@ const getCourseById = async (req, res) => {
 // ✅ Update course with image handling (partial updates supported)
 const updateCourse = async (req, res) => {
   try {
-    const { name, description, price, oldPrice, overview, courseType, startDate, endDate, keepAccessAfterEnd } = req.body;
+    const { name, description, price, oldPrice, studyMaterialPrice, tuitionFeesPrice, overview, courseType, startDate, endDate, keepAccessAfterEnd } = req.body;
     
-    // Only include fields that are actually provided
     const updateData = {};
     if (name !== undefined) updateData.name = name;
     if (description !== undefined) updateData.description = description;
     if (price !== undefined) updateData.price = price;
     if (oldPrice !== undefined) updateData.oldPrice = oldPrice ? Number(oldPrice) : null;
+    if (studyMaterialPrice !== undefined) updateData.studyMaterialPrice = Number(studyMaterialPrice) || 0;
+    if (tuitionFeesPrice !== undefined) updateData.tuitionFeesPrice = Number(tuitionFeesPrice) || 0;
     if (courseType !== undefined) updateData.courseType = courseType;
     if (startDate !== undefined) updateData.startDate = startDate || null;
     if (endDate !== undefined) updateData.endDate = endDate || null;

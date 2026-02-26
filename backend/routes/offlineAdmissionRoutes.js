@@ -7,7 +7,7 @@ const Enrollment = require('../models/Enrollment');
 const Payment = require('../models/Payment');
 const Coupon = require('../models/Coupon');
 const BillingSettings = require('../models/BillingSettings');
-const { prepareInvoiceData, generateInvoiceHtml } = require('../services/invoicePdfService');
+const { prepareInvoiceData, generateInvoiceHtml, generateSequentialInvoiceNumber } = require('../services/invoicePdfService');
 
 router.post('/', adminAuth, async (req, res) => {
   try {
@@ -58,14 +58,6 @@ router.post('/', adminAuth, async (req, res) => {
         isPhoneVerified: true,
         isOnboardingComplete: true,
         role: 'student'
-      });
-    }
-
-    const existingEnrollment = await Enrollment.findOne({ userId: user._id, courseId, status: 'active' });
-    if (existingEnrollment) {
-      return res.status(400).json({
-        success: false,
-        message: 'Student is already enrolled in this course'
       });
     }
 
@@ -129,6 +121,9 @@ router.post('/', adminAuth, async (req, res) => {
       await user.save();
     }
 
+    const prefix = (await BillingSettings.findOne({ isActive: true }))?.invoicePrefix || 'STX';
+    const { counter } = await generateSequentialInvoiceNumber(prefix, BillingSettings);
+
     const payment = await Payment.create({
       userId: user._id,
       courseId,
@@ -140,6 +135,7 @@ router.post('/', adminAuth, async (req, res) => {
       originalAmount: originalAmount * 100,
       discountAmount: discountAmount * 100,
       couponCode: appliedCoupon ? appliedCoupon.code : null,
+      invoiceNumber: counter,
       notes: `Offline Admission | Method: ${paymentMethod}${referenceNumber ? ' | Ref: ' + referenceNumber : ''}${paymentNote ? ' | Note: ' + paymentNote : ''}`,
       validityPeriod: validityDays,
       validityStartDate: now,
@@ -151,6 +147,16 @@ router.post('/', adminAuth, async (req, res) => {
       appliedCoupon.usedCount = (appliedCoupon.usedCount || 0) + 1;
       await appliedCoupon.save();
     }
+
+    const previousPayments = await Payment.find({
+      userId: user._id,
+      courseId,
+      status: 'paid',
+      _id: { $ne: payment._id }
+    }).lean();
+    const previousPaid = previousPayments.reduce((sum, p) => sum + (p.amount >= 100 ? p.amount / 100 : p.amount), 0);
+    const totalPaid = previousPaid + amountNum;
+    const courseFee = appliedCoupon ? (originalAmount - discountAmount) : originalAmount;
 
     res.json({
       success: true,
@@ -165,7 +171,11 @@ router.post('/', adminAuth, async (req, res) => {
         enrollmentId: enrollment._id,
         paymentId: payment._id,
         receiptNumber: payment.receiptNumber,
+        invoiceNumber: `${prefix}${counter}`,
         amountPaid: amountNum,
+        totalPaid,
+        courseFee,
+        remainingBalance: Math.max(0, courseFee - totalPaid),
         paymentMethod,
       }
     });
@@ -175,6 +185,45 @@ router.post('/', adminAuth, async (req, res) => {
       return res.status(400).json({ success: false, message: 'A user with this email already exists' });
     }
     res.status(500).json({ success: false, message: 'Failed to process offline admission' });
+  }
+});
+
+router.get('/payment-history', adminAuth, async (req, res) => {
+  try {
+    const { phone, courseId } = req.query;
+    if (!phone || !courseId) {
+      return res.json({ success: true, payments: [], totalPaid: 0 });
+    }
+
+    const user = await User.findOne({ phoneNumber: phone });
+    if (!user) {
+      return res.json({ success: true, payments: [], totalPaid: 0 });
+    }
+
+    const payments = await Payment.find({
+      userId: user._id,
+      courseId,
+      status: 'paid'
+    }).sort({ createdAt: -1 }).lean();
+
+    const totalPaid = payments.reduce((sum, p) => sum + (p.amount >= 100 ? p.amount / 100 : p.amount), 0);
+
+    res.json({
+      success: true,
+      payments: payments.map(p => ({
+        _id: p._id,
+        amount: p.amount >= 100 ? p.amount / 100 : p.amount,
+        paymentMethod: p.paymentMethod,
+        receiptNumber: p.receiptNumber,
+        invoiceNumber: p.invoiceNumber,
+        notes: p.notes,
+        createdAt: p.createdAt
+      })),
+      totalPaid
+    });
+  } catch (err) {
+    console.error('Payment history error:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch payment history' });
   }
 });
 
@@ -247,6 +296,13 @@ router.get('/invoice/:paymentId', adminTokenFromQuery, adminAuth, async (req, re
     let billingSettings = await BillingSettings.findOne({ isActive: true });
     if (!billingSettings) {
       billingSettings = {};
+    }
+
+    if (!payment.invoiceNumber) {
+      const prefix = billingSettings.invoicePrefix || 'STX';
+      const { counter } = await generateSequentialInvoiceNumber(prefix, BillingSettings);
+      payment.invoiceNumber = counter;
+      await payment.save();
     }
 
     const invoiceData = prepareInvoiceData(payment, user, course, billingSettings);

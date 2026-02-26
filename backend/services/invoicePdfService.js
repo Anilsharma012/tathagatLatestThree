@@ -58,12 +58,14 @@ const numberToWords = (num) => {
   return result + ' Only';
 };
 
-const generateInvoiceNumber = (prefix, paymentId, date) => {
-  const d = new Date(date);
-  const year = d.getFullYear().toString().slice(-2);
-  const month = (d.getMonth() + 1).toString().padStart(2, '0');
-  const shortId = paymentId.toString().slice(-6).toUpperCase();
-  return `${prefix}${year}${month}-${shortId}`;
+const generateSequentialInvoiceNumber = async (prefix, BillingSettings) => {
+  const settings = await BillingSettings.findOneAndUpdate(
+    { isActive: true },
+    { $inc: { invoiceCounter: 1 } },
+    { new: true, upsert: true }
+  );
+  const counter = settings.invoiceCounter;
+  return { formatted: `${prefix}${counter}`, counter };
 };
 
 const formatDate = (date) => {
@@ -90,39 +92,122 @@ const prepareInvoiceData = (payment, user, course, billingSettings) => {
   const centreState = (billingSettings.centreDetails?.state || '').toLowerCase().trim();
   const customerState = (user.state || '').toLowerCase().trim();
   const isInterstate = customerState && centreState && customerState !== centreState;
-  
-  const totalTaxRate = isInterstate ? igstRate : (cgstRate + sgstRate);
-  const taxableValue = amountInRupees / (1 + totalTaxRate / 100);
-  
-  let cgstAmount = 0, sgstAmount = 0, igstAmount = 0;
-  if (isInterstate) {
-    igstAmount = taxableValue * (igstRate / 100);
+
+  const studyMaterialPrice = course.studyMaterialPrice || 0;
+  const tuitionFeesPrice = course.tuitionFeesPrice || 0;
+  const hasSplitPricing = studyMaterialPrice > 0 || tuitionFeesPrice > 0;
+
+  const prefix = billingSettings.invoicePrefix || 'STX';
+  let invoiceNumberStr;
+  if (payment.invoiceNumber) {
+    invoiceNumberStr = `${prefix}${payment.invoiceNumber}`;
   } else {
-    cgstAmount = taxableValue * (cgstRate / 100);
-    sgstAmount = taxableValue * (sgstRate / 100);
+    const shortId = (payment.razorpay_payment_id || payment._id.toString()).slice(-6).toUpperCase();
+    const d = new Date(payment.createdAt);
+    const year = d.getFullYear().toString().slice(-2);
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    invoiceNumberStr = `${prefix}${year}${month}-${shortId}`;
   }
-  
-  const invoiceNumber = generateInvoiceNumber(
-    billingSettings.invoicePrefix || 'STX',
-    payment.razorpay_payment_id || payment._id.toString(),
-    payment.createdAt
-  );
-  
-  const item = {
-    serialNo: 1,
-    description: course.name || 'Course Enrollment',
-    hsnCode: billingSettings.taxSettings?.defaultHsnCode || '999293',
-    baseFee: originalAmount,
-    discount: discountAmount > 0 ? discountAmount : 0,
-    taxableValue: taxableValue,
-    cgstRate: isInterstate ? 0 : cgstRate,
-    cgstAmount: cgstAmount,
-    sgstRate: isInterstate ? 0 : sgstRate,
-    sgstAmount: sgstAmount,
-    igstRate: isInterstate ? igstRate : 0,
-    igstAmount: igstAmount,
-    totalFee: amountInRupees
-  };
+
+  let items = [];
+  let subtotalBaseFee = 0, subtotalDiscount = 0, subtotalTaxable = 0;
+  let subtotalCgst = 0, subtotalSgst = 0, subtotalIgst = 0, subtotalTotal = 0;
+
+  if (hasSplitPricing && discountAmount <= 0) {
+    const discountRatio = amountInRupees / originalAmount;
+
+    if (studyMaterialPrice > 0) {
+      const smAmount = studyMaterialPrice * discountRatio;
+      items.push({
+        serialNo: items.length + 1,
+        description: 'Study Material',
+        hsnCode: '4901',
+        baseFee: studyMaterialPrice,
+        discount: studyMaterialPrice - smAmount,
+        taxableValue: smAmount,
+        cgstRate: 0,
+        cgstAmount: 0,
+        sgstRate: 0,
+        sgstAmount: 0,
+        igstRate: 0,
+        igstAmount: 0,
+        totalFee: smAmount
+      });
+      subtotalBaseFee += studyMaterialPrice;
+      subtotalDiscount += (studyMaterialPrice - smAmount);
+      subtotalTaxable += smAmount;
+      subtotalTotal += smAmount;
+    }
+
+    if (tuitionFeesPrice > 0) {
+      const tfAmount = tuitionFeesPrice * discountRatio;
+      const totalTaxRate = isInterstate ? igstRate : (cgstRate + sgstRate);
+      const tfTaxable = tfAmount / (1 + totalTaxRate / 100);
+      let tfCgst = 0, tfSgst = 0, tfIgst = 0;
+      if (isInterstate) {
+        tfIgst = tfTaxable * (igstRate / 100);
+      } else {
+        tfCgst = tfTaxable * (cgstRate / 100);
+        tfSgst = tfTaxable * (sgstRate / 100);
+      }
+      items.push({
+        serialNo: items.length + 1,
+        description: 'Tuition Fees',
+        hsnCode: billingSettings.taxSettings?.defaultHsnCode || '999293',
+        baseFee: tuitionFeesPrice,
+        discount: tuitionFeesPrice - tfAmount,
+        taxableValue: tfTaxable,
+        cgstRate: isInterstate ? 0 : cgstRate,
+        cgstAmount: tfCgst,
+        sgstRate: isInterstate ? 0 : sgstRate,
+        sgstAmount: tfSgst,
+        igstRate: isInterstate ? igstRate : 0,
+        igstAmount: tfIgst,
+        totalFee: tfAmount
+      });
+      subtotalBaseFee += tuitionFeesPrice;
+      subtotalDiscount += (tuitionFeesPrice - tfAmount);
+      subtotalTaxable += tfTaxable;
+      subtotalCgst += tfCgst;
+      subtotalSgst += tfSgst;
+      subtotalIgst += tfIgst;
+      subtotalTotal += tfAmount;
+    }
+  } else {
+    const totalTaxRate = isInterstate ? igstRate : (cgstRate + sgstRate);
+    const taxableValue = amountInRupees / (1 + totalTaxRate / 100);
+    let cgstAmount = 0, sgstAmount = 0, igstAmount = 0;
+    if (isInterstate) {
+      igstAmount = taxableValue * (igstRate / 100);
+    } else {
+      cgstAmount = taxableValue * (cgstRate / 100);
+      sgstAmount = taxableValue * (sgstRate / 100);
+    }
+
+    items.push({
+      serialNo: 1,
+      description: course.name || 'Course Enrollment',
+      hsnCode: billingSettings.taxSettings?.defaultHsnCode || '999293',
+      baseFee: originalAmount,
+      discount: discountAmount > 0 ? discountAmount : 0,
+      taxableValue: taxableValue,
+      cgstRate: isInterstate ? 0 : cgstRate,
+      cgstAmount: cgstAmount,
+      sgstRate: isInterstate ? 0 : sgstRate,
+      sgstAmount: sgstAmount,
+      igstRate: isInterstate ? igstRate : 0,
+      igstAmount: igstAmount,
+      totalFee: amountInRupees
+    });
+
+    subtotalBaseFee = originalAmount;
+    subtotalDiscount = discountAmount > 0 ? discountAmount : 0;
+    subtotalTaxable = taxableValue;
+    subtotalCgst = cgstAmount;
+    subtotalSgst = sgstAmount;
+    subtotalIgst = igstAmount;
+    subtotalTotal = amountInRupees;
+  }
   
   const address = billingSettings.address || {};
   const centre = billingSettings.centreDetails || {};
@@ -143,13 +228,13 @@ const prepareInvoiceData = (payment, user, course, billingSettings) => {
     companyPhone: billingSettings.phone || '',
     companyGstin: billingSettings.gstNumber || '',
     
-    invoiceNumber: invoiceNumber,
+    invoiceNumber: invoiceNumberStr,
     invoiceDate: formatDate(payment.createdAt),
     
     studentCode: user._id.toString().slice(-8).toUpperCase(),
     studentName: user.name || user.fullName || 'Student',
     studentEmail: user.email || '',
-    studentPhone: user.phone || user.mobile || '',
+    studentPhone: user.phone || user.mobile || user.phoneNumber || '',
     studentAddress: user.address || '',
     studentState: user.state || 'Delhi',
     studentGstin: user.gstin || '',
@@ -160,16 +245,16 @@ const prepareInvoiceData = (payment, user, course, billingSettings) => {
     centreState: centre.state || address.state || 'Delhi',
     centreStateCode: centre.stateCode || '07',
     
-    items: [item],
+    items: items,
     
     isInterstate: isInterstate,
-    subtotalBaseFee: originalAmount,
-    subtotalDiscount: discountAmount > 0 ? discountAmount : 0,
-    subtotalTaxable: taxableValue,
-    subtotalCgst: cgstAmount,
-    subtotalSgst: sgstAmount,
-    subtotalIgst: igstAmount,
-    subtotalTotal: amountInRupees,
+    subtotalBaseFee: subtotalBaseFee,
+    subtotalDiscount: subtotalDiscount,
+    subtotalTaxable: subtotalTaxable,
+    subtotalCgst: subtotalCgst,
+    subtotalSgst: subtotalSgst,
+    subtotalIgst: subtotalIgst,
+    subtotalTotal: subtotalTotal,
     
     adjustmentAmount: 0,
     totalReceived: amountInRupees,
@@ -210,6 +295,6 @@ const generateInvoiceHtml = (invoiceData) => {
 module.exports = {
   prepareInvoiceData,
   generateInvoiceHtml,
-  generateInvoiceNumber,
+  generateSequentialInvoiceNumber,
   numberToWords
 };

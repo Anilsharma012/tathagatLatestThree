@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../AdminLayout/AdminLayout';
 import axios from 'axios';
-import { FaUserPlus, FaSearch, FaFileInvoice, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaUserPlus, FaSearch, FaFileInvoice, FaCheckCircle, FaTimesCircle, FaHistory } from 'react-icons/fa';
 import './OfflineAdmission.css';
 
 const PAYMENT_METHODS = [
@@ -46,6 +46,9 @@ const OfflineAdmission = () => {
   const [admissionsTotalPages, setAdmissionsTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
 
+  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [previouslyPaid, setPreviouslyPaid] = useState(0);
+
   const token = localStorage.getItem('adminToken');
   const headers = { Authorization: `Bearer ${token}` };
 
@@ -56,6 +59,15 @@ const OfflineAdmission = () => {
   useEffect(() => {
     if (activeTab === 'list') fetchAdmissions();
   }, [activeTab, admissionsPage]);
+
+  useEffect(() => {
+    if (form.phone && form.phone.length === 10 && form.courseId && phoneChecked) {
+      fetchPaymentHistory();
+    } else {
+      setPaymentHistory([]);
+      setPreviouslyPaid(0);
+    }
+  }, [form.phone, form.courseId, phoneChecked]);
 
   const fetchCourses = async () => {
     try {
@@ -83,6 +95,21 @@ const OfflineAdmission = () => {
       console.error('Failed to fetch admissions:', err);
     }
     setAdmissionsLoading(false);
+  };
+
+  const fetchPaymentHistory = async () => {
+    try {
+      const res = await axios.get('/api/offline-admissions/payment-history', {
+        headers,
+        params: { phone: form.phone, courseId: form.courseId }
+      });
+      if (res.data.success) {
+        setPaymentHistory(res.data.payments || []);
+        setPreviouslyPaid(res.data.totalPaid || 0);
+      }
+    } catch (err) {
+      console.error('Failed to fetch payment history:', err);
+    }
   };
 
   const checkExistingUser = async () => {
@@ -239,6 +266,8 @@ const OfflineAdmission = () => {
     setPhoneChecked(false);
     setCouponStatus(null);
     setCouponDiscount(0);
+    setPaymentHistory([]);
+    setPreviouslyPaid(0);
   };
 
   const selectedCourse = courses.find(c => c._id === form.courseId);
@@ -251,7 +280,7 @@ const OfflineAdmission = () => {
             <div className="oa-success-icon">
               <FaCheckCircle />
             </div>
-            <h2>Admission Successful!</h2>
+            <h2>Payment Recorded Successfully!</h2>
             <p className="oa-success-msg">{message?.text}</p>
 
             <div className="oa-success-details">
@@ -271,13 +300,31 @@ const OfflineAdmission = () => {
                 <span>Amount Paid</span>
                 <strong>&#8377;{successData.amountPaid?.toLocaleString('en-IN')}</strong>
               </div>
+              {successData.invoiceNumber && (
+                <div className="oa-detail-row">
+                  <span>Invoice No.</span>
+                  <strong>{successData.invoiceNumber}</strong>
+                </div>
+              )}
               <div className="oa-detail-row">
-                <span>Receipt</span>
-                <strong>{successData.receiptNumber}</strong>
+                <span>Total Paid</span>
+                <strong>&#8377;{successData.totalPaid?.toLocaleString('en-IN')}</strong>
               </div>
+              {successData.remainingBalance > 0 && (
+                <div className="oa-detail-row" style={{ color: '#e74c3c' }}>
+                  <span>Remaining Balance</span>
+                  <strong>&#8377;{successData.remainingBalance?.toLocaleString('en-IN')}</strong>
+                </div>
+              )}
+              {successData.remainingBalance === 0 && (
+                <div className="oa-detail-row" style={{ color: '#27ae60' }}>
+                  <span>Status</span>
+                  <strong>Fully Paid</strong>
+                </div>
+              )}
               <div className="oa-detail-row">
-                <span>Status</span>
-                <strong>{successData.isNewUser ? 'New Student Created & Enrolled' : 'Existing Student Enrolled'}</strong>
+                <span>Enrollment</span>
+                <strong>{successData.isNewUser ? 'New Student Created & Enrolled' : 'Student Enrolled'}</strong>
               </div>
             </div>
 
@@ -300,7 +347,7 @@ const OfflineAdmission = () => {
       <div className="oa-container">
         <div className="oa-header">
           <h1><FaUserPlus style={{ marginRight: 10 }} /> Offline Admission</h1>
-          <p>Add students and record payments directly from the admin panel</p>
+          <p>Add students, record payments, and generate invoices</p>
         </div>
 
         <div className="oa-tabs">
@@ -308,7 +355,7 @@ const OfflineAdmission = () => {
             className={`oa-tab ${activeTab === 'form' ? 'active' : ''}`}
             onClick={() => setActiveTab('form')}
           >
-            New Admission
+            New Admission / Payment
           </button>
           <button
             className={`oa-tab ${activeTab === 'list' ? 'active' : ''}`}
@@ -446,6 +493,18 @@ const OfflineAdmission = () => {
                       <span>Course Price:</span>
                       <strong>&#8377;{selectedCourse.price?.toLocaleString('en-IN')}</strong>
                     </div>
+                    {selectedCourse.studyMaterialPrice > 0 && (
+                      <div className="oa-course-detail">
+                        <span>Study Material:</span>
+                        <strong>&#8377;{selectedCourse.studyMaterialPrice?.toLocaleString('en-IN')} (No GST)</strong>
+                      </div>
+                    )}
+                    {selectedCourse.tuitionFeesPrice > 0 && (
+                      <div className="oa-course-detail">
+                        <span>Tuition Fees:</span>
+                        <strong>&#8377;{selectedCourse.tuitionFeesPrice?.toLocaleString('en-IN')} (With GST)</strong>
+                      </div>
+                    )}
                     {selectedCourse.validityMonths && (
                       <div className="oa-course-detail">
                         <span>Validity:</span>
@@ -461,6 +520,48 @@ const OfflineAdmission = () => {
                   </div>
                 )}
               </div>
+
+              {paymentHistory.length > 0 && (
+                <div className="oa-payment-history">
+                  <h4><FaHistory style={{ marginRight: 6 }} /> Previous Payments for this Course</h4>
+                  <div className="oa-history-summary">
+                    <span>Total Previously Paid:</span>
+                    <strong>&#8377;{previouslyPaid.toLocaleString('en-IN')}</strong>
+                    {selectedCourse && (
+                      <>
+                        <span style={{ marginLeft: 20 }}>Remaining:</span>
+                        <strong style={{ color: (selectedCourse.price - previouslyPaid) > 0 ? '#e74c3c' : '#27ae60' }}>
+                          &#8377;{Math.max(0, selectedCourse.price - previouslyPaid).toLocaleString('en-IN')}
+                        </strong>
+                      </>
+                    )}
+                  </div>
+                  <table className="oa-history-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Invoice</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paymentHistory.map(p => (
+                        <tr key={p._id}>
+                          <td>{new Date(p.createdAt).toLocaleDateString('en-IN')}</td>
+                          <td>&#8377;{p.amount?.toLocaleString('en-IN')}</td>
+                          <td>{p.invoiceNumber ? `STX${p.invoiceNumber}` : p.receiptNumber || '-'}</td>
+                          <td>
+                            <button type="button" className="oa-btn-sm" onClick={() => openInvoice(p._id)}>
+                              <FaFileInvoice /> Invoice
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
 
             <div className="oa-section">
@@ -489,6 +590,11 @@ const OfflineAdmission = () => {
                     onChange={e => setForm(prev => ({ ...prev, amount: e.target.value }))}
                     required
                   />
+                  {previouslyPaid > 0 && selectedCourse && (
+                    <span className="oa-field-hint">
+                      Remaining balance: &#8377;{Math.max(0, selectedCourse.price - previouslyPaid).toLocaleString('en-IN')}
+                    </span>
+                  )}
                 </div>
 
                 <div className="oa-field">
@@ -563,7 +669,7 @@ const OfflineAdmission = () => {
 
             <div className="oa-form-actions">
               <button type="submit" className="oa-btn oa-btn-primary" disabled={loading}>
-                {loading ? 'Processing...' : 'Add Student & Record Payment'}
+                {loading ? 'Processing...' : (paymentHistory.length > 0 ? 'Record Additional Payment' : 'Add Student & Record Payment')}
               </button>
               <button type="button" className="oa-btn oa-btn-secondary" onClick={resetForm}>
                 Reset
@@ -603,21 +709,21 @@ const OfflineAdmission = () => {
                         <th>Phone</th>
                         <th>Course</th>
                         <th>Amount</th>
-                        <th>Receipt</th>
+                        <th>Invoice</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {admissions.map(a => (
                         <tr key={a._id}>
-                          <td>{new Date(a.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                          <td>{new Date(a.createdAt).toLocaleDateString('en-IN')}</td>
                           <td>{a.userId?.name || '-'}</td>
                           <td>{a.userId?.phoneNumber || '-'}</td>
                           <td>{a.courseId?.name || '-'}</td>
-                          <td>&#8377;{(a.amount / 100).toLocaleString('en-IN')}</td>
-                          <td>{a.receiptNumber || '-'}</td>
+                          <td>&#8377;{((a.amount >= 100 ? a.amount / 100 : a.amount) || 0).toLocaleString('en-IN')}</td>
+                          <td>{a.invoiceNumber ? `STX${a.invoiceNumber}` : (a.receiptNumber || '-')}</td>
                           <td>
-                            <button className="oa-btn-invoice" onClick={() => openInvoice(a._id)}>
+                            <button className="oa-btn-sm" onClick={() => openInvoice(a._id)}>
                               <FaFileInvoice /> Invoice
                             </button>
                           </td>
@@ -630,15 +736,15 @@ const OfflineAdmission = () => {
                 {admissionsTotalPages > 1 && (
                   <div className="oa-pagination">
                     <button
-                      disabled={admissionsPage <= 1}
-                      onClick={() => setAdmissionsPage(prev => prev - 1)}
+                      disabled={admissionsPage === 1}
+                      onClick={() => setAdmissionsPage(p => p - 1)}
                     >
                       Previous
                     </button>
                     <span>Page {admissionsPage} of {admissionsTotalPages}</span>
                     <button
-                      disabled={admissionsPage >= admissionsTotalPages}
-                      onClick={() => setAdmissionsPage(prev => prev + 1)}
+                      disabled={admissionsPage === admissionsTotalPages}
+                      onClick={() => setAdmissionsPage(p => p + 1)}
                     >
                       Next
                     </button>

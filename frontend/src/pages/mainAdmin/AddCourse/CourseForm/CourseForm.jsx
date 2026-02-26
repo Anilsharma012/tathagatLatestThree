@@ -15,6 +15,8 @@ const CourseForm = ({ onClose, onSuccess, editData, courseType = 'full_course' }
   const [name, setName] = useState(editData?.name || "");
   const [price, setPrice] = useState(editData?.price || "");
   const [oldPrice, setOldPrice] = useState(editData?.oldPrice || "");
+  const [studyMaterialPrice, setStudyMaterialPrice] = useState(editData?.studyMaterialPrice || "");
+  const [tuitionFeesPrice, setTuitionFeesPrice] = useState(editData?.tuitionFeesPrice || "");
   const [description, setDescription] = useState(editData?.description || "");
   const [selectedCourseType, setSelectedCourseType] = useState(editData?.courseType || courseType || 'full_course');
   const [thumbnail, setThumbnail] = useState(null);
@@ -44,6 +46,8 @@ const CourseForm = ({ onClose, onSuccess, editData, courseType = 'full_course' }
   formData.append("name", name);
   formData.append("price", price);
   formData.append("oldPrice", oldPrice || "");
+  formData.append("studyMaterialPrice", studyMaterialPrice || "0");
+  formData.append("tuitionFeesPrice", tuitionFeesPrice || "0");
   formData.append("description", description);
   formData.append("courseType", selectedCourseType);
   formData.append("startDate", startDate || "");
@@ -121,6 +125,19 @@ const CourseForm = ({ onClose, onSuccess, editData, courseType = 'full_course' }
           <div className="adminCourse-form-group">
             <label>Old Price (Strike-through)</label>
             <input type="number" value={oldPrice} onChange={(e) => setOldPrice(e.target.value)} placeholder="Optional - shows as crossed out" />
+          </div>
+
+          <div className="adminCourse-form-row">
+            <div className="adminCourse-form-group">
+              <label>Study Material Price</label>
+              <input type="number" value={studyMaterialPrice} onChange={(e) => setStudyMaterialPrice(e.target.value)} placeholder="No GST (HSN 4901)" />
+              <span className="adminCourse-help-text">For invoice: no GST applied on study material</span>
+            </div>
+            <div className="adminCourse-form-group">
+              <label>Tuition Fees Price</label>
+              <input type="number" value={tuitionFeesPrice} onChange={(e) => setTuitionFeesPrice(e.target.value)} placeholder="With GST (HSN 999293)" />
+              <span className="adminCourse-help-text">For invoice: GST applied on tuition fees</span>
+            </div>
           </div>
 
           <div className="adminCourse-form-group">
