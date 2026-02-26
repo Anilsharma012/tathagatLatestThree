@@ -267,6 +267,191 @@ router.get('/', adminAuth, async (req, res) => {
   }
 });
 
+router.get('/student-ledger', adminAuth, async (req, res) => {
+  try {
+    const { page = 1, limit = 20, search = '' } = req.query;
+
+    const allPayments = await Payment.find({ paymentMethod: 'offline', status: 'paid' })
+      .populate('userId', 'name phoneNumber email city state')
+      .populate('courseId', 'name price studyMaterialPrice tuitionFeesPrice validityMonths courseType')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const billingSettings = await BillingSettings.findOne({ isActive: true }).lean();
+    const invoicePrefix = billingSettings?.invoicePrefix || 'STX';
+
+    const groupMap = {};
+    for (const p of allPayments) {
+      if (!p.userId || !p.courseId) continue;
+      const key = `${p.userId._id}_${p.courseId._id}`;
+      if (!groupMap[key]) {
+        const origAmt = p.originalAmount ? (p.originalAmount >= 100 ? p.originalAmount / 100 : p.originalAmount) : (p.courseId.price || 0);
+        const discAmt = p.discountAmount ? (p.discountAmount >= 100 ? p.discountAmount / 100 : p.discountAmount) : 0;
+        const effectiveFee = origAmt - discAmt;
+        groupMap[key] = {
+          userId: p.userId._id,
+          studentName: p.userId.name,
+          studentPhone: p.userId.phoneNumber,
+          studentEmail: p.userId.email || '',
+          studentCity: p.userId.city || '',
+          studentState: p.userId.state || '',
+          courseId: p.courseId._id,
+          courseName: p.courseId.name,
+          coursePrice: p.courseId.price || 0,
+          effectiveFee: effectiveFee,
+          discountApplied: discAmt,
+          couponUsed: p.couponCode || null,
+          studyMaterialPrice: p.courseId.studyMaterialPrice || 0,
+          tuitionFeesPrice: p.courseId.tuitionFeesPrice || 0,
+          validityMonths: p.courseId.validityMonths || 0,
+          courseType: p.courseId.courseType || '',
+          invoicePrefix,
+          payments: [],
+          totalPaid: 0,
+          lastPaymentDate: null,
+        };
+      }
+      const amt = p.amount >= 100 ? p.amount / 100 : p.amount;
+      groupMap[key].payments.push({
+        _id: p._id,
+        amount: amt,
+        originalAmount: p.originalAmount ? (p.originalAmount >= 100 ? p.originalAmount / 100 : p.originalAmount) : amt,
+        discountAmount: p.discountAmount ? (p.discountAmount >= 100 ? p.discountAmount / 100 : p.discountAmount) : 0,
+        paymentMethod: p.paymentMethod,
+        notes: p.notes || '',
+        receiptNumber: p.receiptNumber || '',
+        invoiceNumber: p.invoiceNumber || null,
+        couponCode: p.couponCode || null,
+        createdAt: p.createdAt,
+      });
+      groupMap[key].totalPaid += amt;
+      if (!groupMap[key].lastPaymentDate || new Date(p.createdAt) > new Date(groupMap[key].lastPaymentDate)) {
+        groupMap[key].lastPaymentDate = p.createdAt;
+      }
+    }
+
+    let ledger = Object.values(groupMap).map(g => ({
+      ...g,
+      remainingBalance: Math.max(0, g.effectiveFee - g.totalPaid),
+      paymentStatus: g.totalPaid >= g.effectiveFee ? 'fully_paid' : 'partial',
+      paymentCount: g.payments.length,
+    }));
+
+    ledger.sort((a, b) => new Date(b.lastPaymentDate) - new Date(a.lastPaymentDate));
+
+    if (search && search.trim()) {
+      const s = search.trim().toLowerCase();
+      ledger = ledger.filter(l =>
+        l.studentName?.toLowerCase().includes(s) ||
+        l.studentPhone?.includes(s) ||
+        l.studentEmail?.toLowerCase().includes(s) ||
+        l.courseName?.toLowerCase().includes(s)
+      );
+    }
+
+    const total = ledger.length;
+    const skip2 = (Number(page) - 1) * Number(limit);
+    const paged = ledger.slice(skip2, skip2 + Number(limit));
+
+    res.json({
+      success: true,
+      ledger: paged,
+      total,
+      page: Number(page),
+      totalPages: Math.ceil(total / Number(limit))
+    });
+  } catch (err) {
+    console.error('Student ledger error:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch student ledger' });
+  }
+});
+
+router.post('/add-payment', adminAuth, async (req, res) => {
+  try {
+    const { userId, courseId, paymentMethod, amount, referenceNumber, paymentNote } = req.body;
+
+    if (!userId || !courseId || !amount || !paymentMethod) {
+      return res.status(400).json({ success: false, message: 'userId, courseId, amount and paymentMethod are required' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: 'Student not found' });
+
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ success: false, message: 'Course not found' });
+
+    const enrollment = await Enrollment.findOne({ userId, courseId });
+    if (!enrollment) {
+      return res.status(400).json({ success: false, message: 'Student is not enrolled in this course. Use the admission form first.' });
+    }
+
+    const amountNum = Number(amount);
+    if (amountNum <= 0) {
+      return res.status(400).json({ success: false, message: 'Amount must be greater than 0' });
+    }
+
+    const existingPayments = await Payment.find({ userId, courseId, status: 'paid' }).lean();
+    const previousPaid = existingPayments.reduce((sum, p) => sum + (p.amount >= 100 ? p.amount / 100 : p.amount), 0);
+
+    const firstPayment = existingPayments.length > 0 ? existingPayments.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0] : null;
+    const origAmt = firstPayment?.originalAmount ? (firstPayment.originalAmount >= 100 ? firstPayment.originalAmount / 100 : firstPayment.originalAmount) : (course.price || 0);
+    const discAmt = firstPayment?.discountAmount ? (firstPayment.discountAmount >= 100 ? firstPayment.discountAmount / 100 : firstPayment.discountAmount) : 0;
+    const effectiveFee = origAmt - discAmt;
+
+    const remainingBefore = Math.max(0, effectiveFee - previousPaid);
+    if (amountNum > remainingBefore && remainingBefore > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Amount exceeds remaining balance. Remaining: \u20B9${remainingBefore.toLocaleString('en-IN')}`
+      });
+    }
+
+    const billingSettings = await BillingSettings.findOne({ isActive: true });
+    const prefix = billingSettings?.invoicePrefix || 'STX';
+    const { counter } = await generateSequentialInvoiceNumber(prefix, BillingSettings);
+
+    const payment = await Payment.create({
+      userId,
+      courseId,
+      razorpay_order_id: `offline_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+      amount: amountNum * 100,
+      currency: 'INR',
+      status: 'paid',
+      paymentMethod: 'offline',
+      originalAmount: origAmt * 100,
+      discountAmount: discAmt * 100,
+      invoiceNumber: counter,
+      notes: `Installment Payment | Method: ${paymentMethod}${referenceNumber ? ' | Ref: ' + referenceNumber : ''}${paymentNote ? ' | Note: ' + paymentNote : ''}`,
+      uploadedByRole: 'admin'
+    });
+
+    if (enrollment.validTill && new Date(enrollment.validTill) < new Date()) {
+      const validityDays = course.validityMonths ? course.validityMonths * 30 : 365;
+      enrollment.validTill = new Date(Date.now() + validityDays * 24 * 60 * 60 * 1000);
+      enrollment.status = 'active';
+      await enrollment.save();
+    }
+
+    const totalPaid = previousPaid + amountNum;
+
+    res.json({
+      success: true,
+      message: 'Payment recorded successfully',
+      data: {
+        paymentId: payment._id,
+        invoiceNumber: `${prefix}${counter}`,
+        amountPaid: amountNum,
+        totalPaid,
+        effectiveFee,
+        remainingBalance: Math.max(0, effectiveFee - totalPaid),
+      }
+    });
+  } catch (err) {
+    console.error('Add payment error:', err);
+    res.status(500).json({ success: false, message: 'Failed to record payment' });
+  }
+});
+
 const adminTokenFromQuery = (req, res, next) => {
   if (!req.headers.authorization && req.query.token) {
     req.headers.authorization = `Bearer ${req.query.token}`;

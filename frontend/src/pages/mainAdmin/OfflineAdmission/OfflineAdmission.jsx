@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../AdminLayout/AdminLayout';
 import axios from 'axios';
-import { FaUserPlus, FaSearch, FaFileInvoice, FaCheckCircle, FaTimesCircle, FaHistory } from 'react-icons/fa';
+import { FaUserPlus, FaSearch, FaFileInvoice, FaCheckCircle, FaTimesCircle, FaHistory, FaChevronDown, FaChevronUp, FaPlus, FaRupeeSign, FaBookOpen } from 'react-icons/fa';
 import './OfflineAdmission.css';
 
 const PAYMENT_METHODS = [
@@ -22,6 +22,8 @@ const INDIAN_STATES = [
   'Uttarakhand', 'West Bengal',
 ];
 
+const formatINR = (n) => Number(n || 0).toLocaleString('en-IN');
+
 const OfflineAdmission = () => {
   const [activeTab, setActiveTab] = useState('form');
   const [courses, setCourses] = useState([]);
@@ -40,11 +42,18 @@ const OfflineAdmission = () => {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [successData, setSuccessData] = useState(null);
 
-  const [admissions, setAdmissions] = useState([]);
-  const [admissionsLoading, setAdmissionsLoading] = useState(false);
-  const [admissionsPage, setAdmissionsPage] = useState(1);
-  const [admissionsTotalPages, setAdmissionsTotalPages] = useState(1);
+  const [ledger, setLedger] = useState([]);
+  const [ledgerLoading, setLedgerLoading] = useState(false);
+  const [ledgerPage, setLedgerPage] = useState(1);
+  const [ledgerTotalPages, setLedgerTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [expandedRow, setExpandedRow] = useState(null);
+
+  const [addPaymentFor, setAddPaymentFor] = useState(null);
+  const [addPaymentForm, setAddPaymentForm] = useState({
+    paymentMethod: 'cash', amount: '', referenceNumber: '', paymentNote: ''
+  });
+  const [addPaymentLoading, setAddPaymentLoading] = useState(false);
 
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [previouslyPaid, setPreviouslyPaid] = useState(0);
@@ -57,8 +66,8 @@ const OfflineAdmission = () => {
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'list') fetchAdmissions();
-  }, [activeTab, admissionsPage]);
+    if (activeTab === 'ledger') fetchLedger();
+  }, [activeTab, ledgerPage]);
 
   useEffect(() => {
     if (form.phone && form.phone.length === 10 && form.courseId && phoneChecked) {
@@ -80,21 +89,21 @@ const OfflineAdmission = () => {
     }
   };
 
-  const fetchAdmissions = async () => {
-    setAdmissionsLoading(true);
+  const fetchLedger = async () => {
+    setLedgerLoading(true);
     try {
-      const res = await axios.get('/api/offline-admissions', {
+      const res = await axios.get('/api/offline-admissions/student-ledger', {
         headers,
-        params: { page: admissionsPage, limit: 20, search: searchTerm }
+        params: { page: ledgerPage, limit: 20, search: searchTerm }
       });
       if (res.data.success) {
-        setAdmissions(res.data.admissions);
-        setAdmissionsTotalPages(res.data.totalPages);
+        setLedger(res.data.ledger);
+        setLedgerTotalPages(res.data.totalPages);
       }
     } catch (err) {
-      console.error('Failed to fetch admissions:', err);
+      console.error('Failed to fetch ledger:', err);
     }
-    setAdmissionsLoading(false);
+    setLedgerLoading(false);
   };
 
   const fetchPaymentHistory = async () => {
@@ -270,7 +279,61 @@ const OfflineAdmission = () => {
     setPreviouslyPaid(0);
   };
 
+  const toggleExpand = (key) => {
+    setExpandedRow(expandedRow === key ? null : key);
+    setAddPaymentFor(null);
+  };
+
+  const openAddPayment = (entry) => {
+    setAddPaymentFor(`${entry.userId}_${entry.courseId}`);
+    setAddPaymentForm({
+      paymentMethod: 'cash',
+      amount: entry.remainingBalance > 0 ? entry.remainingBalance.toString() : '',
+      referenceNumber: '',
+      paymentNote: ''
+    });
+  };
+
+  const handleAddPayment = async (entry) => {
+    if (!addPaymentForm.amount || Number(addPaymentForm.amount) <= 0) {
+      alert('Please enter a valid amount');
+      return;
+    }
+    setAddPaymentLoading(true);
+    try {
+      const res = await axios.post('/api/offline-admissions/add-payment', {
+        userId: entry.userId,
+        courseId: entry.courseId,
+        paymentMethod: addPaymentForm.paymentMethod,
+        amount: addPaymentForm.amount,
+        referenceNumber: addPaymentForm.referenceNumber,
+        paymentNote: addPaymentForm.paymentNote,
+      }, { headers });
+
+      if (res.data.success) {
+        alert(`Payment of \u20B9${formatINR(addPaymentForm.amount)} recorded! Invoice: ${res.data.data.invoiceNumber}`);
+        setAddPaymentFor(null);
+        fetchLedger();
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to record payment');
+    }
+    setAddPaymentLoading(false);
+  };
+
   const selectedCourse = courses.find(c => c._id === form.courseId);
+
+  const extractMethodFromNotes = (notes) => {
+    if (!notes) return '-';
+    const match = notes.match(/Method:\s*(\w+)/);
+    return match ? match[1].charAt(0).toUpperCase() + match[1].slice(1) : '-';
+  };
+
+  const extractRefFromNotes = (notes) => {
+    if (!notes) return '';
+    const match = notes.match(/Ref:\s*([^|]+)/);
+    return match ? match[1].trim() : '';
+  };
 
   if (successData) {
     return (
@@ -358,10 +421,10 @@ const OfflineAdmission = () => {
             New Admission / Payment
           </button>
           <button
-            className={`oa-tab ${activeTab === 'list' ? 'active' : ''}`}
-            onClick={() => setActiveTab('list')}
+            className={`oa-tab ${activeTab === 'ledger' ? 'active' : ''}`}
+            onClick={() => setActiveTab('ledger')}
           >
-            Recent Admissions
+            Payment Records
           </button>
         </div>
 
@@ -678,8 +741,8 @@ const OfflineAdmission = () => {
           </form>
         )}
 
-        {activeTab === 'list' && (
-          <div className="oa-list-section">
+        {activeTab === 'ledger' && (
+          <div className="oa-ledger-section">
             <div className="oa-list-header">
               <div className="oa-search-box">
                 <FaSearch />
@@ -688,63 +751,236 @@ const OfflineAdmission = () => {
                   placeholder="Search by name, phone, course..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && fetchAdmissions()}
+                  onKeyDown={e => e.key === 'Enter' && fetchLedger()}
                 />
-                <button onClick={fetchAdmissions}>Search</button>
+                <button onClick={fetchLedger}>Search</button>
               </div>
             </div>
 
-            {admissionsLoading ? (
+            {ledgerLoading ? (
               <div className="oa-loading">Loading...</div>
-            ) : admissions.length === 0 ? (
-              <div className="oa-empty">No offline admissions found</div>
+            ) : ledger.length === 0 ? (
+              <div className="oa-empty">No payment records found</div>
             ) : (
               <>
-                <div className="oa-table-wrapper">
-                  <table className="oa-table">
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Student</th>
-                        <th>Phone</th>
-                        <th>Course</th>
-                        <th>Amount</th>
-                        <th>Invoice</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {admissions.map(a => (
-                        <tr key={a._id}>
-                          <td>{new Date(a.createdAt).toLocaleDateString('en-IN')}</td>
-                          <td>{a.userId?.name || '-'}</td>
-                          <td>{a.userId?.phoneNumber || '-'}</td>
-                          <td>{a.courseId?.name || '-'}</td>
-                          <td>&#8377;{((a.amount >= 100 ? a.amount / 100 : a.amount) || 0).toLocaleString('en-IN')}</td>
-                          <td>{a.invoiceNumber ? `STX${a.invoiceNumber}` : (a.receiptNumber || '-')}</td>
-                          <td>
-                            <button className="oa-btn-sm" onClick={() => openInvoice(a._id)}>
-                              <FaFileInvoice /> Invoice
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="oa-ledger-list">
+                  {ledger.map(entry => {
+                    const key = `${entry.userId}_${entry.courseId}`;
+                    const isExpanded = expandedRow === key;
+                    const isAddingPayment = addPaymentFor === key;
+
+                    return (
+                      <div key={key} className={`oa-ledger-card ${isExpanded ? 'expanded' : ''}`}>
+                        <div className="oa-ledger-card-header" onClick={() => toggleExpand(key)}>
+                          <div className="oa-ledger-student">
+                            <strong>{entry.studentName}</strong>
+                            <span>{entry.studentPhone}</span>
+                          </div>
+                          <div className="oa-ledger-course">
+                            <span className="oa-ledger-course-name">{entry.courseName}</span>
+                          </div>
+                          <div className="oa-ledger-amounts">
+                            <div className="oa-ledger-amount-item">
+                              <span className="oa-ledger-label">Fee</span>
+                              <strong>&#8377;{formatINR(entry.effectiveFee || entry.coursePrice)}</strong>
+                            </div>
+                            <div className="oa-ledger-amount-item paid">
+                              <span className="oa-ledger-label">Paid</span>
+                              <strong>&#8377;{formatINR(entry.totalPaid)}</strong>
+                            </div>
+                            <div className={`oa-ledger-amount-item ${entry.remainingBalance > 0 ? 'pending' : 'done'}`}>
+                              <span className="oa-ledger-label">Pending</span>
+                              <strong>&#8377;{formatINR(entry.remainingBalance)}</strong>
+                            </div>
+                          </div>
+                          <div className={`oa-ledger-status ${entry.paymentStatus}`}>
+                            {entry.paymentStatus === 'fully_paid' ? 'Paid' : 'Partial'}
+                          </div>
+                          <div className="oa-ledger-expand">
+                            {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
+                          </div>
+                        </div>
+
+                        {isExpanded && (
+                          <div className="oa-ledger-detail">
+                            <div className="oa-ledger-detail-grid">
+                              <div className="oa-ledger-info-card">
+                                <h4><FaBookOpen style={{ marginRight: 6 }} /> Course Fee Breakdown</h4>
+                                <div className="oa-info-row">
+                                  <span>Total Course Fee</span>
+                                  <strong>&#8377;{formatINR(entry.coursePrice)}</strong>
+                                </div>
+                                {entry.studyMaterialPrice > 0 && (
+                                  <div className="oa-info-row">
+                                    <span>Study Material (HSN 4901 - No GST)</span>
+                                    <strong>&#8377;{formatINR(entry.studyMaterialPrice)}</strong>
+                                  </div>
+                                )}
+                                {entry.tuitionFeesPrice > 0 && (
+                                  <div className="oa-info-row">
+                                    <span>Tuition Fees (HSN 999293 - 18% GST)</span>
+                                    <strong>&#8377;{formatINR(entry.tuitionFeesPrice)}</strong>
+                                  </div>
+                                )}
+                                {entry.studyMaterialPrice === 0 && entry.tuitionFeesPrice === 0 && (
+                                  <div className="oa-info-row" style={{color: '#999', fontStyle: 'italic'}}>
+                                    <span>Split pricing not configured for this course</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="oa-ledger-info-card">
+                                <h4><FaRupeeSign style={{ marginRight: 6 }} /> Payment Summary</h4>
+                                <div className="oa-info-row">
+                                  <span>Total Paid ({entry.paymentCount} payment{entry.paymentCount > 1 ? 's' : ''})</span>
+                                  <strong style={{ color: '#2e7d32' }}>&#8377;{formatINR(entry.totalPaid)}</strong>
+                                </div>
+                                <div className="oa-info-row">
+                                  <span>Remaining Balance</span>
+                                  <strong style={{ color: entry.remainingBalance > 0 ? '#e74c3c' : '#2e7d32' }}>
+                                    &#8377;{formatINR(entry.remainingBalance)}
+                                  </strong>
+                                </div>
+                                <div className="oa-info-row">
+                                  <span>Status</span>
+                                  <strong style={{ color: entry.paymentStatus === 'fully_paid' ? '#2e7d32' : '#f57c00' }}>
+                                    {entry.paymentStatus === 'fully_paid' ? 'Fully Paid' : 'Partial Payment'}
+                                  </strong>
+                                </div>
+                                {entry.studentEmail && (
+                                  <div className="oa-info-row">
+                                    <span>Email</span>
+                                    <strong>{entry.studentEmail}</strong>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="oa-ledger-payments-section">
+                              <div className="oa-ledger-payments-header">
+                                <h4><FaHistory style={{ marginRight: 6 }} /> Payment History</h4>
+                                {entry.remainingBalance > 0 && (
+                                  <button
+                                    className="oa-btn oa-btn-add-payment"
+                                    onClick={(e) => { e.stopPropagation(); openAddPayment(entry); }}
+                                  >
+                                    <FaPlus /> Add Payment
+                                  </button>
+                                )}
+                              </div>
+
+                              <table className="oa-ledger-payments-table">
+                                <thead>
+                                  <tr>
+                                    <th>#</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Reference</th>
+                                    <th>Invoice</th>
+                                    <th>Action</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {entry.payments.map((p, idx) => (
+                                    <tr key={p._id}>
+                                      <td>{idx + 1}</td>
+                                      <td>{new Date(p.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                                      <td><strong>&#8377;{formatINR(p.amount)}</strong></td>
+                                      <td>{extractMethodFromNotes(p.notes)}</td>
+                                      <td>{extractRefFromNotes(p.notes) || '-'}</td>
+                                      <td>{p.invoiceNumber ? `${entry.invoicePrefix || 'STX'}${p.invoiceNumber}` : (p.receiptNumber || '-')}</td>
+                                      <td>
+                                        <button className="oa-btn-sm" onClick={() => openInvoice(p._id)}>
+                                          <FaFileInvoice /> Invoice
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {isAddingPayment && (
+                              <div className="oa-add-payment-section">
+                                <h4><FaPlus style={{ marginRight: 6 }} /> Record New Payment</h4>
+                                <div className="oa-add-payment-grid">
+                                  <div className="oa-field">
+                                    <label>Amount (&#8377;) <span className="req">*</span></label>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      placeholder="Amount"
+                                      value={addPaymentForm.amount}
+                                      onChange={e => setAddPaymentForm(prev => ({ ...prev, amount: e.target.value }))}
+                                    />
+                                  </div>
+                                  <div className="oa-field">
+                                    <label>Payment Method <span className="req">*</span></label>
+                                    <select
+                                      value={addPaymentForm.paymentMethod}
+                                      onChange={e => setAddPaymentForm(prev => ({ ...prev, paymentMethod: e.target.value }))}
+                                    >
+                                      {PAYMENT_METHODS.map(m => (
+                                        <option key={m.value} value={m.value}>{m.label}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <div className="oa-field">
+                                    <label>Reference / Transaction No.</label>
+                                    <input
+                                      type="text"
+                                      placeholder="UTR, Cheque No, etc."
+                                      value={addPaymentForm.referenceNumber}
+                                      onChange={e => setAddPaymentForm(prev => ({ ...prev, referenceNumber: e.target.value }))}
+                                    />
+                                  </div>
+                                  <div className="oa-field">
+                                    <label>Note</label>
+                                    <input
+                                      type="text"
+                                      placeholder="Any note"
+                                      value={addPaymentForm.paymentNote}
+                                      onChange={e => setAddPaymentForm(prev => ({ ...prev, paymentNote: e.target.value }))}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="oa-add-payment-actions">
+                                  <button
+                                    className="oa-btn oa-btn-primary"
+                                    disabled={addPaymentLoading}
+                                    onClick={() => handleAddPayment(entry)}
+                                  >
+                                    {addPaymentLoading ? 'Recording...' : 'Record Payment'}
+                                  </button>
+                                  <button
+                                    className="oa-btn oa-btn-secondary"
+                                    onClick={() => setAddPaymentFor(null)}
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
 
-                {admissionsTotalPages > 1 && (
+                {ledgerTotalPages > 1 && (
                   <div className="oa-pagination">
                     <button
-                      disabled={admissionsPage === 1}
-                      onClick={() => setAdmissionsPage(p => p - 1)}
+                      disabled={ledgerPage === 1}
+                      onClick={() => setLedgerPage(p => p - 1)}
                     >
                       Previous
                     </button>
-                    <span>Page {admissionsPage} of {admissionsTotalPages}</span>
+                    <span>Page {ledgerPage} of {ledgerTotalPages}</span>
                     <button
-                      disabled={admissionsPage === admissionsTotalPages}
-                      onClick={() => setAdmissionsPage(p => p + 1)}
+                      disabled={ledgerPage === ledgerTotalPages}
+                      onClick={() => setLedgerPage(p => p + 1)}
                     >
                       Next
                     </button>

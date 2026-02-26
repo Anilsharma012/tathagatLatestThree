@@ -602,6 +602,283 @@
   font-weight: 500;
 }
 
+.oa-ledger-section {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.oa-ledger-list {
+  padding: 8px;
+}
+
+.oa-ledger-card {
+  border: 1.5px solid #e8eaf6;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.oa-ledger-card.expanded {
+  border-color: #1a237e;
+  box-shadow: 0 2px 12px rgba(26, 35, 126, 0.1);
+}
+
+.oa-ledger-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.oa-ledger-card-header:hover {
+  background: #f5f7ff;
+}
+
+.oa-ledger-student {
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+}
+
+.oa-ledger-student strong {
+  font-size: 14px;
+  color: #1a1a2e;
+}
+
+.oa-ledger-student span {
+  font-size: 12px;
+  color: #888;
+}
+
+.oa-ledger-course {
+  flex: 1;
+  min-width: 0;
+}
+
+.oa-ledger-course-name {
+  font-size: 13px;
+  color: #444;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.oa-ledger-amounts {
+  display: flex;
+  gap: 16px;
+}
+
+.oa-ledger-amount-item {
+  text-align: center;
+  min-width: 80px;
+}
+
+.oa-ledger-label {
+  display: block;
+  font-size: 11px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.oa-ledger-amount-item strong {
+  font-size: 14px;
+  color: #333;
+}
+
+.oa-ledger-amount-item.paid strong {
+  color: #2e7d32;
+}
+
+.oa-ledger-amount-item.pending strong {
+  color: #e74c3c;
+}
+
+.oa-ledger-amount-item.done strong {
+  color: #2e7d32;
+}
+
+.oa-ledger-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: center;
+}
+
+.oa-ledger-status.fully_paid {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.oa-ledger-status.partial {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.oa-ledger-expand {
+  color: #999;
+  font-size: 14px;
+  padding: 4px;
+}
+
+.oa-ledger-detail {
+  border-top: 1px solid #e8eaf6;
+  background: #fafbff;
+  padding: 16px;
+}
+
+.oa-ledger-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.oa-ledger-info-card {
+  background: #fff;
+  border: 1px solid #e0e4f0;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.oa-ledger-info-card h4 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a237e;
+  margin: 0 0 10px 0;
+  display: flex;
+  align-items: center;
+}
+
+.oa-info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.oa-info-row:last-child {
+  border-bottom: none;
+}
+
+.oa-info-row span {
+  color: #666;
+}
+
+.oa-info-row strong {
+  color: #333;
+}
+
+.oa-ledger-payments-section {
+  background: #fff;
+  border: 1px solid #e0e4f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.oa-ledger-payments-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f5f7ff;
+  border-bottom: 1px solid #e0e4f0;
+}
+
+.oa-ledger-payments-header h4 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a237e;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.oa-btn-add-payment {
+  padding: 6px 14px;
+  border: none;
+  background: #2e7d32;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.2s;
+}
+
+.oa-btn-add-payment:hover {
+  background: #1b5e20;
+}
+
+.oa-ledger-payments-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.oa-ledger-payments-table th {
+  background: #f8f9ff;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  border-bottom: 2px solid #e8eaf6;
+}
+
+.oa-ledger-payments-table td {
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.oa-ledger-payments-table tbody tr:hover {
+  background: #f5f7ff;
+}
+
+.oa-add-payment-section {
+  margin-top: 16px;
+  background: #fff;
+  border: 2px solid #2e7d32;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.oa-add-payment-section h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2e7d32;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+}
+
+.oa-add-payment-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.oa-add-payment-actions {
+  display: flex;
+  gap: 10px;
+}
+
 @media (max-width: 768px) {
   .oa-container {
     padding: 16px;
@@ -626,5 +903,36 @@
 
   .oa-btn {
     justify-content: center;
+  }
+
+  .oa-ledger-card-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .oa-ledger-amounts {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .oa-ledger-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .oa-add-payment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .oa-ledger-student {
+    min-width: 100%;
+  }
+
+  .oa-ledger-payments-table {
+    font-size: 12px;
+  }
+
+  .oa-ledger-payments-table th,
+  .oa-ledger-payments-table td {
+    padding: 6px 8px;
   }
 }
