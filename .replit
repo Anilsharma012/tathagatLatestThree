@@ -50,20 +50,20 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd /home/runner/workspace/backend && node index.js"
+args = "cd /home/runner/workspace/backend && node --max-old-space-size=1024 index.js"
 waitForPort = 3001
 
 [[workflows.workflow]]
 name = "Frontend"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd /home/runner/workspace/frontend && npx cross-env HOST=0.0.0.0 PORT=5000 DANGEROUSLY_DISABLE_HOST_CHECK=true WDS_SOCKET_PORT=0 GENERATE_SOURCEMAP=false TSC_COMPILE_ON_ERROR=true ESLINT_NO_DEV_ERRORS=true NODE_OPTIONS=\"--max-old-space-size=4096\" react-scripts start"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd /home/runner/workspace/frontend && npx cross-env HOST=0.0.0.0 PORT=5000 DANGEROUSLY_DISABLE_HOST_CHECK=true WDS_SOCKET_PORT=0 GENERATE_SOURCEMAP=false TSC_COMPILE_ON_ERROR=true ESLINT_NO_DEV_ERRORS=true NODE_OPTIONS=\"--max-old-space-size=2048\" react-scripts start"
+waitForPort = 5000
 
 [[ports]]
 localPort = 3001
