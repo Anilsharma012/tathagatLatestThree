@@ -913,6 +913,11 @@ const server = app.listen(PORT, HOST, () => {
   console.log(`✅ JWT Secret loaded: ${!!process.env.JWT_SECRET}`);
 });
 
+setInterval(() => {
+  const http = require('http');
+  http.get(`http://127.0.0.1:${PORT}/api/health`, () => {}).on('error', () => {});
+}, 30000);
+
 server.on("error", (error) => {
   console.error("❌ Server startup error:", error);
   if (error.code === "EADDRINUSE") {
