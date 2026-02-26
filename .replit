@@ -62,7 +62,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd /home/runner/workspace/frontend && npx cross-env HOST=0.0.0.0 PORT=5000 DANGEROUSLY_DISABLE_HOST_CHECK=true WDS_SOCKET_PORT=0 GENERATE_SOURCEMAP=false TSC_COMPILE_ON_ERROR=true ESLINT_NO_DEV_ERRORS=true NODE_OPTIONS=\"--max-old-space-size=2048\" react-scripts start"
+args = "cd /home/runner/workspace/frontend && npx cross-env HOST=0.0.0.0 PORT=5000 DANGEROUSLY_DISABLE_HOST_CHECK=true WDS_SOCKET_PORT=0 GENERATE_SOURCEMAP=false TSC_COMPILE_ON_ERROR=true ESLINT_NO_DEV_ERRORS=true NODE_OPTIONS=\"--max-old-space-size=1024\" react-scripts start"
 waitForPort = 5000
 
 [[ports]]
