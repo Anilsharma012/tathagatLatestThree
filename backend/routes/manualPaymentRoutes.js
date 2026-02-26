@@ -7,6 +7,7 @@ const ManualPaymentRequest = require('../models/ManualPaymentRequest');
 const Enrollment = require('../models/Enrollment');
 const Payment = require('../models/Payment');
 const Course = require('../models/course/Course');
+const User = require('../models/UserSchema');
 
 router.get('/upi-settings', async (req, res) => {
   try {
@@ -178,6 +179,20 @@ router.put('/verify/:id', adminAuth, async (req, res) => {
         },
         { upsert: true, new: true }
       );
+
+      const user = await User.findById(request.userId);
+      if (user) {
+        const existingEntry = user.enrolledCourses?.find(c => String(c.courseId) === String(request.courseId));
+        if (!existingEntry) {
+          user.enrolledCourses = user.enrolledCourses || [];
+          user.enrolledCourses.push({ courseId: request.courseId, status: 'unlocked', enrolledAt: now });
+          await user.save();
+        } else if (existingEntry.status !== 'unlocked') {
+          existingEntry.status = 'unlocked';
+          existingEntry.enrolledAt = now;
+          await user.save();
+        }
+      }
 
       await Payment.create({
         userId: request.userId,

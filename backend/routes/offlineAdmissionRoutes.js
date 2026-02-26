@@ -118,6 +118,17 @@ router.post('/', adminAuth, async (req, res) => {
       { upsert: true, new: true }
     );
 
+    const existingEntry = user.enrolledCourses?.find(c => String(c.courseId) === String(courseId));
+    if (!existingEntry) {
+      user.enrolledCourses = user.enrolledCourses || [];
+      user.enrolledCourses.push({ courseId, status: 'unlocked', enrolledAt: now });
+      await user.save();
+    } else if (existingEntry.status !== 'unlocked') {
+      existingEntry.status = 'unlocked';
+      existingEntry.enrolledAt = now;
+      await user.save();
+    }
+
     const payment = await Payment.create({
       userId: user._id,
       courseId,
