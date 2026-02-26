@@ -15,8 +15,8 @@ const CourseForm = ({ onClose, onSuccess, editData, courseType = 'full_course' }
   const [name, setName] = useState(editData?.name || "");
   const [price, setPrice] = useState(editData?.price || "");
   const [oldPrice, setOldPrice] = useState(editData?.oldPrice || "");
-  const [studyMaterialPrice, setStudyMaterialPrice] = useState(editData?.studyMaterialPrice || "");
-  const [tuitionFeesPrice, setTuitionFeesPrice] = useState(editData?.tuitionFeesPrice || "");
+  const [studyMaterialPrice, setStudyMaterialPrice] = useState(editData?.studyMaterialPrice !== undefined && editData?.studyMaterialPrice !== null ? editData.studyMaterialPrice : "");
+  const [tuitionFeesPrice, setTuitionFeesPrice] = useState(editData?.tuitionFeesPrice !== undefined && editData?.tuitionFeesPrice !== null ? editData.tuitionFeesPrice : "");
   const [description, setDescription] = useState(editData?.description || "");
   const [selectedCourseType, setSelectedCourseType] = useState(editData?.courseType || courseType || 'full_course');
   const [thumbnail, setThumbnail] = useState(null);
@@ -85,7 +85,8 @@ const CourseForm = ({ onClose, onSuccess, editData, courseType = 'full_course' }
     onSuccess(); // Refresh + Close modal
   } catch (err) {
     console.error("Error:", err);
-    alert("❌ Something went wrong!");
+    const errMsg = err.response?.data?.message || err.message || "Something went wrong";
+    alert("❌ " + errMsg);
   } finally {
     setLoading(false);
   }
