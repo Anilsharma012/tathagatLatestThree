@@ -33,7 +33,7 @@ const CourseMockTestManager = ({ course, onClose }) => {
 
   const categoryOptions = [
     { value: 'Modular', label: 'Modular Tests' },
-    { value: 'Sessional', label: 'Sessional Tests' },
+    { value: 'Sessional', label: 'Sectional Tests' },
     { value: 'Full', label: 'Full Tests' },
     { value: 'Final', label: 'Final Tests' },
     { value: 'Previous Year', label: 'Previous Year Papers' }

@@ -3715,6 +3715,7 @@ select:focus {
   font-size: 0.9rem;
 }
 
+/* profile stats styles removed - streak/points no longer shown
 .profile-stats-pro {
   display: flex;
   flex-direction: column;
@@ -3769,6 +3770,7 @@ select:focus {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+*/
 
 .logout-btn-pro {
   width: 100%;

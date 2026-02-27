@@ -179,6 +179,7 @@
   position: relative;
 }
 
+/* profile-stats removed - no longer needed
 .profile-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -186,6 +187,7 @@
   z-index: 1;
   position: relative;
 }
+*/
 
 .stat-card {
   background: rgba(255, 255, 255, 0.1);
@@ -609,10 +611,12 @@
     border-radius: 20px;
   }
   
-  .profile-stats {
+  /* responsive rules for profile-stats commented out
+.profile-stats {
     grid-template-columns: 1fr;
     gap: 12px;
   }
+*/
   
   .form-actions {
     flex-direction: column;

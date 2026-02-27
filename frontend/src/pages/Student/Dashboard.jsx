@@ -90,8 +90,7 @@ const StudentDashboard = () => {
     name: "Student",
     email: "student@example.com",
     profileImage: null,
-    streak: 15,
-    totalPoints: 2850,
+    // streak/totalPoints intentionally omitted
   });
   const [myCourses, setMyCourses] = useState([]);
   const [myCoursesLoading, setMyCoursesLoading] = useState(false);
@@ -110,7 +109,7 @@ const StudentDashboard = () => {
     completionRate: 0,
     learningProgress: [],
     coursesEnrolled: 0,
-    streak: 0,
+    // streak data not used here
   });
   const [dashboardMetricsLoading, setDashboardMetricsLoading] = useState(false);
   const [courseProgressData, setCourseProgressData] = useState({
@@ -304,8 +303,7 @@ const StudentDashboard = () => {
         email:
           storedUser.email || storedUser.phoneNumber || "student@example.com",
         profileImage: storedUser.profilePic || null,
-        streak: 15,
-        totalPoints: 2850,
+        // streak/points not tracked in dashboard state
       });
 
       // Also update profile form
@@ -587,10 +585,8 @@ const StudentDashboard = () => {
         const data = await response.json();
         if (data.success && data.data) {
           setDashboardMetrics(data.data);
-          setUserDetails((prev) => ({
-            ...prev,
-            streak: data.data.streak || prev.streak,
-          }));
+          // no longer tracking streak in userDetails
+
         }
       }
     } catch (error) {
@@ -2025,15 +2021,7 @@ const StudentDashboard = () => {
             <p>Tests Taken</p>
           </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon">
-            <FiTrendingUp />
-          </div>
-          <div className="stat-info">
-            <h3>{userDetails.streak}</h3>
-            <p>Day Streak</p>
-          </div>
-        </div>
+        {/* streak card removed per design */}
       </div>
 
       <div className="dashboard-grid">
@@ -3086,30 +3074,7 @@ const StudentDashboard = () => {
             )}
           </div>
 
-          <div className="profile-stats-pro">
-            <div className="stat-item-pro">
-              <div className="stat-icon-pro streak">
-                <FiTrendingUp />
-              </div>
-              <div className="stat-details">
-                <span className="stat-value-pro">
-                  {userDetails.streak || 0}
-                </span>
-                <span className="stat-label-pro">Day Streak</span>
-              </div>
-            </div>
-            <div className="stat-item-pro">
-              <div className="stat-icon-pro points">
-                <FiTarget />
-              </div>
-              <div className="stat-details">
-                <span className="stat-value-pro">
-                  {userDetails.totalPoints || 0}
-                </span>
-                <span className="stat-label-pro">Total Points</span>
-              </div>
-            </div>
-          </div>
+          {/* profile stats (streak/points) removed */}
 
           <button className="logout-btn-pro" onClick={handleLogout}>
             <FiLogOut /> Sign Out

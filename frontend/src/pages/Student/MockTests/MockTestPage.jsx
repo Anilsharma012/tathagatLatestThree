@@ -163,7 +163,7 @@ const MockTestPage = () => {
 
     const years = Object.keys(testTree.sessionalTests);
     if (years.length === 0) {
-      return <div className="empty-state">No sessional tests available</div>;
+      return <div className="empty-state">No sectional tests available</div>;
     }
 
     return (
@@ -240,22 +240,10 @@ const MockTestPage = () => {
       <div className="tabs-container">
         <div className="main-tabs">
           <button
-            className={`tab ${activeTab === 'previousYear' ? 'active' : ''}`}
-            onClick={() => setActiveTab('previousYear')}
-          >
-            Previous Year Papers
-          </button>
-          <button
-            className={`tab ${activeTab === 'full' ? 'active' : ''}`}
-            onClick={() => setActiveTab('full')}
-          >
-            Full Tests
-          </button>
-          <button
             className={`tab ${activeTab === 'series' ? 'active' : ''}`}
             onClick={() => setActiveTab('series')}
           >
-            Series Tests
+            Topic Tests
           </button>
           <button
             className={`tab ${activeTab === 'module' ? 'active' : ''}`}
@@ -267,7 +255,19 @@ const MockTestPage = () => {
             className={`tab ${activeTab === 'sessional' ? 'active' : ''}`}
             onClick={() => setActiveTab('sessional')}
           >
-            Sessional Tests
+            Sectional Tests
+          </button>
+          <button
+            className={`tab ${activeTab === 'full' ? 'active' : ''}`}
+            onClick={() => setActiveTab('full')}
+          >
+            Full Tests
+          </button>
+          <button
+            className={`tab ${activeTab === 'previousYear' ? 'active' : ''}`}
+            onClick={() => setActiveTab('previousYear')}
+          >
+            Previous Year Papers
           </button>
         </div>
 

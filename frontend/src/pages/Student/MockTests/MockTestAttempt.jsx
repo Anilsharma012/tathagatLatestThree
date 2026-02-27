@@ -1036,11 +1036,13 @@ const MockTestAttempt = () => {
     } catch (error) {
       console.error("Error submitting feedback:", error);
     }
-    navigate("/student/dashboard?section=analysis");
+    // After feedback we want to return user to the list of mock tests
+    navigate("/student/mock-tests");
   };
 
   const handleFeedbackSkip = () => {
-    navigate("/student/dashboard?section=analysis");
+    // user skipped feedback; send them back to the mock tests overview
+    navigate("/student/mock-tests");
   };
 
   const getCurrentQuestion = () => {

@@ -420,22 +420,10 @@ const MockTestManagement = () => {
       <div className="tabs-container">
         <div className="main-tabs">
           <button
-            className={activeTab === 'previousYear' ? 'active' : ''}
-            onClick={() => setActiveTab('previousYear')}
-          >
-            Previous Year Papers
-          </button>
-          <button
-            className={activeTab === 'full' ? 'active' : ''}
-            onClick={() => setActiveTab('full')}
-          >
-            Full Tests
-          </button>
-          <button
             className={activeTab === 'series' ? 'active' : ''}
             onClick={() => setActiveTab('series')}
           >
-            Series Tests
+            Topic Tests
           </button>
           <button
             className={activeTab === 'module' ? 'active' : ''}
@@ -447,7 +435,19 @@ const MockTestManagement = () => {
             className={activeTab === 'sessional' ? 'active' : ''}
             onClick={() => setActiveTab('sessional')}
           >
-            Sessional Tests
+            Sectional Tests
+          </button>
+          <button
+            className={activeTab === 'full' ? 'active' : ''}
+            onClick={() => setActiveTab('full')}
+          >
+            Full Tests
+          </button>
+          <button
+            className={activeTab === 'previousYear' ? 'active' : ''}
+            onClick={() => setActiveTab('previousYear')}
+          >
+            Previous Year Papers
           </button>
         </div>
 

@@ -25,21 +25,8 @@ const StudentProfile = () => {
     selectedCategory: "",
     selectedExam: "",
     targetYear: "",
-    streak: 0,
-    points: 0,
-    notificationPreferences: {
-      email: true,
-      sms: true,
-      analytics: true
-    }
+    // streak and points no longer displayed on profile
   });
-
-  const examCategories = [
-    { id: "MBA", name: "MBA Entrance" },
-    { id: "After12", name: "After 12th" },
-    { id: "GMAT", name: "GMAT/GRE" },
-    { id: "Govt", name: "Govt Exams" }
-  ];
 
   const examTypes = {
     MBA: ["CAT", "XAT", "SNAP", "MAT", "CMAT", "NMAT", "IIFT"],
@@ -86,8 +73,7 @@ const StudentProfile = () => {
         selectedCategory: user.selectedCategory || "",
         selectedExam: user.selectedExam || "",
         targetYear: user.targetYear || "",
-        streak: user.streak || 0,
-        points: user.points || 0,
+        // streak/points omitted
         notificationPreferences: user.notificationPreferences || {
           email: true,
           sms: true,
@@ -245,18 +231,7 @@ const StudentProfile = () => {
               <h2>{userData.name || "Student"}</h2>
               <p className="profile-email">{userData.email || userData.phoneNumber}</p>
               
-              <div className="profile-stats">
-                <div className="stat-card">
-                  <span className="stat-icon">🔥</span>
-                  <span className="stat-value">{userData.streak}</span>
-                  <span className="stat-label">Day Streak</span>
-                </div>
-                <div className="stat-card">
-                  <span className="stat-icon">⭐</span>
-                  <span className="stat-value">{userData.points}</span>
-                  <span className="stat-label">Total Points</span>
-                </div>
-              </div>
+              {/* profile-stats removed as not needed anymore */}
             </div>
 
             <div className="section-nav">

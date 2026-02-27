@@ -645,7 +645,7 @@
 
 /* ===== FULL COURSE CONTENT V2 ===== */
 .scm-fc-section {
-  padding: 0 !important;
+  padding: 0 24px !important;           /* horizontal breathing room */
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -713,7 +713,9 @@
 .scm-fc-tree {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
+  max-width: 1024px;  /* restrict width on large screens */
+  margin: 0 auto;     /* center the tree */
 }
 
 /* SUBJECT CARD */
@@ -734,7 +736,7 @@
   width: 100%;
   border: none;
   background: #f8fafc;
-  padding: 16px 20px;
+  padding: 20px 24px; /* extra padding on desktop */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -757,12 +759,12 @@
 }
 
 .scm-fc-snum {
-  font-size: 0.75rem;
+  font-size: 0.85rem; /* slightly bigger subject index */
   font-weight: 800;
   color: #ffffff;
   background: #4f46e5;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -771,7 +773,7 @@
 }
 
 .scm-fc-sname {
-  font-size: 1rem;
+  font-size: 1.1rem; /* slightly bigger subject text */
   font-weight: 600;
   color: #1e293b;
 }
@@ -818,6 +820,7 @@
 /* CHAPTER LIST */
 .scm-fc-ch-list {
   border-top: 1px solid #f1f5f9;
+  padding-left: 20px; /* indent chapters inside subject */
 }
 
 .scm-fc-ch-item {
@@ -851,7 +854,7 @@
 .scm-fc-ch-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px; /* more breathing room between index/icon/name */
 }
 
 .scm-fc-ch-idx {
@@ -863,14 +866,16 @@
 
 .scm-fc-ch-icon {
   color: #818cf8;
-  font-size: 0.8rem;
+  font-size: 1rem;          /* slightly larger icon for clarity */
   flex-shrink: 0;
 }
 
+/* chapter name style: make it more prominent */
 .scm-fc-ch-name {
-  font-size: 0.92rem;
-  font-weight: 500;
+  font-size: 1.2rem;        /* larger for better readability */
+  font-weight: 600;          /* slightly bolder for emphasis */
   color: #334155;
+  font-family: 'Poppins', sans-serif; /* use same family as global body */
 }
 
 .scm-fc-ch-right {
@@ -941,7 +946,7 @@
 }
 
 .scm-fc-tp-name {
-  font-size: 0.88rem;
+  font-size: 0.95rem; /* larger for readability */
   color: #475569;
   font-weight: 400;
 }
@@ -1180,7 +1185,7 @@
   }
 
   .scm-fc-sname {
-    font-size: 0.92rem;
+    font-size: 1rem; /* responsive smaller-screen size */
   }
 
   .scm-fc-res-grid {
@@ -1245,7 +1250,7 @@
   }
 
   .scm-fc-sname {
-    font-size: 0.88rem;
+    font-size: 1rem; /* maintain readability on narrow viewports */
   }
 
   .scm-fc-count-tag {
@@ -1254,11 +1259,14 @@
   }
 
   .scm-fc-ch-row {
-    padding: 11px 16px 11px 22px;
-  }
+  padding: 12px 18px 12px 24px; /* a bit more spacious */
+  font-family: 'Poppins', sans-serif;
+}
 
-  .scm-fc-ch-name {
-    font-size: 0.85rem;
+/* responsive adjustment for smaller screens */
+.scm-fc-ch-name {
+  font-size: 1.1rem; /* keep slightly larger on mobile too */
+  font-family: 'Poppins', sans-serif;
   }
 
   .scm-fc-tp-list {
@@ -1270,7 +1278,7 @@
   }
 
   .scm-fc-tp-name {
-    font-size: 0.82rem;
+    font-size: 0.95rem; /* make topic names easier to read */
   }
 
   .scm-fc-res-panel {
