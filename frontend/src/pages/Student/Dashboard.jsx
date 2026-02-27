@@ -40,6 +40,12 @@ import {
   FiFileText,
   FiLogOut,
   FiPhone,
+  FiDollarSign,
+  FiShoppingBag,
+  FiCreditCard,
+  FiHash,
+  FiExternalLink,
+  FiUpload,
 } from "react-icons/fi";
 import { Line, Doughnut, Bar } from "react-chartjs-2";
 import logo from "../../images/tgLOGO.png";
@@ -1713,37 +1719,76 @@ const StudentDashboard = () => {
       });
     };
 
-    const getStatusColor = (status) => {
-      switch (status) {
-        case "paid":
-          return "#27ae60";
-        case "created":
-          return "#f39c12";
-        case "failed":
-          return "#e74c3c";
-        default:
-          return "#7f8c8d";
-      }
+    const paidPayments = paymentHistory.filter(
+      (p) => p.status === "paid" || p.status === "captured" || p.status === "success"
+    );
+    const totalSpent = paidPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    const lastPurchase = paidPayments.length
+      ? paidPayments.reduce((latest, p) => {
+          const d = new Date(p.createdAt);
+          return d > latest ? d : latest;
+        }, new Date(0))
+      : null;
+
+    const findReceiptForPayment = (paymentId) => {
+      return receipts.find((r) => r.paymentId === paymentId || r._id === paymentId);
     };
 
     return (
       <div className="purchases-content">
-        <div className="section-header">
-          <h2>Purchase History</h2>
-          <p>View your course purchases and download receipts</p>
+        <div className="ph-page-header">
+          <div className="ph-page-header-text">
+            <h2>Purchase History</h2>
+            <p>Manage your purchases, invoices and receipts</p>
+          </div>
         </div>
 
-        <div className="purchases-section">
-          <div className="section-title">
-            <h3>Payment History</h3>
-            {paymentHistoryLoading && (
-              <span className="loading-indicator">Loading...</span>
-            )}
+        <div className="ph-stats-row">
+          <div className="ph-stat-card">
+            <div className="ph-stat-icon ph-stat-icon-green">
+              <FiDollarSign size={22} />
+            </div>
+            <div className="ph-stat-info">
+              <span className="ph-stat-label">Total Spent</span>
+              <span className="ph-stat-value">{formatCurrency(totalSpent)}</span>
+            </div>
           </div>
+          <div className="ph-stat-card">
+            <div className="ph-stat-icon ph-stat-icon-blue">
+              <FiShoppingBag size={22} />
+            </div>
+            <div className="ph-stat-info">
+              <span className="ph-stat-label">Total Orders</span>
+              <span className="ph-stat-value">{paymentHistory.length}</span>
+            </div>
+          </div>
+          <div className="ph-stat-card">
+            <div className="ph-stat-icon ph-stat-icon-purple">
+              <FiCalendar size={22} />
+            </div>
+            <div className="ph-stat-info">
+              <span className="ph-stat-label">Last Purchase</span>
+              <span className="ph-stat-value">{lastPurchase ? formatDate(lastPurchase) : "N/A"}</span>
+            </div>
+          </div>
+          <div className="ph-stat-card">
+            <div className="ph-stat-icon ph-stat-icon-orange">
+              <FiFileText size={22} />
+            </div>
+            <div className="ph-stat-info">
+              <span className="ph-stat-label">Receipts</span>
+              <span className="ph-stat-value">{receipts.length}</span>
+            </div>
+          </div>
+        </div>
 
-          <form className="offline-upload" onSubmit={submitOfflinePayment}>
-            <div className="upload-row">
-              <div className="upload-field">
+        <div className="ph-section-block">
+          <div className="ph-section-top">
+            <h3>Upload Offline Payment</h3>
+          </div>
+          <form className="ph-offline-form" onSubmit={submitOfflinePayment}>
+            <div className="ph-form-grid">
+              <div className="ph-form-field">
                 <label>Course</label>
                 <select
                   value={offlineForm.courseId}
@@ -1751,13 +1796,11 @@ const StudentDashboard = () => {
                 >
                   <option value="">Select course</option>
                   {courses.map((c) => (
-                    <option key={c._id} value={c._id}>
-                      {c.name}
-                    </option>
+                    <option key={c._id} value={c._id}>{c.name}</option>
                   ))}
                 </select>
               </div>
-              <div className="upload-field">
+              <div className="ph-form-field">
                 <label>Amount (INR)</label>
                 <input
                   type="number"
@@ -1765,208 +1808,205 @@ const StudentDashboard = () => {
                   step="0.01"
                   value={offlineForm.amount}
                   onChange={(e) => onOfflineField("amount", e.target.value)}
+                  placeholder="0.00"
                 />
               </div>
-              <div className="upload-field">
-                <label>Slip Photo</label>
+              <div className="ph-form-field">
+                <label>Payment Slip</label>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={(e) => setOfflineFile(e.target.files?.[0] || null)}
                 />
               </div>
-              <div className="upload-field">
+              <div className="ph-form-field">
                 <label>Note</label>
                 <input
                   type="text"
                   value={offlineForm.note}
                   onChange={(e) => onOfflineField("note", e.target.value)}
-                  placeholder="Optional"
+                  placeholder="Optional note"
                 />
               </div>
-              <div className="upload-actions">
+              <div className="ph-form-field ph-form-submit">
                 <button
                   type="submit"
-                  className="download-btn"
-                  disabled={
-                    offlineUploading ||
-                    !offlineForm.courseId ||
-                    !offlineForm.amount ||
-                    !offlineFile
-                  }
+                  className="ph-submit-btn"
+                  disabled={offlineUploading || !offlineForm.courseId || !offlineForm.amount || !offlineFile}
                 >
-                  {offlineUploading ? "Uploading…" : "Upload Offline Slip"}
+                  <FiUpload size={16} />
+                  {offlineUploading ? "Uploading..." : "Submit"}
                 </button>
               </div>
             </div>
           </form>
+        </div>
+
+        <div className="ph-section-block">
+          <div className="ph-section-top">
+            <h3>Payment History</h3>
+            {paymentHistoryLoading && <span className="ph-loading-badge">Loading...</span>}
+          </div>
 
           {paymentHistory.length === 0 && !paymentHistoryLoading ? (
-            <div className="empty-state">
-              <FiFileText size={48} />
+            <div className="ph-empty-state">
+              <div className="ph-empty-icon">
+                <FiFileText size={48} />
+              </div>
               <h4>No Purchases Yet</h4>
-              <p>Your course purchases will appear here</p>
+              <p>Your course purchases will appear here once you enroll in a course.</p>
+              <button className="ph-browse-btn" onClick={() => setActiveSection("available-courses")}>
+                Browse Courses
+              </button>
             </div>
           ) : (
-            <div className="purchases-grid">
-              {paymentHistory.map((payment) => (
-                <div key={payment._id} className="purchase-card">
-                  <div className="purchase-header">
-                    <div className="course-info">
-                      <h4>{payment.courseId?.name || "Course"}</h4>
-                      <p>
-                        {payment.courseId?.description
-                          ?.replace(/<[^>]*>/g, "")
-                          .substring(0, 100)}
-                        ...
-                      </p>
-                    </div>
-                    <div className="purchase-status">
-                      <span
-                        className={`status-badge ${payment.status}`}
-                        style={{
-                          backgroundColor: getStatusColor(payment.status),
-                        }}
-                      >
-                        {payment.status.toUpperCase()}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="purchase-details">
-                    <div className="detail-row">
-                      <span>Purchase Date:</span>
-                      <span>{formatDate(payment.createdAt)}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span>Amount Paid:</span>
-                      <span className="amount">
-                        {formatCurrency(payment.amount)}
-                      </span>
-                    </div>
-                    {payment.paymentMethod && (
-                      <div className="detail-row">
-                        <span>Method:</span>
-                        <span>
-                          {(payment.paymentMethod || "").toUpperCase()}
-                        </span>
+            <div className="ph-payments-list">
+              {paymentHistory.map((payment) => {
+                const isPaid = payment.status === "paid" || payment.status === "captured" || payment.status === "success";
+                const matchedReceipt = findReceiptForPayment(payment._id);
+                return (
+                  <div key={payment._id} className={`ph-payment-card ${isPaid ? "ph-payment-paid" : ""}`}>
+                    <div className="ph-payment-top-row">
+                      <div className="ph-payment-course">
+                        <h4>{payment.courseId?.name || "Course"}</h4>
+                        {payment.courseId?.description && (
+                          <p className="ph-payment-desc">
+                            {payment.courseId.description.replace(/<[^>]*>/g, "").substring(0, 80)}
+                          </p>
+                        )}
                       </div>
-                    )}
+                      <span className={`ph-status-pill ph-status-${payment.status}`}>
+                        {(payment.status || "").toUpperCase()}
+                      </span>
+                    </div>
+
+                    <div className="ph-payment-meta">
+                      <div className="ph-meta-item">
+                        <FiCalendar size={14} />
+                        <span>{formatDate(payment.createdAt)}</span>
+                      </div>
+                      <div className="ph-meta-item ph-meta-amount">
+                        <FiDollarSign size={14} />
+                        <span>{formatCurrency(payment.amount)}</span>
+                      </div>
+                      {payment.paymentMethod && (
+                        <div className="ph-meta-item">
+                          <FiCreditCard size={14} />
+                          <span>{(payment.paymentMethod || "").toUpperCase()}</span>
+                        </div>
+                      )}
+                      {payment.validityEndDate && (
+                        <div className="ph-meta-item">
+                          <FiClock size={14} />
+                          <span>Valid till {formatDate(payment.validityEndDate)}</span>
+                        </div>
+                      )}
+                      {payment.receiptNumber && (
+                        <div className="ph-meta-item">
+                          <FiHash size={14} />
+                          <span>{payment.receiptNumber}</span>
+                        </div>
+                      )}
+                    </div>
+
                     {payment.offlineSlipUrl && (
-                      <div className="detail-row">
-                        <span>Slip:</span>
-                        <a
-                          className="link"
-                          href={payment.offlineSlipUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          View
+                      <div className="ph-slip-link">
+                        <a href={payment.offlineSlipUrl} target="_blank" rel="noreferrer">
+                          <FiExternalLink size={14} /> View Payment Slip
                         </a>
                       </div>
                     )}
-                    {payment.validityEndDate && (
-                      <div className="detail-row">
-                        <span>Valid Until:</span>
-                        <span>{formatDate(payment.validityEndDate)}</span>
-                      </div>
-                    )}
-                    {payment.receiptNumber && (
-                      <div className="detail-row">
-                        <span>Receipt No:</span>
-                        <span>{payment.receiptNumber}</span>
+
+                    {isPaid && (
+                      <div className="ph-payment-actions">
+                        <button
+                          className="ph-action-btn ph-action-invoice"
+                          onClick={() => {
+                            const token = localStorage.getItem('authToken') || localStorage.getItem('token') || '';
+                            const url = `/api/invoices/download/${payment._id}?token=${encodeURIComponent(token)}`;
+                            window.open(url, '_blank');
+                          }}
+                        >
+                          <FiDownload size={14} /> Tax Invoice
+                        </button>
+                        {matchedReceipt && (
+                          <button
+                            className="ph-action-btn ph-action-receipt"
+                            onClick={() => viewReceipt(matchedReceipt._id)}
+                          >
+                            <FiEye size={14} /> View Receipt
+                          </button>
+                        )}
+                        {matchedReceipt && (
+                          <button
+                            className="ph-action-btn ph-action-download"
+                            onClick={() => downloadReceipt(matchedReceipt._id, "html")}
+                          >
+                            <FiDownload size={14} /> Download Receipt
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
-
-                  {(payment.status === "paid" || payment.status === "captured" || payment.status === "success") && (
-                    <div className="purchase-actions">
-                      <button
-                        className="download-btn"
-                        onClick={() => {
-                          const token = localStorage.getItem('authToken') || localStorage.getItem('token') || '';
-                          const url = `/api/invoices/download/${payment._id}?token=${encodeURIComponent(token)}`;
-                          window.open(url, '_blank');
-                        }}
-                      >
-                        <FiDownload /> Tax Invoice
-                      </button>
-                      <button
-                        className="download-btn"
-                        onClick={() => downloadReceipt(payment._id, "html")}
-                        style={{ marginLeft: 8 }}
-                      >
-                        <FiDownload /> Receipt
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
 
-        <div className="purchases-section">
-          <div className="section-title">
-            <h3>Receipts</h3>
-            {receiptsLoading && (
-              <span className="loading-indicator">Loading...</span>
-            )}
-          </div>
-
-          {receipts.length === 0 && !receiptsLoading ? (
-            <div className="empty-state">
-              <FiDownload size={48} />
-              <h4>No Receipts Available</h4>
-              <p>Receipts for successful payments will appear here</p>
+        {receipts.length > 0 && (
+          <div className="ph-section-block">
+            <div className="ph-section-top">
+              <h3>Receipts</h3>
+              {receiptsLoading && <span className="ph-loading-badge">Loading...</span>}
             </div>
-          ) : (
-            <div className="receipts-table">
-              <table>
+
+            <div className="ph-receipts-table-wrap">
+              <table className="ph-receipts-table">
                 <thead>
                   <tr>
                     <th>Receipt No.</th>
                     <th>Course</th>
                     <th>Date</th>
                     <th>Amount</th>
-                    <th>Downloads</th>
-                    <th>Action</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {receipts.map((receipt) => (
                     <tr key={receipt._id}>
-                      <td>{receipt.receiptNumber}</td>
+                      <td className="ph-receipt-no">{receipt.receiptNumber}</td>
                       <td>{receipt.courseId?.name || "Course"}</td>
-                      <td>{formatDate(receipt.generatedAt)}</td>
-                      <td>{formatCurrency(receipt.totalAmount)}</td>
-                      <td>{receipt.downloadCount}</td>
+                      <td>{formatDate(receipt.generatedAt || receipt.createdAt)}</td>
+                      <td className="ph-receipt-amount">{formatCurrency(receipt.totalAmount || receipt.amount || 0)}</td>
                       <td>
-                        <div className="receipt-actions">
+                        <div className="ph-receipt-actions">
+                          {receipt.paymentId && (
+                            <button
+                              className="ph-action-btn ph-action-invoice"
+                              onClick={() => {
+                                const token = localStorage.getItem('authToken') || localStorage.getItem('token') || '';
+                                const url = `/api/invoices/download/${receipt.paymentId}?token=${encodeURIComponent(token)}`;
+                                window.open(url, '_blank');
+                              }}
+                              title="Download Tax Invoice"
+                            >
+                              <FiDownload size={13} /> Invoice
+                            </button>
+                          )}
                           <button
-                            className="download-btn small pdf-btn"
-                            onClick={() =>
-                              downloadTaxInvoice(
-                                receipt.paymentId || receipt._id,
-                              )
-                            }
-                            title="Download Tax Invoice PDF"
-                          >
-                            <FiDownload /> PDF
-                          </button>
-                          <button
-                            className="download-btn small view-btn"
+                            className="ph-action-btn ph-action-receipt"
                             onClick={() => viewReceipt(receipt._id)}
                             title="View Receipt"
                           >
-                            <FiEye /> View
+                            <FiEye size={13} /> View
                           </button>
                           <button
-                            className="download-btn small"
+                            className="ph-action-btn ph-action-download"
                             onClick={() => downloadReceipt(receipt._id, "text")}
                             title="Download as Text"
                           >
-                            TXT
+                            <FiFileText size={13} /> TXT
                           </button>
                         </div>
                       </td>
@@ -1975,8 +2015,8 @@ const StudentDashboard = () => {
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     );
   };

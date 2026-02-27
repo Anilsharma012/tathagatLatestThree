@@ -37,6 +37,7 @@ The platform features a clean, professional design with consistent styling acros
 - **Policy Pages**: Dedicated pages for Privacy Policy, Refund & Cancellation Policy, and Terms & Conditions.
 - **Offline Admission System**: Admin interface for walk-in student enrollment, course selection, payment recording, and invoice generation. Supports partial payments with payment history tracking per student/course.
 - **Invoice System**: HTML-based professional tax invoice generation with sequential invoice numbering (starting from 1001 via BillingSettings.invoiceCounter). Supports split line items: Study Material (HSN 4901, no GST) and Tuition Fees (HSN 999293, with GST). Each payment gets its own invoice number.
+- **Purchase History**: Professional redesigned UI with stats cards, payment list with status pills, receipt matching (maps payment IDs to receipt IDs), and inline invoice/receipt actions. Receipt downloads use proper receipt IDs (not payment IDs). CSS in `Dashboard-purchases.css`.
 - **Course Pricing**: Courses have a main `price` field plus optional `studyMaterialPrice` and `tuitionFeesPrice` fields for invoice line item breakdown.
 
 ## External Dependencies
