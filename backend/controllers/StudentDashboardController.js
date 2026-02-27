@@ -4,6 +4,7 @@ const LiveClass = require('../models/LiveClass');
 const LiveSession = require('../models/LiveSession');
 const VideoContent = require('../models/course/VideoContent');
 const Course = require('../models/course/Course');
+const UserProgress = require('../models/UserProgress');
 const mongoose = require('mongoose');
 
 exports.getDashboardMetrics = async (req, res) => {
@@ -24,12 +25,12 @@ exports.getDashboardMetrics = async (req, res) => {
 
     const testsTaken = await MockTestAttempt.countDocuments({
       userId: new mongoose.Types.ObjectId(userId),
-      status: { $in: ['completed', 'submitted'] }
+      status: { $in: ['completed', 'submitted', 'COMPLETED', 'SUBMITTED'] }
     });
 
     const completedAttempts = await MockTestAttempt.find({
       userId: new mongoose.Types.ObjectId(userId),
-      status: { $in: ['completed', 'submitted'] }
+      status: { $in: ['completed', 'submitted', 'COMPLETED', 'SUBMITTED'] }
     }).lean();
 
     let totalScore = 0;
@@ -45,7 +46,7 @@ exports.getDashboardMetrics = async (req, res) => {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const weeklyActivity = await MockTestAttempt.aggregate([
+    const weeklyTestActivity = await MockTestAttempt.aggregate([
       {
         $match: {
           userId: new mongoose.Types.ObjectId(userId),
@@ -54,32 +55,50 @@ exports.getDashboardMetrics = async (req, res) => {
       },
       {
         $group: {
-          _id: { $dayOfWeek: '$createdAt' },
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
           count: { $sum: 1 }
         }
       }
     ]);
 
+    const allProgress = await UserProgress.find({
+      userId: new mongoose.Types.ObjectId(userId),
+      courseId: { $in: enrolledCourseIds }
+    }).lean();
+
+    const lessonActivityMap = {};
+    for (const prog of allProgress) {
+      for (const lesson of (prog.lessonProgress || [])) {
+        const accessDate = lesson.lastAccessedAt || lesson.completedAt;
+        if (accessDate && new Date(accessDate) >= sevenDaysAgo) {
+          const dateKey = new Date(accessDate).toISOString().split('T')[0];
+          lessonActivityMap[dateKey] = (lessonActivityMap[dateKey] || 0) + 1;
+        }
+      }
+    }
+
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const learningProgress = [];
     const today = new Date();
-    
+
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      const dayOfWeek = date.getDay() + 1;
-      
-      const activityForDay = weeklyActivity.find(a => a._id === dayOfWeek);
+      const dateKey = date.toISOString().split('T')[0];
+
+      const testCount = weeklyTestActivity.find(a => a._id === dateKey)?.count || 0;
+      const lessonCount = lessonActivityMap[dateKey] || 0;
+
       learningProgress.push({
         day: dayNames[date.getDay()],
-        activities: activityForDay ? activityForDay.count : 0
+        activities: testCount + lessonCount
       });
     }
 
     let totalCourseItems = 0;
     let completedItems = 0;
     let totalVideos = 0;
-    let totalMockTests = 0;
+    let totalLessonsCompleted = 0;
 
     for (const courseId of enrolledCourseIds) {
       try {
@@ -87,28 +106,38 @@ exports.getDashboardMetrics = async (req, res) => {
         if (course) {
           const videoCount = await VideoContent.countDocuments({ courseId });
           totalVideos += videoCount;
-          
-          // Count mock tests available in the course (assume 5 per course as baseline)
-          totalMockTests += 5;
+
+          const progress = allProgress.find(
+            p => p.courseId.toString() === courseId.toString()
+          );
+          if (progress) {
+            const completed = (progress.lessonProgress || []).filter(
+              l => l.status === 'completed'
+            ).length;
+            totalLessonsCompleted += completed;
+          }
         }
       } catch (e) {
         console.warn('Error counting course items:', e.message);
       }
     }
 
-    // Total items = videos + mock tests available
-    totalCourseItems = totalVideos + totalMockTests;
-    
-    // Completed items = tests taken (video progress tracking not yet implemented)
-    completedItems = testsTaken;
+    totalCourseItems = totalVideos > 0 ? totalVideos : enrolledCourseIds.length * 10;
+    completedItems = totalLessonsCompleted + testsTaken;
 
-    // Calculate completion rate based on completed tests vs total expected items
-    // Note: Video progress tracking would improve this metric
-    const completionRate = totalCourseItems > 0 
-      ? Math.round((completedItems / totalCourseItems) * 100) 
+    const completionRate = totalCourseItems > 0
+      ? Math.round((completedItems / totalCourseItems) * 100)
       : 0;
 
     const coursesEnrolled = enrolledCourseIds.length;
+
+    let totalTimeSpent = 0;
+    for (const prog of allProgress) {
+      totalTimeSpent += prog.totalTimeSpent || 0;
+      for (const lesson of (prog.lessonProgress || [])) {
+        totalTimeSpent += lesson.timeSpent || 0;
+      }
+    }
 
     res.json({
       success: true,
@@ -118,7 +147,9 @@ exports.getDashboardMetrics = async (req, res) => {
         completionRate: Math.min(completionRate, 100),
         coursesEnrolled,
         learningProgress,
-        streak: user.streak || 0
+        streak: user.streak || 0,
+        lessonsCompleted: totalLessonsCompleted,
+        totalTimeSpentMinutes: Math.round(totalTimeSpent / 60)
       }
     });
 
@@ -143,6 +174,11 @@ exports.getCourseProgress = async (req, res) => {
     const enrolledCourses = (user.enrolledCourses || [])
       .filter(e => e.status === 'unlocked');
 
+    const allProgress = await UserProgress.find({
+      userId: new mongoose.Types.ObjectId(userId),
+      courseId: { $in: enrolledCourses.map(e => e.courseId) }
+    }).lean();
+
     const courseProgressData = [];
     let totalCompleted = 0;
     let totalInProgress = 0;
@@ -158,21 +194,30 @@ exports.getCourseProgress = async (req, res) => {
         const testAttempts = await MockTestAttempt.countDocuments({
           userId: new mongoose.Types.ObjectId(userId),
           courseId: enrollment.courseId,
-          status: { $in: ['completed', 'submitted'] }
+          status: { $in: ['completed', 'submitted', 'COMPLETED', 'SUBMITTED'] }
         });
 
-        // Calculate total items: videos + estimated mock tests per course
-        // Using a reasonable baseline of 5 mock tests per course
-        const estimatedMockTests = 5;
-        const totalItems = videoCount + estimatedMockTests;
-        
-        // Completed items = tests completed (video progress tracking not yet implemented)
-        const completedItems = testAttempts;
-        const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+        const progress = allProgress.find(
+          p => p.courseId.toString() === enrollment.courseId.toString()
+        );
+
+        const lessonsCompleted = progress
+          ? (progress.lessonProgress || []).filter(l => l.status === 'completed').length
+          : 0;
+        const lessonsInProgress = progress
+          ? (progress.lessonProgress || []).filter(l => l.status === 'in_progress').length
+          : 0;
+        const overallProgress = progress?.overallProgress || 0;
+
+        const totalItems = videoCount > 0 ? videoCount : 10;
+        const completedItems = lessonsCompleted + testAttempts;
+        const progressPercent = overallProgress > 0
+          ? overallProgress
+          : (totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0);
 
         if (progressPercent >= 80) {
           totalCompleted++;
-        } else if (progressPercent > 0) {
+        } else if (progressPercent > 0 || lessonsInProgress > 0 || testAttempts > 0) {
           totalInProgress++;
         } else {
           totalNotStarted++;
@@ -183,9 +228,11 @@ exports.getCourseProgress = async (req, res) => {
           courseName: course.name,
           thumbnail: course.thumbnail,
           totalVideos: videoCount,
-          watchedVideos: 0,
+          watchedVideos: lessonsCompleted,
+          lessonsInProgress,
           testsCompleted: testAttempts,
-          progressPercent: Math.min(progressPercent, 100)
+          progressPercent: Math.min(progressPercent, 100),
+          overallProgress
         });
 
       } catch (e) {
@@ -194,13 +241,9 @@ exports.getCourseProgress = async (req, res) => {
     }
 
     const total = totalCompleted + totalInProgress + totalNotStarted;
-    const chartData = total > 0 
-      ? [
-          Math.round((totalCompleted / total) * 100),
-          Math.round((totalInProgress / total) * 100),
-          Math.round((totalNotStarted / total) * 100)
-        ]
-      : [0, 0, 100];
+    const chartData = total > 0
+      ? [totalCompleted, totalInProgress, totalNotStarted]
+      : [0, 0, enrolledCourses.length || 1];
 
     res.json({
       success: true,
@@ -210,6 +253,7 @@ exports.getCourseProgress = async (req, res) => {
           completed: totalCompleted,
           inProgress: totalInProgress,
           notStarted: totalNotStarted,
+          total,
           chartData
         }
       }
@@ -259,7 +303,7 @@ exports.getUpcomingClasses = async (req, res) => {
         populate: { path: 'courseId', select: 'name' }
       })
       .sort({ date: 1 })
-      .limit(5)
+      .limit(10)
       .lean();
 
       batchSessions = batchSessions.filter(session => {
