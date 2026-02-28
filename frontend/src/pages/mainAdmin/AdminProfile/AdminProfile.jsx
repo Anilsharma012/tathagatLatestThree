@@ -202,16 +202,6 @@ const AdminProfile = () => {
               <span className="profile-role">Administrator</span>
             </div>
 
-            <div className="profile-stats">
-              <div className="stat-item">
-                <FaCalendarAlt className="stat-icon" />
-                <div>
-                  <span className="stat-label">Member Since</span>
-                  <span className="stat-value">{formatDate(admin?.createdAt)}</span>
-                </div>
-              </div>
-            </div>
-
             <button className="logout-btn" onClick={handleLogout}>
               <FaSignOutAlt /> Logout
             </button>

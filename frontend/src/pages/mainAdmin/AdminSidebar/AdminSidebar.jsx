@@ -81,7 +81,6 @@ const SECTIONS = [
       { path: "/admin/user-management", label: "User Management", icon: "FaUserPlus", module: "students" },
       { path: "/admin/all-users", label: "All Users", icon: "FaUsers", module: "students" },
       { path: "/admin/all-students", label: "All Students", icon: "FaUserGraduate", module: "students" },
-      { path: "/admin/all-teachers", label: "All Teachers", icon: "FaChalkboardTeacher", module: "faculty" },
       { path: "/admin/role-management", label: "Permissions", icon: "FaUserShield", module: "roleManagement" },
     ]
   },

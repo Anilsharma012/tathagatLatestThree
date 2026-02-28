@@ -460,7 +460,7 @@ const UserManagement = () => {
                           </td>
                           <td>{user.email || "—"}</td>
                           <td>{user.phoneNumber || "—"}</td>
-                          <td>{user.selectedCategory || "—"}</td>
+                          <td>{user.selectedExam || "—"}</td>
                           <td>
                             <div className="um-verification-badges">
                               {user.isEmailVerified && <span className="um-v-badge verified">Email</span>}
